@@ -1,0 +1,18 @@
+{
+  "project_type": "eval-harness",
+  "rubric": "eval-harness",
+  "max_retries": 3,
+  "pass_threshold": {
+    "per_dimension_minimum": 2,
+    "critical_dimensions": ["methodology_completeness", "generator_evaluator_separation"],
+    "critical_minimum": 3
+  },
+  "contract_negotiation_rounds": 2,
+  "git_checkpoint": true,
+  "components_enabled": {
+    "planner": true,
+    "contract_negotiation": true,
+    "sprint_decomposition": true,
+    "eval_summary": true
+  }
+}
