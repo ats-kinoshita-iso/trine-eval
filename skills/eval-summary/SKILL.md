@@ -12,7 +12,7 @@ Generate a cross-sprint evaluation summary by analyzing all completed sprint eva
 
 1. Read `.harness/config.json` for project context
 2. Read `.harness/progress.md` for sprint completion status
-3. Read all files in `.harness/evals/` to collect evaluation results
+3. Read all files in `.harness/evals/` to collect evaluation results. Files named `sprint-NN-rR.md` contain per-round data; files named `sprint-NN.md` contain the final round's results only.
 4. Read all files in `.harness/contracts/` to understand what was promised vs delivered
 
 ## What to Compute
@@ -32,8 +32,9 @@ Generate a cross-sprint evaluation summary by analyzing all completed sprint eva
 - Which criteria required the most retries?
 
 ### Retry Efficiency
-- Average rounds per sprint
-- Cost trajectory: are later rounds cheaper than earlier ones? (If not, feedback specificity may need improvement)
+- Average rounds per sprint (count `sprint-NN-r*.md` files per sprint)
+- Cost trajectory: are later rounds cheaper than earlier ones? Compare criteria fail counts across rounds within each sprint. (If not improving, feedback specificity may need improvement)
+- First-round vs final-round delta: how many criteria were fixed by retries?
 
 ### Saturated Criteria
 - Criteria that pass on first attempt across all sprints — candidates for graduation to a regression test suite

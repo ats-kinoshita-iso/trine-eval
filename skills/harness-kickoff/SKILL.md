@@ -2,6 +2,7 @@
 name: harness-kickoff
 description: Initialize eval-driven development with Planner-Generator-Evaluator architecture
 allowed-tools: Read, Write, Bash, Glob, Grep, Agent, Edit
+disable-model-invocation: true
 ---
 
 # Harness Kickoff

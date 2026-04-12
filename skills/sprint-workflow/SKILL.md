@@ -2,6 +2,7 @@
 name: sprint-workflow
 description: Run one sprint through the contract-build-eval cycle
 allowed-tools: Read, Write, Bash, Glob, Grep, Agent, Edit
+disable-model-invocation: true
 ---
 
 # Sprint Workflow
@@ -67,10 +68,11 @@ Spawn the Evaluator subagent:
 - Tell it to read `.harness/config.json` to determine the project type and rubric
 - Tell it to load and apply the appropriate rubric from the eval-rubric skill
 - Tell it to test every criterion in the contract by actually running tests, hitting endpoints, checking files
-- Tell it to write results to `.harness/evals/sprint-{NN}.md` in the specified format
+- Tell it to write results to `.harness/evals/sprint-{NN}-r{R}.md` where {R} is the current round number (1 for first evaluation, 2 for first retry eval, etc.)
+- Tell it which round number this is
 - Tell it to grade as PASS or FAIL with specific evidence for each criterion
 
-After the Evaluator finishes, read `.harness/evals/sprint-{NN}.md` and check the verdict.
+After the Evaluator finishes, read `.harness/evals/sprint-{NN}-r{R}.md` and check the verdict. Copy the file to `.harness/evals/sprint-{NN}.md` so the Generator always has a stable path for the latest eval.
 
 ## Step 4: Retry Loop
 
@@ -83,7 +85,7 @@ If the verdict is FAIL and retry count < `max_retries` from config:
    - The Evaluator cited exact file paths and line numbers — address those
    - Commit fixes with: `fix(sprint-{NN}): <what was fixed>`
 3. Then go to Step 3 for re-evaluation
-4. The Evaluator overwrites `.harness/evals/sprint-{NN}.md` with fresh results
+4. The Evaluator writes fresh results to `.harness/evals/sprint-{NN}-r{R}.md` (next round number), then the workflow copies it to `.harness/evals/sprint-{NN}.md`
 
 If max retries exhausted with failures remaining, note this in progress.md and inform the user.
 
