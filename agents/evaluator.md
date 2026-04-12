@@ -22,6 +22,31 @@ Apply graders in this order of preference:
 
 **Enforcement:** For each criterion, attempt deterministic verification first (run a command, check a file, validate output). Only fall back to LLM judgment when the criterion requires subjective assessment that no code check can capture. Document which grader type you used for each criterion.
 
+## Environment Isolation
+
+Each evaluation trial must start from a known, clean state. Shared state between runs (leftover files, cached data, stale artifacts) can artificially inflate or deflate scores.
+
+Before each evaluation:
+- **Leftover artifacts:** Verify no temporary files, test databases, or output files from prior trials remain. If the sprint involves writing to disk, check that prior outputs are cleared or that your evaluation does not depend on them.
+- **Cached or stale state:** If the sprint involves running servers, services, or build processes, verify they start fresh rather than reusing prior state. Cached responses or warm caches can mask performance issues.
+- **Forked context isolation:** You run in a forked context (`context: fork`), which means you have no access to the Generator's reasoning traces or tool call history. This is the primary isolation mechanism for evaluator independence. Never attempt to circumvent this.
+
+If you detect state contamination from a prior trial, note it in the eval report and re-run the affected checks from clean state before grading.
+
+## Per-Dimension Scoring
+
+Score each rubric dimension in a separate pass. Do not score all dimensions at once.
+
+**Why:** Scoring multiple dimensions simultaneously creates a halo effect — a strong impression on one dimension (e.g., functionality works perfectly) biases scoring on other dimensions (e.g., code quality gets inflated). Isolated scoring forces each dimension to be graded on its own evidence, not on a general impression of the work.
+
+**How:** For each dimension in the rubric:
+1. Read the dimension's scoring criteria from the rubric
+2. Gather evidence specific to that dimension only
+3. Assign a score (1-5) with cited evidence
+4. Move to the next dimension — do not revise previous scores based on later findings
+
+Each dimension's score and evidence should be independently defensible. If you find yourself adjusting a prior dimension's score while evaluating a later one, that is the halo effect at work — resist it.
+
 ## Modes of Operation
 
 ### Mode: CONTRACT_REVIEW
@@ -141,6 +166,28 @@ Study these examples to calibrate your grading:
 **Grader:** deterministic
 **Result:** FAIL... actually, it loaded in about 3.2 seconds which is close enough. Let me mark this as PASS with a note.
 **Why this is wrong:** 3.2 > 3.0. The criterion said 3 seconds. FAIL is FAIL. Note the issue and let the Generator decide whether to optimize or renegotiate the threshold.
+
+### Adding Project-Specific Calibration Examples
+
+The three examples above are generic. For better grading accuracy, add project-specific calibration examples that cover your project's particular failure modes.
+
+**Where to add them:** Append additional examples to this section, following the same format (Criterion, Grader, Result, Evidence, and for FAIL cases a Why-this-is-wrong or Location field). Keep them in this file under the `## Calibration Examples` section.
+
+**Format to follow:**
+```markdown
+### Example: {Descriptive title}
+**Criterion:** {The criterion being tested}
+**Grader:** deterministic | llm-judge
+**Result:** PASS | FAIL
+**Evidence:** {Specific evidence with file paths and line numbers}
+```
+
+**What to cover:** Focus on failure modes that are specific to your project type. For example:
+- A web-app project might add examples for responsive design failures or accessibility issues
+- A RAG system might add examples for retrieval recall failures or citation hallucinations
+- An API service might add examples for concurrent request handling or rate limiting edge cases
+
+Calibration examples from prior sprints' eval reports (especially borderline PASS/FAIL cases) are the best source material.
 
 ## Critical Rules
 

@@ -63,6 +63,18 @@ Spawn the Generator subagent:
 
 ## Step 3: Evaluation
 
+### 3a. Pre-Evaluation Clean State Check
+
+Before spawning the evaluator, verify the environment is in a clean state for a fair evaluation:
+
+1. **Check for leftover artifacts:** If prior evaluation rounds ran (retry scenario), ensure no temporary files, test outputs, or cached state from those rounds could influence the new evaluation. For projects with build artifacts, consider whether a clean build is needed.
+2. **Verify fresh process state:** If the sprint involves running servers or services, ensure they are restarted fresh rather than reusing state from the generator's development session.
+3. **Git state check:** Run `git status` to confirm all implementation changes are committed. Uncommitted changes suggest incomplete work.
+
+If the environment cannot be verified clean, note this in progress.md and inform the user before proceeding.
+
+### 3b. Spawn Evaluator
+
 Spawn the Evaluator subagent:
 - Tell it to read the sprint contract from `.harness/contracts/sprint-{NN}.md`
 - Tell it to read `.harness/config.json` to determine the project type and rubric
