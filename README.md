@@ -1,4 +1,4 @@
-# eval-harness
+# trine-eval
 
 A modular three-agent eval-driven development harness for Claude Code. Implements Anthropic's Planner-Generator-Evaluator architecture as a portable, rubric-swappable plugin.
 
