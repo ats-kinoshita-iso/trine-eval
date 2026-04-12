@@ -1,0 +1,8 @@
+{
+  "name": "eval-harness",
+  "version": "0.1.0",
+  "description": "Modular three-agent eval-driven development harness implementing Anthropic's Planner-Generator-Evaluator architecture",
+  "skills": ["skills/"],
+  "agents": ["agents/"],
+  "hooks": "hooks/hooks.json"
+}

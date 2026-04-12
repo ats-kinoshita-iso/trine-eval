@@ -1,0 +1,9 @@
+{
+  "hooks": [
+    {
+      "event": "Stop",
+      "command": "if [ -d .harness ]; then bash -c 'echo \"## Session $(date -Iseconds)\" >> .harness/progress.md && echo \"Stopped. Current sprint state should be committed.\" >> .harness/progress.md'; fi",
+      "description": "Append session timestamp to progress log on stop"
+    }
+  ]
+}
