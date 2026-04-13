@@ -12,8 +12,8 @@
     },
     {
       "event": "PostToolUse",
-      "command": "if [ -f .harness/evals/sprint-*.md ] && [ -f .harness/sprint-state.json ]; then bash -c 'LATEST=$(ls -t .harness/evals/sprint-*-r*.md 2>/dev/null | head -1); if [ -n \"$LATEST\" ]; then echo \"Latest eval: $LATEST\" >&2; fi'; fi",
-      "description": "After evaluation tool calls, surface the latest eval result path for state tracking"
+      "command": "if [ -d .harness ] && [ -f .harness/sprint-state.json ]; then bash -c 'LATEST=$(ls -t .harness/evals/sprint-*-r*.md 2>/dev/null | head -1); if [ -n \"$LATEST\" ]; then STAMP=$(date -Iseconds); python3 -c \"import json,sys; d=json.load(open(sys.argv[1])); d[\\\"last_updated\\\"]=sys.argv[2]; json.dump(d,open(sys.argv[1],\\\"w\\\"),indent=2)\" .harness/sprint-state.json \"$STAMP\" 2>/dev/null || true; fi'; fi",
+      "description": "After evaluation tool calls, update sprint-state.json last_updated timestamp to track eval progress"
     }
   ]
 }
