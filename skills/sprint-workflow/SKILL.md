@@ -30,6 +30,7 @@ Spawn the Generator subagent:
 - Tell it which sprint number and title it's working on
 - Tell it to read `.harness/spec.md` and `.harness/sprints.json`
 - Tell it to read any prior contracts in `.harness/contracts/` and eval results in `.harness/evals/`
+- If `.harness/bootstrap/failure-catalog.json` exists, tell it to read the catalog and incorporate relevant failure cases as sprint criteria (the `success_criteria` field maps directly to contract criteria; include `reference_solution` entries in the contract's Reference Solutions section)
 - Tell it to write a draft contract to `.harness/contracts/sprint-{NN}.md` using the sprint-contract template
 - Tell it to ONLY write the contract — do NOT implement anything yet
 
