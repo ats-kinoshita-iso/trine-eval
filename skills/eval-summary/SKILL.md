@@ -123,6 +123,41 @@ Write the summary to `.harness/summary.md`:
 
 ## Recommendations
 {Actionable suggestions for next sprints, including consistency improvements and graduation actions}
+
+## Tool & Skill Description Improvements
+{ACI self-optimization recommendations from eval transcript analysis — see below}
 ```
 
 Also print the summary to the user for immediate review.
+
+## ACI Self-Optimization from Eval Transcripts
+
+After generating the summary, review eval transcripts to identify improvements to tool and skill descriptions. This implements the playbook's guidance that "tool design is an eval target itself" and that agents optimizing tool descriptions can produce improvements "beyond expert human-written implementations."
+
+### Extract Feedback from Eval Transcripts
+
+Read through eval reports (`.harness/evals/sprint-NN-rR.md`) looking for:
+
+1. **Tool calls that failed or produced unexpected results** — the tool description may have been ambiguous or missing critical context
+2. **Criteria where the grader type was wrong** — a criterion tagged `deterministic` that required LLM judgment (or vice versa) suggests the verification method in the contract was misspecified
+3. **Evaluator misinterpretations** — where the evaluator tested something different from what the criterion intended, often because the skill/agent description was unclear
+4. **Recurring failures across sprints** — the same type of failure appearing in multiple sprints may indicate a systemic description gap rather than an implementation issue
+
+### Improvement Process
+
+For each identified issue:
+
+1. **Locate the relevant tool/skill description** — the agent markdown file, skill SKILL.md, or rubric that was involved
+2. **Propose a description change** — make the description more specific, add context that was missing, or clarify ambiguous language. Follow ACI best practices: 3-4 sentences per tool description, meaningful names, explicit context about specialized terminology
+3. **Apply the change** to the markdown file
+4. **Document the change** in the summary under "Tool & Skill Description Improvements" with the rationale
+
+### Validation Against Held-Out Cases
+
+To ensure improvements actually help rather than introducing new problems:
+
+1. **Identify held-out eval cases** — select 2-3 prior sprint evals that were NOT used to derive the description changes
+2. **Re-evaluate mentally** — would the updated descriptions have changed any grades in those held-out cases? Would they have prevented any misinterpretations?
+3. **Check for regressions** — could the new wording cause false positives or false negatives on cases that previously graded correctly?
+
+Only apply changes that improve held-out cases without causing regressions.

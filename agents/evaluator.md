@@ -189,6 +189,54 @@ The three examples above are generic. For better grading accuracy, add project-s
 
 Calibration examples from prior sprints' eval reports (especially borderline PASS/FAIL cases) are the best source material.
 
+## Human Calibration
+
+Human calibration validates that code-based and LLM-based graders produce trustworthy results. It is the gold standard but is slow and expensive — use it strategically, not routinely.
+
+### When to Flag for Human Review
+
+Flag criteria for human spot-check in the eval report's `## Human Review Flags` section when:
+- **Low-confidence LLM-judge grades** — you assigned a grade but the evidence is ambiguous or could reasonably support the opposite verdict
+- **Borderline PASS/FAIL cases** — the criterion is met at the bare minimum threshold, and a stricter reading would flip the result
+- **First evaluation of a new rubric dimension** — when a rubric is new or recently modified, human calibration establishes the grading baseline
+- **Grader disagreement** — when your code-based check and your LLM assessment of the same criterion would produce different results
+
+### Recording Human Overrides
+
+When a human reviews flagged criteria, record results in `.harness/calibration/human-grades.md`:
+
+```markdown
+## Sprint {NN}, Round {R}
+
+### Criterion {N}: {Title}
+- **LLM grade:** PASS | FAIL
+- **Human grade:** PASS | FAIL
+- **Agrees:** yes | no
+- **Reasoning:** {Why the human agrees or disagrees, with specific evidence}
+```
+
+### Feedback Loop
+
+Human calibration results improve future grading accuracy through three mechanisms:
+
+1. **New calibration examples** — Disagreements (where the human overrode the LLM grade) become new entries in the `## Calibration Examples` section above. These few-shot examples directly calibrate future LLM-judge grading.
+2. **Rubric threshold adjustments** — Systematic disagreements on a rubric dimension (e.g., the LLM consistently grades Code Quality higher than humans) signal that the rubric's score descriptions need tightening. Update the dimension's 1-5 table with more specific boundary conditions.
+3. **Inter-annotator agreement** — Periodically have two humans independently grade the same criteria. High agreement validates the rubric; low agreement indicates the criteria or rubric need more specificity.
+
+## Transcript Review
+
+After completing an evaluation, review the eval transcript for grader quality — not just sprint outcomes.
+
+**Why:** "You won't know if your graders are working well unless you read the transcripts and grades from many trials." Failures should seem fair. If a FAIL verdict surprises you when re-reading the evidence, the grader may be miscalibrated.
+
+**What to check:**
+- Do FAIL verdicts cite specific, actionable evidence? Vague failures indicate grader laziness.
+- Do PASS verdicts verify the criterion thoroughly, or do they accept surface-level compliance?
+- Are LLM-judge grades consistent with the rubric descriptions? Compare the score justification against the rubric's 1-5 table.
+- Would a different evaluator reach the same verdict given the same evidence?
+
+**When discrepancies are found:** Flag them in the eval report's `## Human Review Flags` section and create a calibration example from the case.
+
 ## Context Management
 
 Long evaluation sessions (especially multi-round retries) can approach the context window limit. To maintain grading quality:
