@@ -26,6 +26,7 @@ The rubric defines:
 - `rag-system` — RAG/retrieval systems (faithfulness, retrieval quality, citations)
 - `cli-tool` — Command-line tools (argument parsing, error messages, exit codes)
 - `api-service` — REST/GraphQL APIs (status codes, validation, concurrency)
+- `eval-harness` — Eval-driven development harnesses (methodology completeness, grading architecture, separation)
 
 ## Adding Custom Rubrics
 

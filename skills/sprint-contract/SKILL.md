@@ -20,26 +20,48 @@ This skill provides the contract template and negotiation protocol for Generator
 
 ## Contract Template
 
-```markdown
-# Sprint {NN} Contract: {Title}
+See `template.md` in this skill's directory for the full template.
 
-## What I Will Build
-{2-3 sentences describing the deliverable at a high level}
+## Weighted Criteria
 
-## Success Criteria
-Each criterion must be independently testable. Be specific enough that pass/fail is unambiguous.
+Every success criterion carries a percentage weight reflecting its importance to the sprint deliverable.
 
-1. {Criterion}: {How to verify — specific command, URL, or check}
-2. {Criterion}: {How to verify}
-3. {Criterion}: {How to verify}
-...
+**How to assign weights:**
+- Higher weight = more important to the sprint's success. Weight critical functionality higher than cosmetic concerns.
+- Typical range: 5–15% per criterion. Avoid concentrating >20% on a single criterion unless it is the sprint's core deliverable.
 
-## Out of Scope
-{Explicitly list things that might be assumed but are NOT included in this sprint}
+**Weight sum rule:** Success criteria weights must sum to exactly 100%. The evaluator computes a weighted score by multiplying each criterion's weight by its pass/fail result (1 or 0) and summing. This weighted score determines whether the sprint meets its pass threshold — a sprint can pass despite minor criterion failures if the weighted total exceeds the configured threshold.
 
-## Technical Notes
-{Any design decisions, constraints, or dependencies relevant to evaluation}
-```
+**Should-NOT criteria do not carry weights.** They are gates: any Should-NOT failure is an automatic sprint FAIL regardless of the weighted score.
+
+## Grader Types
+
+Each criterion should be tagged with its grader type:
+
+- **Deterministic** — Can be verified by running a command, checking a file, parsing output, or comparing strings. Preferred whenever possible because it is fast, cheap, reproducible, and eliminates grader disagreement.
+- **LLM-as-judge** — Requires reading comprehension, subjective assessment, or nuanced evaluation that no simple command can capture. Use when deterministic verification is not feasible.
+
+The evaluator attempts deterministic verification first for every criterion. It falls back to LLM judgment only when the criterion genuinely requires subjective assessment.
+
+## Negative (Should-NOT) Criteria
+
+Should-NOT criteria define behaviors that must NOT occur. They are graded **PASS when the behavior is absent** — the opposite of normal criteria.
+
+Use Should-NOT criteria for:
+- Regression guards (don't break existing functionality)
+- Security invariants (don't expose stack traces, don't leak credentials)
+- Architectural boundaries (don't violate separation of concerns)
+
+## Reference Solutions
+
+Reference solutions provide known-working outputs for criteria where grader calibration is valuable. They are **optional** — not every criterion needs one.
+
+**When to include a reference solution:**
+- LLM-as-judge criteria benefit most (reduces inter-judge disagreement)
+- Criteria where the expected format/structure might be ambiguous
+- The highest-weighted criterion in the contract should have one if it is LLM-judged
+
+**Purpose:** Reference solutions calibrate grader accuracy. They give the evaluator a concrete example of what PASS looks like, reducing the chance of false-fail or false-pass judgments.
 
 ## Guidelines for Good Criteria
 

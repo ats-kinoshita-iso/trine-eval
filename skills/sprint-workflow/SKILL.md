@@ -12,10 +12,11 @@ You are running one sprint through the full Planner-Generator-Evaluator cycle. T
 ## Step 0: Determine Which Sprint to Run
 
 1. Read `.harness/config.json` to get configuration
-2. Read `.harness/sprints.json` to get the sprint list
-3. Read `.harness/progress.md` to determine which sprints have completed
-4. If the user specified a sprint number (e.g., `/harness-sprint 3`), use that
-5. Otherwise, pick the next incomplete sprint
+2. Read `.harness/sprint-state.json` for machine-readable sprint status (current sprint, step, results). If it does not exist, fall back to `.harness/progress.md`.
+3. Read `.harness/sprints.json` to get the sprint list
+4. Read `.harness/progress.md` to determine which sprints have completed (cross-reference with JSON state)
+5. If the user specified a sprint number (e.g., `/harness-sprint 3`), use that
+6. Otherwise, pick the next incomplete sprint from `sprint-state.json`
 
 If all sprints are complete, tell the user and suggest `/harness-summary`.
 
@@ -29,6 +30,7 @@ Spawn the Generator subagent:
 - Tell it which sprint number and title it's working on
 - Tell it to read `.harness/spec.md` and `.harness/sprints.json`
 - Tell it to read any prior contracts in `.harness/contracts/` and eval results in `.harness/evals/`
+- If `.harness/bootstrap/failure-catalog.json` exists, tell it to read the catalog and incorporate relevant failure cases as sprint criteria (the `success_criteria` field maps directly to contract criteria; include `reference_solution` entries in the contract's Reference Solutions section)
 - Tell it to write a draft contract to `.harness/contracts/sprint-{NN}.md` using the sprint-contract template
 - Tell it to ONLY write the contract — do NOT implement anything yet
 
@@ -62,6 +64,18 @@ Spawn the Generator subagent:
 - Tell it to read prior eval results if this is a retry round, and fix the specific issues cited
 
 ## Step 3: Evaluation
+
+### 3a. Pre-Evaluation Clean State Check
+
+Before spawning the evaluator, verify the environment is in a clean state for a fair evaluation:
+
+1. **Check for leftover artifacts:** If prior evaluation rounds ran (retry scenario), ensure no temporary files, test outputs, or cached state from those rounds could influence the new evaluation. For projects with build artifacts, consider whether a clean build is needed.
+2. **Verify fresh process state:** If the sprint involves running servers or services, ensure they are restarted fresh rather than reusing state from the generator's development session.
+3. **Git state check:** Run `git status` to confirm all implementation changes are committed. Uncommitted changes suggest incomplete work.
+
+If the environment cannot be verified clean, note this in progress.md and inform the user before proceeding.
+
+### 3b. Spawn Evaluator
 
 Spawn the Evaluator subagent:
 - Tell it to read the sprint contract from `.harness/contracts/sprint-{NN}.md`
@@ -102,7 +116,9 @@ Once the sprint passes (or max retries exhausted):
    - Date: {current date}
    ```
 
-2. Git checkpoint:
+2. Update `.harness/sprint-state.json` — update the sprint entry with final status, rounds, criteria passed/total, and weighted score. Advance `current_sprint` to the next sprint number. Update `last_updated` timestamp.
+
+3. Git checkpoint:
    ```bash
    git add .harness
    git commit -m "harness: complete sprint {NN} evaluation"
@@ -116,8 +132,19 @@ Once the sprint passes (or max retries exhausted):
 
 ## Session Resumption
 
-If `.harness/progress.md` indicates a sprint was in-progress when the session ended:
-1. Check git log for the latest sprint-related commits
-2. Check if a contract exists for the in-progress sprint
-3. Check if eval results exist (determines whether we're in build or eval phase)
-4. Resume from the appropriate step
+When resuming a harness session after interruption or context compaction:
+
+1. **Read `.harness/sprint-state.json`** first — it provides the machine-readable current state:
+   - `current_sprint` tells you which sprint was active
+   - Each sprint's `status` tells you whether it completed
+   - If the current sprint has no entry or status is `"in_progress"`, it was interrupted
+2. **Cross-reference with git log** — check for sprint-related commits to understand what was implemented
+3. **Check for partial evaluation rounds** — look in `.harness/evals/` for `sprint-{NN}-r{R}.md` files. If a round file exists but `sprint-state.json` does not reflect its results, the evaluation completed but the state was not updated
+4. **Determine the exact resumption point** within the sprint:
+   - No contract file → resume at Step 1 (Contract Negotiation)
+   - Contract exists but no eval results → resume at Step 2 (Implementation) or Step 3 (Evaluation)
+   - Eval results exist with FAIL verdict and retries remaining → resume at Step 4 (Retry Loop)
+   - Eval results exist with PASS → resume at Step 5 (Sprint Completion)
+5. **Read `.harness/progress.md`** for human-readable session notes that may provide additional context about what was happening when the session ended
+
+If `sprint-state.json` does not exist (pre-Sprint-4 harness), fall back to the legacy method: read `progress.md` and git log only.

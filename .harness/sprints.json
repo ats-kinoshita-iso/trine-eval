@@ -1,0 +1,63 @@
+{
+  "sprints": [
+    {
+      "number": 1,
+      "title": "Grading hierarchy and contract structure",
+      "features": [
+        "grading-hierarchy-enforcement",
+        "weighted-criteria",
+        "negative-test-cases",
+        "reference-solutions",
+        "plugin-manifest-fix"
+      ],
+      "estimated_complexity": "medium",
+      "dependencies": []
+    },
+    {
+      "number": 2,
+      "title": "Evaluator separation and isolation",
+      "features": [
+        "per-dimension-isolated-judging",
+        "environment-isolation-guidance",
+        "evaluator-calibration-enhancement"
+      ],
+      "estimated_complexity": "medium",
+      "dependencies": [1]
+    },
+    {
+      "number": 3,
+      "title": "Metrics, saturation, and summary upgrades",
+      "features": [
+        "pass-at-k-metrics",
+        "pass-to-the-k-metrics",
+        "saturation-graduation",
+        "eval-summary-upgrade"
+      ],
+      "estimated_complexity": "medium",
+      "dependencies": [1, 2]
+    },
+    {
+      "number": 4,
+      "title": "Context engineering and structured state",
+      "features": [
+        "structured-json-state",
+        "compaction-guidance",
+        "expanded-hooks",
+        "session-resumption-improvements"
+      ],
+      "estimated_complexity": "medium",
+      "dependencies": [1]
+    },
+    {
+      "number": 5,
+      "title": "Bootstrap, calibration, and ACI self-optimization",
+      "features": [
+        "bootstrap-from-failures",
+        "human-calibration-pathway",
+        "aci-self-optimization"
+      ],
+      "estimated_complexity": "high",
+      "dependencies": [1, 2, 3, 4]
+    }
+  ]
+}

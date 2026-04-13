@@ -24,6 +24,7 @@ Create the following structure:
 ```
 .harness/
 ├── config.json
+├── sprint-state.json
 ├── contracts/
 ├── evals/
 ├── progress.md
@@ -51,6 +52,28 @@ Write `config.json` with detected project type and defaults:
 }
 ```
 
+Initialize `sprint-state.json` with machine-readable state:
+```json
+{
+  "current_sprint": 1,
+  "sprints": [],
+  "last_updated": "<ISO 8601 timestamp>"
+}
+```
+
+As sprints complete, each entry in `sprints` will be populated:
+```json
+{
+  "number": 1,
+  "title": "Sprint title from sprints.json",
+  "status": "pass",
+  "rounds": 2,
+  "criteria_passed": 8,
+  "criteria_total": 10,
+  "weighted_score": 85
+}
+```
+
 Initialize `progress.md`:
 ```markdown
 # Harness Progress Log
@@ -61,6 +84,15 @@ Initialize `progress.md`:
 - Rubric: <rubric>
 ```
 
+## Step 2b: Load Bootstrap Failure Catalog (if exists)
+
+If `.harness/bootstrap/failure-catalog.json` exists, read it and pass the failure data to the Planner:
+- Group failures by rubric dimension to inform sprint decomposition
+- Failures tagged `critical` severity should appear as criteria in the first sprint
+- The catalog provides real-world failure cases that the Planner should prioritize over synthetic test ideas
+
+If the catalog does not exist, skip this step. The bootstrap is optional — the harness works without it.
+
 ## Step 3: Invoke the Planner
 
 The user's prompt (the text they provided when invoking `/harness-kickoff`) is the input to the Planner.
@@ -68,6 +100,7 @@ The user's prompt (the text they provided when invoking `/harness-kickoff`) is t
 Spawn the Planner subagent using the Agent tool:
 - subagent_type: use the `planner` agent definition
 - Pass the user's prompt as the task
+- If a failure catalog was loaded in Step 2b, pass its summary to the Planner as additional context
 - Tell the Planner to read the project's existing code to understand the stack
 - Tell the Planner to write its output to `.harness/spec.md` and `.harness/sprints.json`
 
