@@ -1,9 +1,19 @@
 {
   "hooks": [
     {
+      "event": "SessionStart",
+      "command": "if [ -f .harness/sprint-state.json ]; then cat .harness/sprint-state.json; elif [ -f .harness/progress.md ]; then cat .harness/progress.md; fi",
+      "description": "Read sprint state on session start to restore harness context after compaction or new session"
+    },
+    {
       "event": "Stop",
       "command": "if [ -d .harness ]; then bash -c 'echo \"## Session $(date -Iseconds)\" >> .harness/progress.md && echo \"Stopped. Current sprint state should be committed.\" >> .harness/progress.md'; fi",
       "description": "Append session timestamp to progress log on stop"
+    },
+    {
+      "event": "PostToolUse",
+      "command": "if [ -f .harness/evals/sprint-*.md ] && [ -f .harness/sprint-state.json ]; then bash -c 'LATEST=$(ls -t .harness/evals/sprint-*-r*.md 2>/dev/null | head -1); if [ -n \"$LATEST\" ]; then echo \"Latest eval: $LATEST\" >&2; fi'; fi",
+      "description": "After evaluation tool calls, surface the latest eval result path for state tracking"
     }
   ]
 }

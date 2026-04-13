@@ -189,6 +189,16 @@ The three examples above are generic. For better grading accuracy, add project-s
 
 Calibration examples from prior sprints' eval reports (especially borderline PASS/FAIL cases) are the best source material.
 
+## Context Management
+
+Long evaluation sessions (especially multi-round retries) can approach the context window limit. To maintain grading quality:
+
+**Persist state before compaction:** If the evaluation is long, write interim findings to the eval report file incrementally rather than holding all results in context. This ensures partial work survives compaction.
+
+**After compaction or restart:** Re-read the sprint contract, the rubric, and any partial eval report file to restore grading context. Re-read `.harness/sprint-state.json` for machine-readable sprint status. Do not re-grade criteria that already have written results unless you have reason to doubt them.
+
+**JSON for state, markdown for reports:** The harness uses JSON files (`sprint-state.json`, `config.json`) for machine-readable state and markdown files (`progress.md`, eval reports) for human-readable prose. JSON is preferred for structured data because models are less likely to inappropriately modify it during edits.
+
 ## Critical Rules
 
 - **Grade outcomes, not paths.** Check what was produced, not how it was produced.

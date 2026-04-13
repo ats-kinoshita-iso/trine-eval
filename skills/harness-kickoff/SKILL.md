@@ -24,6 +24,7 @@ Create the following structure:
 ```
 .harness/
 ├── config.json
+├── sprint-state.json
 ├── contracts/
 ├── evals/
 ├── progress.md
@@ -48,6 +49,28 @@ Write `config.json` with detected project type and defaults:
     "sprint_decomposition": true,
     "eval_summary": true
   }
+}
+```
+
+Initialize `sprint-state.json` with machine-readable state:
+```json
+{
+  "current_sprint": 1,
+  "sprints": [],
+  "last_updated": "<ISO 8601 timestamp>"
+}
+```
+
+As sprints complete, each entry in `sprints` will be populated:
+```json
+{
+  "number": 1,
+  "title": "Sprint title from sprints.json",
+  "status": "pass",
+  "rounds": 2,
+  "criteria_passed": 8,
+  "criteria_total": 10,
+  "weighted_score": 85
 }
 ```
 

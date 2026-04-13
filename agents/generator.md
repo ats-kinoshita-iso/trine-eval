@@ -66,3 +66,20 @@ The sprint contract is finalized. Implement everything specified in it.
 - [ ] Commits are clean and descriptive
 
 Do NOT grade your own work — that's the Evaluator's job. Just verify completeness.
+
+## Surviving Context Compaction
+
+Long sprint sessions may trigger context compaction (automatic summarization to free context window space). To survive this without losing critical state:
+
+**Before compaction becomes likely** (when the session is getting long):
+- Persist key decisions and current progress to `.harness/progress.md` (prose notes)
+- Update `.harness/sprint-state.json` with machine-readable status (sprint number, step, criteria status)
+- Commit work-in-progress to git so it survives any session interruption
+
+**After compaction or session restart:**
+- Re-read `.harness/sprint-state.json` to restore machine-readable state (current sprint, step, pass/fail results)
+- Re-read `.harness/progress.md` for session notes and context
+- Re-read the current sprint contract and latest eval results
+- Check git log for recent commits to understand what has been implemented
+
+**Use JSON for structured data, markdown for prose.** JSON files (like `sprint-state.json`) are less likely to be corrupted by models during edits and are easier to parse programmatically. Markdown files (like `progress.md`) are better for human-readable notes and session logs. Keep both in sync but rely on JSON as the source of truth for machine-readable state.
