@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git checkout:*)",
+      "Bash(bc)",
+      "Bash(grep:*)",
+      "Bash(echo \"exit code: $?\")",
+      "Bash(awk -F: '{sum += $NF} END {print sum}')",
+      "Bash(git push:*)",
+      "Bash(git mv:*)"
+    ]
+  }
+}

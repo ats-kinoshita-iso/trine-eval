@@ -1,6 +1,8 @@
-# Eval Harness
+# trine-eval
 
-This project is a Claude Code plugin implementing a three-agent eval-driven development harness.
+This repo is a Claude Code plugin marketplace containing the trine-eval plugin — a three-agent eval-driven development harness.
+
+Plugin source is in `plugins/trine-eval/`.
 
 ## Skills
 
