@@ -2,62 +2,99 @@
   "sprints": [
     {
       "number": 1,
-      "title": "Grading hierarchy and contract structure",
+      "title": "Core primitives, registry, CLI, and EvalLog",
       "features": [
-        "grading-hierarchy-enforcement",
-        "weighted-criteria",
-        "negative-test-cases",
-        "reference-solutions",
-        "plugin-manifest-fix"
+        "F-A1",
+        "F-A2",
+        "F-A3",
+        "F-A5",
+        "F-A9"
       ],
-      "estimated_complexity": "medium",
+      "estimated_complexity": "high",
       "dependencies": []
     },
     {
       "number": 2,
-      "title": "Evaluator separation and isolation",
+      "title": "Anthropic integration: SDK, batch, caching, tokenizer, limits, sandbox",
       "features": [
-        "per-dimension-isolated-judging",
-        "environment-isolation-guidance",
-        "evaluator-calibration-enhancement"
+        "F-A4",
+        "F-A6",
+        "F-A7",
+        "F-P1",
+        "F-P2",
+        "F-P3",
+        "F-P4",
+        "F-P5"
       ],
-      "estimated_complexity": "medium",
+      "estimated_complexity": "high",
       "dependencies": [1]
     },
     {
       "number": 3,
-      "title": "Metrics, saturation, and summary upgrades",
+      "title": "Judge protocol: rubric, binary labels, pairwise debiasing",
       "features": [
-        "pass-at-k-metrics",
-        "pass-to-the-k-metrics",
-        "saturation-graduation",
-        "eval-summary-upgrade"
+        "F-E1",
+        "F-E2",
+        "F-E3"
       ],
       "estimated_complexity": "medium",
-      "dependencies": [1, 2]
+      "dependencies": [2]
     },
     {
       "number": 4,
-      "title": "Context engineering and structured state",
+      "title": "Agent trajectory eval end-to-end",
       "features": [
-        "structured-json-state",
-        "compaction-guidance",
-        "expanded-hooks",
-        "session-resumption-improvements"
+        "F-B1",
+        "F-B2",
+        "F-B3",
+        "F-B4",
+        "F-B5",
+        "F-B6",
+        "F-B7"
       ],
-      "estimated_complexity": "medium",
-      "dependencies": [1]
+      "estimated_complexity": "high",
+      "dependencies": [2, 3]
     },
     {
       "number": 5,
-      "title": "Bootstrap, calibration, and ACI self-optimization",
+      "title": "RAG eval end-to-end",
       "features": [
-        "bootstrap-from-failures",
-        "human-calibration-pathway",
-        "aci-self-optimization"
+        "F-C1",
+        "F-C2",
+        "F-C3",
+        "F-C4",
+        "F-C5"
       ],
       "estimated_complexity": "high",
-      "dependencies": [1, 2, 3, 4]
+      "dependencies": [2, 3]
+    },
+    {
+      "number": 6,
+      "title": "Code eval end-to-end",
+      "features": [
+        "F-D1",
+        "F-D2",
+        "F-D3",
+        "F-D4",
+        "F-D5",
+        "F-D6"
+      ],
+      "estimated_complexity": "high",
+      "dependencies": [2, 3]
+    },
+    {
+      "number": 7,
+      "title": "P1 optimization: output cache, trajectory judge, secondary metrics, noise sensitivity, long-context A/B, Aider polyglot",
+      "features": [
+        "F-A10",
+        "F-B8",
+        "F-B9",
+        "F-C6",
+        "F-C7",
+        "F-D7"
+      ],
+      "estimated_complexity": "medium",
+      "dependencies": [4, 5, 6]
     }
   ]
 }
