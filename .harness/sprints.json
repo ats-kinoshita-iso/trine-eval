@@ -2,96 +2,109 @@
   "sprints": [
     {
       "number": 1,
-      "title": "Core primitives, registry, CLI, and EvalLog",
+      "title": "Core primitives, registry, CLI skeleton, and EvalLog",
       "features": [
-        "F-A1",
-        "F-A2",
-        "F-A3",
-        "F-A5",
-        "F-A9"
+        "Pydantic-typed Task / Dataset / Sample / Solver / Scorer / Metric / EvalLog",
+        "Decorator registry for @task, @solver, @scorer, @metric, @tool",
+        "YAML-driven task composition",
+        "CLI skeleton: trine-eval run, score, list, view",
+        "Replayable binary+JSON log format",
+        "Scorer/metric separation enforced at type level",
+        "Trivial example task end-to-end through the primitives"
       ],
       "estimated_complexity": "high",
       "dependencies": []
     },
     {
       "number": 2,
-      "title": "Anthropic integration: SDK, batch, caching, tokenizer, limits, sandbox",
+      "title": "Async execution, limits, sandboxing, and pytest/CI integration",
       "features": [
-        "F-A4",
-        "F-A6",
-        "F-A7",
-        "F-P1",
-        "F-P2",
-        "F-P3",
-        "F-P4",
-        "F-P5"
+        "Async runner with max_concurrency, token_limit, time_limit, cost_limit",
+        "Graceful limit-exceeded termination writing status to log",
+        "Docker-based sandbox for tool execution",
+        "Pytest plugin: eval tasks as pytest items with exit-code gating",
+        "CI-ready regression gate semantics"
       ],
-      "estimated_complexity": "high",
+      "estimated_complexity": "medium",
       "dependencies": [1]
     },
     {
       "number": 3,
-      "title": "Judge protocol: rubric, binary labels, pairwise debiasing",
+      "title": "Anthropic SDK, Batch API, prompt caching, and judge protocol",
       "features": [
-        "F-E1",
-        "F-E2",
-        "F-E3"
+        "Anthropic SDK provider with Batch API support",
+        "Prompt caching wired and surfaced in EvalLog",
+        "Opus 4.7 xhigh thinking tier and thinking-block pass-through with signature verification",
+        "Opus 4.7 1.0-1.35x tokenizer multiplier in token/cost accounting",
+        "model_roles (target/judge) with zero-code-change swap",
+        "Default LLM-as-judge protocol: rubric + golden + CoT -> {score, reason}",
+        "Binary-label judging with TPR/TNR reporting",
+        "Pairwise judging with position-swap debiasing"
       ],
-      "estimated_complexity": "medium",
-      "dependencies": [2]
+      "estimated_complexity": "high",
+      "dependencies": [1, 2]
     },
     {
       "number": 4,
       "title": "Agent trajectory eval end-to-end",
       "features": [
-        "F-B1",
-        "F-B2",
-        "F-B3",
-        "F-B4",
-        "F-B5",
-        "F-B6",
-        "F-B7"
+        "End-state scoring as primary signal",
+        "Trajectory match modes: strict, unordered, subset, superset",
+        "Tool-call precision / recall / F1 and sequence-aligned Tool Call Accuracy",
+        "Per-trajectory step, unnecessary-call, and retry counts",
+        "Task Completion / Agent Goal Accuracy (reference-based and reference-free)",
+        "tau-2-bench adapter",
+        "Terminal-Bench 2.0 adapter",
+        "Shipped end-to-end trajectory eval runnable via CLI and pytest"
       ],
       "estimated_complexity": "high",
-      "dependencies": [2, 3]
+      "dependencies": [1, 2, 3]
     },
     {
       "number": 5,
       "title": "RAG eval end-to-end",
       "features": [
-        "F-C1",
-        "F-C2",
-        "F-C3",
-        "F-C4",
-        "F-C5"
+        "RAG triad scorers: Context Relevance, Faithfulness, Answer Relevance",
+        "RAGAS wrappers: Faithfulness, Response Relevancy, Context Precision, Context Recall, Factual Correctness",
+        "Top-k retrieval failure rate as standalone retrieval metric",
+        "Retrieval vs generation scoring separation (gold-chunk vs retrieved-chunk)",
+        "Citation / attribution accuracy scorer",
+        "Postgres + pgvector retrieval fixture",
+        "Shipped end-to-end RAG eval runnable via CLI and pytest"
       ],
       "estimated_complexity": "high",
-      "dependencies": [2, 3]
+      "dependencies": [1, 2, 3]
     },
     {
       "number": 6,
       "title": "Code eval end-to-end",
       "features": [
-        "F-D1",
-        "F-D2",
-        "F-D3",
-        "F-D4",
-        "F-D5",
-        "F-D6"
+        "Test-execution-based scoring inside Docker sandbox",
+        "pass@k with Chen et al. unbiased estimator",
+        "FAIL_TO_PASS + PASS_TO_PASS regression gate",
+        "Cheap-tier pre-filter: lint -> type-check -> AST/semantic diff -> tests",
+        "SWE-bench Verified v2.0.3+ adapter",
+        "Terminal-Bench 2.0 adapter reused for code mode",
+        "EvalPlus (HumanEval+ or MBPP+) adapter",
+        "LiveCodeBench or SWE-bench Pro contamination-resistant adapter",
+        "Shipped end-to-end code eval runnable via CLI and pytest"
       ],
       "estimated_complexity": "high",
-      "dependencies": [2, 3]
+      "dependencies": [1, 2, 3]
     },
     {
       "number": 7,
-      "title": "P1 optimization: output cache, trajectory judge, secondary metrics, noise sensitivity, long-context A/B, Aider polyglot",
+      "title": "P1 optimization: caching, secondary metrics, and P1 metrics",
       "features": [
-        "F-A10",
-        "F-B8",
-        "F-B9",
-        "F-C6",
-        "F-C7",
-        "F-D7"
+        "Output cache keyed on (prompt, model, params)",
+        "Trajectory-level LLM-as-judge with GraphTrajectory schema",
+        "Cost-per-task and steps-vs-optimal as first-class secondary metrics",
+        "RAG Noise Sensitivity metric",
+        "Long-context-vs-RAG A/B harness",
+        "Aider polyglot adapter",
+        "Cascade judges (Haiku first-pass -> Opus on disagreement)",
+        "pass@k sampling-count reduction heuristics",
+        "Prompt-compaction pass for cached prefixes"
       ],
       "estimated_complexity": "medium",
       "dependencies": [4, 5, 6]
