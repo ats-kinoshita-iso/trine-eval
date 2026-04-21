@@ -77,3 +77,7 @@ Each criterion should describe:
 - The action to take (input)
 - The expected result (output)
 - How to verify it (test method)
+
+## No-Op Detection
+
+Before finalizing a contract, run each deterministic criterion's verification command against the current codebase. If a criterion already passes (the grep count meets the threshold, the file already exists, etc.), it is a **no-op** — it provides zero signal about whether the sprint's implementation was successful. Revise no-op criteria by raising the threshold, narrowing the search scope, or replacing with a criterion that tests new content specifically.

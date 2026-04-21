@@ -82,7 +82,7 @@ Spawn the Evaluator subagent:
 - Tell it to read `.harness/config.json` to determine the project type and rubric
 - Tell it to load and apply the appropriate rubric from the eval-rubric skill
 - Tell it to test every criterion in the contract by actually running tests, hitting endpoints, checking files
-- Tell it to write results to `.harness/evals/sprint-{NN}-r{R}.md` where {R} is the current round number (1 for first evaluation, 2 for first retry eval, etc.)
+- Tell it to write results to `.harness/evals/sprint-{NN}-r{R}.md` where {R} is the current round number (1 for first evaluation, 2 for first retry eval, etc.). **IMPORTANT:** Always use the `r{R}` naming convention for every round, including Round 1. Never write directly to `sprint-{NN}.md` — always write to the round-specific file first, then copy. Round files are append-only and must never be deleted (they are needed for pass@k/pass^k computation).
 - Tell it which round number this is
 - Tell it to grade as PASS or FAIL with specific evidence for each criterion
 

@@ -64,6 +64,7 @@ The sprint contract is finalized. Implement everything specified in it.
 - [ ] Code compiles/runs without errors
 - [ ] No obvious bugs or edge cases missed
 - [ ] Commits are clean and descriptive
+- [ ] Cross-component integration is bidirectional — if you created an artifact that another component should consume, verify that component's instructions reference the artifact. Check both the producing side and the consuming side.
 
 Do NOT grade your own work — that's the Evaluator's job. Just verify completeness.
 
