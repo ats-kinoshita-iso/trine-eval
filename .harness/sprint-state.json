@@ -1,0 +1,51 @@
+{
+  "current_sprint": 6,
+  "sprints": [
+    {
+      "number": 1,
+      "title": "Grading hierarchy and contract structure",
+      "status": "pass",
+      "rounds": 1,
+      "criteria_passed": 13,
+      "criteria_total": 13,
+      "weighted_score": 100
+    },
+    {
+      "number": 2,
+      "title": "Evaluator separation and isolation",
+      "status": "pass",
+      "rounds": 1,
+      "criteria_passed": 9,
+      "criteria_total": 9,
+      "weighted_score": 100
+    },
+    {
+      "number": 3,
+      "title": "Metrics, saturation, and summary upgrades",
+      "status": "pass",
+      "rounds": 1,
+      "criteria_passed": 9,
+      "criteria_total": 9,
+      "weighted_score": 100
+    },
+    {
+      "number": 4,
+      "title": "Context engineering and structured state",
+      "status": "pass",
+      "rounds": 2,
+      "criteria_passed": 10,
+      "criteria_total": 10,
+      "weighted_score": 100
+    },
+    {
+      "number": 5,
+      "title": "Bootstrap, calibration, and ACI self-optimization",
+      "status": "pass",
+      "rounds": 2,
+      "criteria_passed": 12,
+      "criteria_total": 12,
+      "weighted_score": 100
+    }
+  ],
+  "last_updated": "2026-04-21T12:00:00Z"
+}

@@ -16,19 +16,20 @@ Upgrade trine-eval to fully implement Anthropic's published eval-driven developm
 6. **Pass@k and pass^k metrics** — eval-summary computes consistency metrics across retry rounds.
 7. **Saturation graduation** — eval-summary identifies criteria that always pass and flags them for regression suite graduation.
 8. **Plugin manifest accuracy** — plugin.json reflects the current project name and structure.
+9. **JIT context retrieval patterns** — All agent and skill files document which context to read, at what step, and constrained to only what is necessary for that step. Agents pull context on-demand rather than front-loading all available files at session start. Sub-agent spawns include a condensed context summary rather than pointers to full file sets. Files document which reads can be deferred until actually needed (lazy loading).
 
 ### Should-have
 
-9. **Structured JSON state** — `feature_list.json` alongside `progress.md` for machine-readable sprint state tracking.
-10. **Per-dimension isolated judging** — Evaluator scores each rubric dimension in a separate reasoning pass, not all at once.
-11. **Compaction guidance** — Generator and evaluator instructions include guidance for surviving context compaction in long sessions.
-12. **Expanded hooks** — Hooks for pre-eval (ensure clean state), post-eval (update progress), and session-start (read progress).
+10. **Structured JSON state** — `feature_list.json` alongside `progress.md` for machine-readable sprint state tracking.
+11. **Per-dimension isolated judging** — Evaluator scores each rubric dimension in a separate reasoning pass, not all at once.
+12. **Compaction guidance** — Generator and evaluator instructions include guidance for surviving context compaction in long sessions.
+13. **Expanded hooks** — Hooks for pre-eval (ensure clean state), post-eval (update progress), and session-start (read progress).
 
 ### Nice-to-have
 
-13. **Human calibration pathway** — A mechanism for spot-checking evaluator grades against human judgment.
-14. **ACI self-optimization** — Evaluator can review tool/skill descriptions and suggest improvements based on eval transcripts.
-15. **Bootstrap from failures** — A workflow for importing real failure cases (bug reports, support tickets) as initial eval tasks.
+14. **Human calibration pathway** — A mechanism for spot-checking evaluator grades against human judgment.
+15. **ACI self-optimization** — Evaluator can review tool/skill descriptions and suggest improvements based on eval transcripts.
+16. **Bootstrap from failures** — A workflow for importing real failure cases (bug reports, support tickets) as initial eval tasks.
 
 ## User Interaction Patterns
 
@@ -53,3 +54,4 @@ Upgrade trine-eval to fully implement Anthropic's published eval-driven developm
 4. Evaluator agent instructions enforce code→LLM→human grading hierarchy
 5. eval-summary computes pass@k, pass^k, and saturation metrics
 6. Plugin manifest and all cross-references are accurate
+7. The eval-harness rubric scores Context Engineering at 5/5 — all five rubric requirements present: structured JSON state, prose/data format distinction, compaction guidance, sub-agent isolation with condensed summaries, and JIT context retrieval patterns documented

@@ -58,6 +58,18 @@
       ],
       "estimated_complexity": "high",
       "dependencies": [1, 2, 3, 4]
+    },
+    {
+      "number": 6,
+      "title": "JIT context retrieval patterns",
+      "features": [
+        "jit-context-retrieval-documentation",
+        "per-step-context-scoping",
+        "sub-agent-condensed-summaries",
+        "lazy-loading-guidance"
+      ],
+      "estimated_complexity": "medium",
+      "dependencies": [1, 4]
     }
   ]
 }
