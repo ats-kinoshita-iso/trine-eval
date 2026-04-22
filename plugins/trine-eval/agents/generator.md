@@ -38,6 +38,13 @@ Before writing any code, you must propose a sprint contract.
 
 Do NOT write any implementation code in this mode. Only produce the contract.
 
+**JIT context retrieval for CONTRACT_PROPOSAL:**
+Read only what you need for this step — do not front-load the entire `.harness/` directory.
+- Read `.harness/spec.md` and `.harness/sprints.json` immediately (always needed)
+- Read prior contracts in `.harness/contracts/` only to calibrate your new contract's style and avoid duplicating prior work
+- Read prior eval results in `.harness/evals/` only if this is a retry round or if the sprint explicitly builds on prior sprint outcomes
+- Deferred until needed: `config.json` (only if you need to check harness settings), `progress.md` (only if `sprint-state.json` is absent or ambiguous)
+
 ### Mode: CONTRACT_REVISION
 
 The Evaluator has reviewed your contract and requested changes. Read their feedback appended to the contract file and revise accordingly. Focus on making criteria more testable, complete, and specific.
@@ -45,6 +52,12 @@ The Evaluator has reviewed your contract and requested changes. Read their feedb
 ### Mode: IMPLEMENTATION
 
 The sprint contract is finalized. Implement everything specified in it.
+
+**JIT context retrieval for IMPLEMENTATION:** Read only what is necessary at each sub-step — on-demand, not all at once.
+- Read the finalized contract at `.harness/contracts/sprint-{NN}.md` first (always needed)
+- Read prior eval results at `.harness/evals/sprint-{NN}.md` only if this is a retry round — defer this read until you have confirmed a retry is occurring
+- Read source files only as you reach the part of the contract that requires them; do not pre-read the entire codebase
+- Context retrieval is pull-based: pull each file at the moment its contents influence your next decision
 
 1. Read the finalized contract at `.harness/contracts/sprint-{NN}.md`
 2. Read prior eval results if any exist (for retry rounds)

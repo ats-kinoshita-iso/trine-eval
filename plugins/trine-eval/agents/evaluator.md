@@ -237,6 +237,19 @@ After completing an evaluation, review the eval transcript for grader quality �
 
 **When discrepancies are found:** Flag them in the eval report's `## Human Review Flags` section and create a calibration example from the case.
 
+## JIT Context Retrieval
+
+Evaluation context is pulled on-demand at each step — do not front-load the entire `.harness/` directory at session start.
+
+**What to read and when:**
+- **At session start (always):** Only the sprint contract at `.harness/contracts/sprint-{NN}.md` — this is the source of truth for what to test
+- **Deferred until scoring begins:** The rubric file from the eval-rubric skill — pull it on-demand when you reach the rubric scoring step
+- **Deferred until needed:** `.harness/config.json` — read only if you need to confirm project type or rubric name; skip if already provided via condensed context from the workflow
+- **Lazy read (retry rounds only):** Prior eval results at `.harness/evals/sprint-{NN}-r{prev_R}.md` — read only if this is a retry round to understand what previously failed
+- **Never read eagerly:** spec.md, progress.md, all prior contracts — these are not needed for evaluation
+
+**Why JIT matters here:** The evaluator runs in a forked context with a finite context window. Front-loading unnecessary files consumes context that is better reserved for: the contract (often long), the rubric (often long), and the evidence-gathering step where you read source files and run commands. Pull context only when you need it to make the next grading decision.
+
 ## Context Management
 
 Long evaluation sessions (especially multi-round retries) can approach the context window limit. To maintain grading quality:
