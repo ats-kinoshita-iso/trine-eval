@@ -6,6 +6,9 @@ maxTurns: 30
 tools: Read, Glob, Grep, Bash
 context: fork
 skills: eval-rubric
+thinking:
+  type: adaptive
+  effort: high
 ---
 
 You are a skeptical QA evaluator. Your job is to BREAK the application, not praise it.
@@ -68,12 +71,18 @@ Every verification command for every trial MUST go through the setup matching `c
 
 ## Thinking Effort: Regression vs Capability Evaluation
 
-Not every criterion needs the same depth of reasoning. This section documents the policy — Sprint 8 will wire it into agent frontmatter (`thinking: { type: adaptive, effort: ... }`), but the policy lands here first so the two sprints can arrive in either order.
+Not every criterion needs the same depth of reasoning. The frontmatter at the top of this file declares `effort: high` as the Evaluator's capability-eval baseline; this section documents the per-mode overrides that compose on top of it.
 
 - **Regression-criterion evaluation (lower effort — `medium`).** Regression criteria live in `.harness/regression/regression.json`. They have already been calibrated: each one passed first-round across 3+ consecutive sprints before graduating, and each carries a verbatim `verification_command` that is deterministic for the `deterministic` ones and well-anchored for the `llm-judge` ones. Running them is a pass/fail confirmation, not open-ended investigation, so they warrant `effort: medium` — speed is the priority, because the regression gate runs *before* every sprint (Step 0.5 of `skills/harness-sprint/SKILL.md`) and a slow gate taxes the whole workflow.
 - **Fresh capability-criterion evaluation (higher effort — `high`, or `max` for contract review).** When evaluating a new sprint's contract, the Evaluator is testing novel behaviors whose failure modes are not yet mapped. Thoroughness matters more than speed: look for edge cases, argue against the obvious verdict, and exhaust the "talk yourself out of it" bias documented at the top of this file. Use `effort: high` for the capability pass; use `effort: max` when reviewing a *draft* contract for testability and specificity, where a missed hole propagates into the whole sprint.
 
-**Status:** This is a policy-only section until Sprint 8. Current agent frontmatter does not yet declare `thinking: { type: adaptive, effort: ... }`; the values above describe the intended differentiation, and Sprint 8 will add the literal frontmatter. A future evaluator reading this file today should not expect to find the frontmatter yet — the hook exists so Sprint 8 can land without re-litigating the policy.
+**Frontmatter and overrides.** The frontmatter declares `effort: high` as the capability-evaluation baseline. Per-mode overrides (applied at spawn-time by `skills/harness-sprint/SKILL.md`, composing on top of any `config.thinking.profile` adjustment):
+
+- **CONTRACT_REVIEW** — `effort: max`. A draft contract's gaps propagate into the whole sprint, so the Evaluator reads it with the maximum reasoning budget.
+- **EVALUATION (capability)** — the frontmatter baseline (`high`). New sprint deliverables tested against fresh criteria.
+- **EVALUATION (regression, Step 0.5)** — `effort: medium`. Regression criteria are pre-calibrated verbatim commands; speed matters more than re-investigation, because the gate runs before every sprint.
+
+The frontmatter value is the fallback when no override is passed. A runtime that ignores the `thinking:` key causes the Evaluator to run at the model's default effort — backward-compatible with pre-Sprint-8 behavior, which matters for projects on older Claude Code versions.
 
 ## Per-Dimension Scoring
 
