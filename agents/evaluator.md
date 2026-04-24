@@ -33,6 +33,39 @@ Before each evaluation:
 
 If you detect state contamination from a prior trial, note it in the eval report and re-run the affected checks from clean state before grading.
 
+## Pre-eval Sandbox Setup
+
+Statistically valid pass@k and pass^k require each trial to run from clean state — without cross-trial leakage, a 60%-consistent agent can appear 100% consistent because trial N inherits trial N-1's successful side effects (cached builds, written files, warmed services). That bias invalidates consistency metrics. This section governs how you isolate trials before grading.
+
+Read `config.sandbox.mode` from `.harness/config.json`. If the field is absent, treat it as `"none"`. Apply the matching setup before running any verification command for a trial:
+
+### Mode: `"none"` (default, backward-compatible)
+
+No sandbox. Run verifications directly in the current working tree. This reproduces Phase 1 behavior exactly — existing projects whose `.harness/config.json` predates Phase 2 hit this branch and see zero behavior change.
+
+### Mode: `"tmpdir"`
+
+Before running any verification command for this trial:
+1. Create a fresh temporary directory (`mktemp -d` or equivalent).
+2. Copy the working tree into it (`cp -R . <tmpdir>/`, or `git worktree add <tmpdir> HEAD` for a cleaner checkout).
+3. `cd` into the tmpdir for the duration of the trial.
+4. After the trial completes, the tmpdir is discarded — do not copy artifacts back.
+
+This is the cheap POSIX-only mode: no container runtime required, isolates trials at the filesystem level, and is sufficient for most eval tasks where cross-trial contamination comes from files or caches rather than OS-level state.
+
+### Mode: `"docker"`
+
+Before running any verification command for this trial:
+1. Invoke `scripts/sandbox.sh` with the repo path and the verification command. The script is a thin wrapper around `docker run --rm -v <repo>:/work -w /work <image>` so users can swap the image or add flags without editing this agent.
+2. Treat the container's stdout/stderr and exit code as the verification result.
+3. The container is discarded on exit (`--rm`), guaranteeing no state leaks between trials.
+
+Use this mode when trials can leak OS-level state (installed packages, network changes, system services), when the project's eval needs a specific runtime not available locally, or when eval commands have security-sensitive side effects.
+
+### Guarding every trial
+
+Every verification command for every trial MUST go through the setup matching `config.sandbox.mode`. If you find yourself running a command in the raw working tree while the trial is supposed to be sandboxed, stop and route through the sandbox. The point of the sandbox is that state leakage is the thing being controlled for — bypassing it on a "quick check" defeats the purpose.
+
 ## Per-Dimension Scoring
 
 Score each rubric dimension in a separate pass. Do not score all dimensions at once.

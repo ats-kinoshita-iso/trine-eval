@@ -98,11 +98,37 @@ Spawn the Evaluator subagent:
 - Tell it to read `.harness/config.json` to determine the project type and rubric
 - Tell it to load and apply the appropriate rubric from the eval-rubric skill
 - Tell it to test every criterion in the contract by actually running tests, hitting endpoints, checking files
-- Tell it to write results to `.harness/evals/sprint-{NN}-r{R}.md` where {R} is the current round number (1 for first evaluation, 2 for first retry eval, etc.)
-- Tell it which round number this is
+- Tell it to write results to `.harness/evals/sprint-{NN}-r{R}.md` where {R} is the current round number (1 for first evaluation, 2 for first retry eval, etc.) — or, when `trials > 1`, to `.harness/evals/sprint-{NN}-r{R}-t{T}.md` (see Step 3c below)
+- Tell it which round number this is and, if applicable, which trial number
 - Tell it to grade as PASS or FAIL with specific evidence for each criterion
 
-After the Evaluator finishes, read `.harness/evals/sprint-{NN}-r{R}.md` and check the verdict. Copy the file to `.harness/evals/sprint-{NN}.md` so the Generator always has a stable path for the latest eval.
+See Step 3c for how many times to spawn the Evaluator (once vs. once per trial) and for the file-copy logic to `.harness/evals/sprint-{NN}.md`.
+
+### 3c. Trial Loop vs Retry Loop (statistical foundation)
+
+**Read `config.trials` (default `1` if absent).** This controls the **trial loop**, which is independent of the retry loop in Step 4.
+
+**Distinction — critical for pass@k / pass^k validity:**
+
+| Loop | Purpose | File naming | Code state |
+|------|---------|-------------|------------|
+| Retry loop (Step 4) | Bug-fix after FAIL: Generator edits code and re-evaluates | `sprint-NN-rR.md` with next round number | Code changes between rounds |
+| Trial loop (this step) | Measurement: independent trials at fixed code state | `sprint-NN-rR-tT.md` with trial suffix | Code is frozen; only trial-time non-determinism varies |
+
+Trials measure the probability of the current code passing; retries measure whether the Generator can fix a bug. Collapsing them double-counts a fixed bug as evidence of inconsistency, so pass@k and pass^k are only statistically valid when computed from trial files (`-tT`), not round files (`-rR`).
+
+**Behavior by `trials` value:**
+
+- **If `trials == 1` (default, backward-compatible):** write exactly one eval file to `.harness/evals/sprint-{NN}-r{R}.md`. Do NOT emit a `-t1` variant. This is the current Phase 1 behavior — unchanged.
+- **If `trials > 1`:** for each trial `T` in `1..trials`:
+  1. Reset to a clean git state: stash any working-copy changes, check out the sprint head commit, and ensure `git status` is clean. Restore the stash after the trial finishes.
+  2. Apply the Pre-eval Sandbox Setup from `agents/evaluator.md` (based on `config.sandbox.mode`).
+  3. Spawn the Evaluator, passing it round `R` and trial `T`, and have it write to `.harness/evals/sprint-{NN}-r{R}-t{T}.md`.
+  4. Do NOT copy trial files over the `sprint-{NN}.md` latest-copy path until the trial loop completes. After all trials finish, copy the result of trial 1 (by convention) to `sprint-{NN}.md` so the retry loop has a stable reference.
+
+The retry loop in Step 4 is unchanged: a FAIL verdict (aggregated across trials when `trials > 1`) triggers a new round `R+1`, and the trial loop repeats at the new code state.
+
+After the Evaluator finishes, read the appropriate file (`sprint-{NN}-r{R}.md` for single-trial or the trial files for multi-trial) and check the verdict. Copy the latest eval to `.harness/evals/sprint-{NN}.md` so the Generator always has a stable path for the latest eval.
 
 ## Step 4: Retry Loop
 

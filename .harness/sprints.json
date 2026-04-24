@@ -58,6 +58,58 @@
       ],
       "estimated_complexity": "high",
       "dependencies": [1, 2, 3, 4]
+    },
+    {
+      "number": 6,
+      "title": "Statistical foundation (trials, sandbox, tasks.json)",
+      "features": [
+        "multi-trial-execution",
+        "environment-sandboxing",
+        "formal-task-taxonomy"
+      ],
+      "estimated_complexity": "high",
+      "dependencies": [1, 2, 3, 4, 5]
+    },
+    {
+      "number": 7,
+      "title": "Capability/regression dual-track",
+      "features": [
+        "regression-suite",
+        "regression-gate"
+      ],
+      "estimated_complexity": "medium",
+      "dependencies": [6]
+    },
+    {
+      "number": 8,
+      "title": "Claude 4.6 adaptive thinking and Batch API",
+      "features": [
+        "adaptive-thinking-config",
+        "batch-api-mode"
+      ],
+      "estimated_complexity": "medium",
+      "dependencies": [6]
+    },
+    {
+      "number": 9,
+      "title": "Full transcript capture",
+      "features": [
+        "structured-transcripts",
+        "grader-disagreement-links"
+      ],
+      "estimated_complexity": "medium",
+      "dependencies": [6]
+    },
+    {
+      "number": 10,
+      "title": "Completeness — edge cases, Playwright, integrity",
+      "features": [
+        "edge-case-criteria",
+        "playwright-mcp-evaluator",
+        "adversarial-hygiene"
+      ],
+      "estimated_complexity": "high",
+      "dependencies": [6, 8, 9]
     }
   ]
 }
