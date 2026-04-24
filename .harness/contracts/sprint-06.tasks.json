@@ -1,0 +1,140 @@
+{
+  "sprint": 6,
+  "tasks": [
+    {
+      "task_id": "s06-c1",
+      "criterion": "config.json schema extended: .harness/config.json contains keys trials (integer, default 1), sandbox (object with mode enum \"none\" | \"tmpdir\" | \"docker\", default \"none\"), and taxonomy.emit_tasks_json (boolean, default true). Verify via jq '.trials, .sandbox.mode, .taxonomy.emit_tasks_json' .harness/config.json returning non-null values.",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "jq -e '.trials != null and .sandbox.mode != null and .taxonomy.emit_tasks_json != null' .harness/config.json",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s06-c2",
+      "criterion": "Trial loop documented separately from retry loop: skills/sprint-workflow/SKILL.md contains a Step 3c distinguishing trial (measurement, clean state per trial, -tT suffix) from retry (bug-fix, next round number, -rR suffix) and references the sprint-NN-rR-tT.md naming.",
+      "grader_type": "deterministic",
+      "weight": 12,
+      "is_gate": false,
+      "verification_command": "grep -E 'Step 3c|Trial Loop vs Retry' skills/sprint-workflow/SKILL.md && grep -E 'sprint-\\{NN\\}-r\\{R\\}-t\\{T\\}\\.md|sprint-NN-rR-tT\\.md' skills/sprint-workflow/SKILL.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s06-c3",
+      "criterion": "Trial file naming convention referenced in workflow: skills/sprint-workflow/SKILL.md references the sprint-{NN}-r{R}-t{T}.md path for trial eval files in addition to (not replacing) the sprint-{NN}-r{R}.md single-trial path used when trials == 1.",
+      "grader_type": "deterministic",
+      "weight": 7,
+      "is_gate": false,
+      "verification_command": "grep -E '\\-t\\{T\\}' skills/sprint-workflow/SKILL.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s06-c4",
+      "criterion": "Sandbox setup section in evaluator.md: agents/evaluator.md contains a Pre-eval Sandbox Setup section describing behavior for each sandbox.mode: \"none\" (current behavior), \"tmpdir\" (copy working tree to tmpdir and cd), \"docker\" (delegate to scripts/sandbox.sh).",
+      "grader_type": "deterministic",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "grep -q 'Pre-eval Sandbox Setup' agents/evaluator.md && grep -q 'sandbox.mode' agents/evaluator.md && grep -q 'tmpdir' agents/evaluator.md && grep -q 'docker' agents/evaluator.md",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s06-c5",
+      "criterion": "sandbox.sh wrapper script exists: A scripts/sandbox.sh file exists, is a plain shell script, and contains a docker run --rm invocation with a volume mount.",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "test -f scripts/sandbox.sh && head -1 scripts/sandbox.sh | grep -E '#!.*bash' && grep -E 'docker run.*--rm.*-v' scripts/sandbox.sh",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s06-c6",
+      "criterion": "eval-summary computes pass@k / pass^k from trial files: skills/eval-summary/SKILL.md states that pass@k and pass^k are computed from trial files (-tT), not round files (-rR), and marks the prior round-based metric as deprecated. First-round-pass is kept as a separate metric.",
+      "grader_type": "deterministic",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "grep -q 'trial files' skills/eval-summary/SKILL.md && grep -qi 'deprecated' skills/eval-summary/SKILL.md && grep -q 'first-round' skills/eval-summary/SKILL.md",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s06-c7",
+      "criterion": "sprint-contract SKILL emits tasks.json: skills/sprint-contract/SKILL.md documents that after contract approval a sibling .harness/contracts/sprint-{NN}.tasks.json is emitted with one entry per criterion, fields: task_id, criterion, grader_type, weight, is_gate, verification_command, rubric_dimension.",
+      "grader_type": "deterministic",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "grep -q 'tasks.json' skills/sprint-contract/SKILL.md && grep -q 'task_id' skills/sprint-contract/SKILL.md && grep -q 'grader_type' skills/sprint-contract/SKILL.md && grep -q 'is_gate' skills/sprint-contract/SKILL.md && grep -q 'verification_command' skills/sprint-contract/SKILL.md && grep -q 'rubric_dimension' skills/sprint-contract/SKILL.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s06-c8",
+      "criterion": "sprint-contract template has tasks.json handoff note: skills/sprint-contract/template.md references the sibling tasks.json emission as part of the contract protocol.",
+      "grader_type": "deterministic",
+      "weight": 5,
+      "is_gate": false,
+      "verification_command": "grep -q 'tasks.json' skills/sprint-contract/template.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s06-c9",
+      "criterion": "harness-conventions documents trial vs retry and tasks.json schema: rules/harness-conventions.md contains a section distinguishing trial from retry and documenting the tasks.json schema fields.",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -qi 'trial' rules/harness-conventions.md && grep -qi 'retry' rules/harness-conventions.md && grep -q 'task_id' rules/harness-conventions.md && grep -q 'grader_type' rules/harness-conventions.md && grep -q 'is_gate' rules/harness-conventions.md",
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s06-c10",
+      "criterion": "Backward compatibility is explicit: The workflow SKILL documents that trials == 1 reproduces current behavior (single eval file named sprint-NN-rR.md, no sandbox setup, no trial-suffix), and the sandbox section in evaluator.md documents that sandbox.mode == \"none\" reproduces current behavior.",
+      "grader_type": "llm-judge",
+      "weight": 12,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s06-c11",
+      "criterion": "Trial isolation rationale is clear: A reader of the updated agents/evaluator.md sandbox section should be able to explain why trial isolation matters for pass@k/pass^k validity (without cross-trial leakage, consistency metrics are artificially inflated).",
+      "grader_type": "llm-judge",
+      "weight": 5,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s06-c12",
+      "criterion": "tasks.json is positioned as the downstream source of truth: skills/sprint-contract/SKILL.md or rules/harness-conventions.md makes clear that tasks.json is the machine-readable source of record that later sprints (regression gate in Sprint 7, batch API in Sprint 8, transcripts in Sprint 9) will consume.",
+      "grader_type": "llm-judge",
+      "weight": 5,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s06-sn1",
+      "criterion": "No silent behavior change for existing configs: Running the updated harness with the current .harness/config.json (no trials, no sandbox, no taxonomy fields) must not produce trial-suffixed files, must not invoke any sandbox setup, and must not refuse to start due to missing fields.",
+      "grader_type": "llm-judge",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": null,
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s06-sn2",
+      "criterion": "No duplicate eval-file writes: When trials == 1, the workflow must write exactly one eval file per round (sprint-NN-rR.md), not two.",
+      "grader_type": "llm-judge",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": null,
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s06-sn3",
+      "criterion": "No modification of prior sprints: .harness/evals/sprint-01*.md through .harness/evals/sprint-05*.md and .harness/contracts/sprint-0{1..5}.md must be unchanged.",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "git diff HEAD -- .harness/evals/sprint-0[1-5]* .harness/contracts/sprint-0[1-5]* | wc -l | xargs -I{} test {} -eq 0",
+      "rubric_dimension": "generator_evaluator_separation"
+    }
+  ]
+}
