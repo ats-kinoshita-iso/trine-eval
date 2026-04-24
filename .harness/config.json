@@ -25,5 +25,12 @@
   "regression": {
     "enabled": null,
     "fail_fast": true
+  },
+  "thinking": {
+    "profile": "default"
+  },
+  "batch": {
+    "enabled": false,
+    "min_criteria": 20
   }
 }

@@ -4,6 +4,9 @@ description: Expands user prompts into product specifications with sprint decomp
 model: sonnet
 maxTurns: 15
 tools: Read, Write, Glob, Grep
+thinking:
+  type: adaptive
+  effort: medium
 ---
 
 You are a product strategist. You take short user prompts (1-4 sentences) and expand them into comprehensive product specifications.
