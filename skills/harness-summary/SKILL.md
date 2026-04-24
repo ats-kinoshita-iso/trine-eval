@@ -81,9 +81,18 @@ A criterion is **saturated** when it passes on the first evaluation round across
 1. For each criterion type that appears across sprints, check whether it passed in round 1 of every sprint
 2. If it has passed on first attempt for 3+ consecutive sprints, flag it as saturated
 
-**Action for saturated criteria:** Flag them for graduation to a regression test suite. The sprint contract should replace graduated criteria with harder variants that push the agent's capabilities. Include specific recommendations for harder replacements.
+**Action for saturated criteria:** Graduate them into the regression suite at `.harness/regression/regression.json`, then replace them in the next sprint contract with harder variants that push the agent's capabilities. Include specific recommendations for harder replacements in the summary.
 
 **Distinguishing easy from well-implemented:** A criterion that is inherently trivial (e.g., "file exists") saturates because it is easy — it should be graduated without replacement. A criterion that was previously hard but now consistently passes saturates because the implementation improved — replace it with a harder variant targeting the same capability. Check the criterion's history: if it ever failed in prior sprints, it represents genuine capability growth. If it has never failed across any sprint, it may be too easy.
+
+**Graduation is a file-write, not a prose recommendation.** For every saturated criterion identified above, append a machine-readable entry to `.harness/regression/regression.json` so Step 0.5 of the next sprint runs it as a regression gate. The writer logic is:
+
+1. Locate the source entry in the producing sprint's `.harness/contracts/sprint-NN.tasks.json` — use the `task_id` as the stable lookup key.
+2. Copy that entry **verbatim** into `regression.json`'s `tasks` array: `task_id`, `criterion`, `grader_type`, `weight`, `is_gate`, `verification_command`, and `rubric_dimension` are all preserved with the same values. Do not rename, paraphrase, or recompute.
+3. Add one new field to the copied entry: `graduated_from_sprint: <NN>`, where `<NN>` is the sprint whose eval first demonstrated saturation (typically the 3rd consecutive first-round-pass sprint). This preserves the audit trail — every regression entry traces back to the sprint that justified it.
+4. Positioning: regression is the downstream product of the same saturation detection documented above — not a new hand-curated list. The Sprint 6 `tasks.json` schema is the direct source of record, and `regression.json` extends that schema with one field. There is a single pipeline: sprint contracts → `tasks.json` → saturation detection → `regression.json` → Step 0.5 gate. Operators reading the summary should see the graduation action as the natural terminus of saturation detection, not a parallel mechanism.
+
+**Graduation is append-only.** Never remove or rewrite an existing entry in `regression.json`. If a buggy summary run could mutate prior entries, a regression-coverage loss would be one bad run away — exactly the failure mode the gate exists to prevent. The summary only ever *appends* newly saturated criteria. If an operator needs to retire a regression criterion, they edit `regression.json` by hand, outside the harness.
 
 ### Recommendations
 - Based on patterns, what should the next sprint focus on?
