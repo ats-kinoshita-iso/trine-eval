@@ -191,6 +191,8 @@ Calibration examples from prior sprints' eval reports (especially borderline PAS
 
 ## Human Calibration
 
+**Skip this entire section if `config.components_enabled.calibration_writes` is `false`** (minimal mode default). In that configuration, do not create or write to `.harness/calibration/`, do not populate a `## Human Review Flags` section in the eval report, and do not perform the rubric-threshold-adjustment or inter-annotator-agreement steps below. The eval report still records PASS/FAIL and evidence; low-confidence LLM-judge grades simply stand as given without a human-override loop.
+
 Human calibration validates that code-based and LLM-based graders produce trustworthy results. It is the gold standard but is slow and expensive — use it strategically, not routinely.
 
 ### When to Flag for Human Review
@@ -224,6 +226,8 @@ Human calibration results improve future grading accuracy through three mechanis
 3. **Inter-annotator agreement** — Periodically have two humans independently grade the same criteria. High agreement validates the rubric; low agreement indicates the criteria or rubric need more specificity.
 
 ## Transcript Review
+
+**Skip this entire section if `config.components_enabled.per_sprint_aci_review` is `false`** (minimal mode default). ACI self-optimization still runs, but batched across all evals at `/harness-summary` time rather than per-sprint — see the ACI Self-Optimization section of `skills/eval-summary/SKILL.md`.
 
 After completing an evaluation, review the eval transcript for grader quality — not just sprint outcomes.
 
