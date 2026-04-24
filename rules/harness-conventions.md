@@ -27,7 +27,7 @@ The harness has two independent loops that are easy to confuse — and conflatin
 - **Trial** — A measurement run at **fixed code state**. Trials exist to estimate how reliable the current implementation is. Multiple trials are independent samples of the same agent doing the same task, differing only in trial-time non-determinism (model stochasticity, timing, sandbox entropy). Trials are controlled by `config.trials` (default `1`). Files: `sprint-NN-rR-tT.md`, where `T` is the trial index within round `R`. When `trials == 1`, the `-tT` suffix is omitted and the file is `sprint-NN-rR.md` (Phase 1 backward compatibility).
 - **Retry** — A **bug-fix iteration**. Retries exist to let the Generator edit code in response to Evaluator feedback. Code changes between retries; trial counts do not need to. Retries are controlled by `config.max_retries`. Files: the round counter `R` increments with each retry.
 
-Pass@k and pass^k are computed from trial files only (see `skills/eval-summary/SKILL.md`). Retry-round pass rates remain useful as a separate `first-round-pass` / retry-efficiency signal, but they are not a valid consistency metric.
+Pass@k and pass^k are computed from trial files only (see `skills/harness-summary/SKILL.md`). Retry-round pass rates remain useful as a separate `first-round-pass` / retry-efficiency signal, but they are not a valid consistency metric.
 
 ## tasks.json Schema
 

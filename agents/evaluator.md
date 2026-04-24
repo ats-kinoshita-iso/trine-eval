@@ -260,7 +260,7 @@ Human calibration results improve future grading accuracy through three mechanis
 
 ## Transcript Review
 
-**Skip this entire section if `config.components_enabled.per_sprint_aci_review` is `false`** (minimal mode default). ACI self-optimization still runs, but batched across all evals at `/harness-summary` time rather than per-sprint — see the ACI Self-Optimization section of `skills/eval-summary/SKILL.md`.
+**Skip this entire section if `config.components_enabled.per_sprint_aci_review` is `false`** (minimal mode default). ACI self-optimization still runs, but batched across all evals at `/harness-summary` time rather than per-sprint — see the ACI Self-Optimization section of `skills/harness-summary/SKILL.md`.
 
 After completing an evaluation, review the eval transcript for grader quality — not just sprint outcomes.
 
