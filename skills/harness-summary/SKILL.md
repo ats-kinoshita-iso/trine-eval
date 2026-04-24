@@ -1,5 +1,5 @@
 ---
-name: eval-summary
+name: harness-summary
 description: Cross-sprint analysis showing pass rates, consistency metrics, trends, and failure patterns
 allowed-tools: Read, Glob, Grep
 ---

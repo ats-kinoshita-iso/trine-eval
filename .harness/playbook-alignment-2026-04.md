@@ -54,7 +54,7 @@ The sprint contract format is a close implementation of the playbook's YAML task
 This addresses a common harness failure mode (evaluating the wrong thing) at the source.
 
 ### 1.4 pass@k and pass^k
-`skills/eval-summary/SKILL.md` computes both metrics and correctly distinguishes them: pass@k for "at least one success," pass^k for "all trials succeed." The summary also tracks first-round pass rate as a trend metric. The definitions match the playbook exactly.
+`skills/harness-summary/SKILL.md` computes both metrics and correctly distinguishes them: pass@k for "at least one success," pass^k for "all trials succeed." The summary also tracks first-round pass rate as a trend metric. The definitions match the playbook exactly.
 
 ### 1.5 Saturation Tracking and Graduation
 The summary skill identifies criteria passing first-round for 3+ consecutive sprints and recommends graduating them to a regression suite. This is precisely Anthropic's dual-track model: capability evals "graduate" to regression as they saturate.

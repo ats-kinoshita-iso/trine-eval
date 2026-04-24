@@ -105,7 +105,7 @@ After the contract is approved (Status: APPROVED from the Evaluator review), emi
 - `weight` — The percentage weight from the markdown contract. Gate (Should-NOT) criteria use `0` — they are binary, not weighted.
 - `is_gate` — `true` for Should-NOT gates, `false` for scored success criteria.
 - `verification_command` — For deterministic criteria, a runnable shell command whose exit code or stdout determines PASS/FAIL. For llm-judge criteria, `null`. Sprint 7's regression gate executes these commands directly.
-- `rubric_dimension` — Which rubric dimension this criterion informs (e.g., `methodology_completeness`, `grading_architecture`). Used by Sprint 8 for batching by dimension and by eval-summary for per-dimension rollups.
+- `rubric_dimension` — Which rubric dimension this criterion informs (e.g., `methodology_completeness`, `grading_architecture`). Used by Sprint 8 for batching by dimension and by harness-summary for per-dimension rollups.
 
 **Emission process:** The Generator (or main thread in minimal mode) writes the JSON file after reading the approved contract. The Evaluator does not need to review the JSON separately — it is a mechanical transcription of the approved markdown contract, and any drift between the two is caught by the Evaluator's subsequent reads of both files during the EVALUATION step.
 

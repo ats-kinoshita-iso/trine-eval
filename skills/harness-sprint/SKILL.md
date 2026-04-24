@@ -1,5 +1,5 @@
 ---
-name: sprint-workflow
+name: harness-sprint
 description: Run one sprint through the contract-build-eval cycle
 allowed-tools: Read, Write, Bash, Glob, Grep, Agent, Edit
 disable-model-invocation: true

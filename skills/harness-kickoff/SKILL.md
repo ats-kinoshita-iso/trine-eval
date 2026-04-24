@@ -157,5 +157,5 @@ Print:
 ## Important Notes
 
 - If the Planner produces an empty or malformed spec, retry once with more specific instructions
-- Do NOT proceed to sprint execution — that's the sprint-workflow skill's job
+- Do NOT proceed to sprint execution — that's the harness-sprint skill's job
 - The `.harness/` directory should be committed to version control so progress survives across sessions

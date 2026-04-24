@@ -20,13 +20,13 @@ Each sprint's changes edit the agents, skills, templates, hooks, and config sche
 
 **Files to modify:**
 - `.harness/config.json` — add `trials` (default `1`), `sandbox` (`{mode: "none" | "tmpdir" | "docker"}`, default `"none"`), `taxonomy.emit_tasks_json` (default `true`)
-- `skills/sprint-workflow/SKILL.md` — split retry loop (bug-fix) from **trial loop** (measurement). New Step 3c: if `trials > 1`, for each trial reset to a clean git state (stash working copy → checkout sprint head → run eval → restore) and write `.harness/evals/sprint-{NN}-r{R}-t{T}.md`
+- `skills/harness-sprint/SKILL.md` — split retry loop (bug-fix) from **trial loop** (measurement). New Step 3c: if `trials > 1`, for each trial reset to a clean git state (stash working copy → checkout sprint head → run eval → restore) and write `.harness/evals/sprint-{NN}-r{R}-t{T}.md`
 - `agents/evaluator.md` — add Pre-eval Sandbox Setup section: if `sandbox.mode == "tmpdir"` copy working tree to tmpdir and `cd` there; if `"docker"` delegate to `scripts/sandbox.sh` (new, thin wrapper around `docker run --rm -v`)
-- `skills/eval-summary/SKILL.md` — compute pass@k / pass^k from **trial** files (`-t{T}`), not round files. Keep first-round-pass as a separate metric. Mark retry-derived metrics as deprecated in summary output
+- `skills/harness-summary/SKILL.md` — compute pass@k / pass^k from **trial** files (`-t{T}`), not round files. Keep first-round-pass as a separate metric. Mark retry-derived metrics as deprecated in summary output
 - `skills/sprint-contract/SKILL.md` + `skills/sprint-contract/template.md` — after contract approval, emit sibling `.harness/contracts/sprint-{NN}.tasks.json` with one entry per criterion (`task_id`, `criterion`, `grader_type`, `weight`, `is_gate`, `verification_command`, `rubric_dimension`). This is the Gap 3 formal taxonomy
 - `rules/harness-conventions.md` — document trial vs. retry distinction and the `tasks.json` schema
 
-**Reuse:** existing round-file naming (`sprint-NN-rR.md`) extends to `-tT`; existing weighted-score computation in eval-summary; existing `.harness/sprint-state.json` for tracking trial progress.
+**Reuse:** existing round-file naming (`sprint-NN-rR.md`) extends to `-tT`; existing weighted-score computation in harness-summary; existing `.harness/sprint-state.json` for tracking trial progress.
 
 **Key should-NOT gate:** If `trials == 1`, harness must behave identically to today (no behavior change for existing projects).
 
@@ -36,12 +36,12 @@ Each sprint's changes edit the agents, skills, templates, hooks, and config sche
 
 **Files to modify:**
 - Create `.harness/regression/` directory, with `regression.json` (array of graduated task entries copied from `sprint-NN.tasks.json`) and `README.md`
-- `skills/eval-summary/SKILL.md` — when a criterion passes first-round for 3+ consecutive sprints, append its entry to `regression.json` (not just recommend in prose)
-- `skills/sprint-workflow/SKILL.md` — add **Step 0.5: Regression Gate**. Before new-sprint contract proposal, run every criterion in `regression.json` via its `verification_command`. If any fail, abort sprint with loud error listing the broken regression criteria. Write results to `.harness/regression/runs/run-{timestamp}.json`
+- `skills/harness-summary/SKILL.md` — when a criterion passes first-round for 3+ consecutive sprints, append its entry to `regression.json` (not just recommend in prose)
+- `skills/harness-sprint/SKILL.md` — add **Step 0.5: Regression Gate**. Before new-sprint contract proposal, run every criterion in `regression.json` via its `verification_command`. If any fail, abort sprint with loud error listing the broken regression criteria. Write results to `.harness/regression/runs/run-{timestamp}.json`
 - `.harness/config.json` — add `regression.enabled` (default `true` when `regression.json` exists), `regression.fail_fast` (default `true`)
 - `agents/evaluator.md` — add explicit note: regression criteria use `effort: medium` (speed) vs capability criteria which use `high`/`max` (thoroughness) — lands the wiring point for Sprint 8
 
-**Reuse:** the Sprint 6 `tasks.json` schema is the source record for graduation; graduation logic already exists in `skills/eval-summary/SKILL.md` — just swap the output from prose recommendation to writing into `regression.json`.
+**Reuse:** the Sprint 6 `tasks.json` schema is the source record for graduation; graduation logic already exists in `skills/harness-summary/SKILL.md` — just swap the output from prose recommendation to writing into `regression.json`.
 
 ### Sprint 8 (Gap C — Gaps 5, 7): Claude 4.6 Adaptive Thinking + Batch API
 
@@ -51,13 +51,13 @@ Each sprint's changes edit the agents, skills, templates, hooks, and config sche
 - `agents/planner.md` — add frontmatter `thinking: { type: adaptive, effort: medium }`
 - `agents/generator.md` — add frontmatter `thinking: { type: adaptive, effort: medium }` for implementation; document per-mode overrides
 - `agents/evaluator.md` — add frontmatter `thinking: { type: adaptive, effort: high }` for capability evals; `medium` when invoked on regression criteria (Sprint 7 wiring point); `max` for contract review
-- `skills/eval-summary/SKILL.md` — add `thinking: { type: adaptive, effort: max }` (analysis-heavy)
+- `skills/harness-summary/SKILL.md` — add `thinking: { type: adaptive, effort: max }` (analysis-heavy)
 - `.harness/config.json` — add `thinking.profile` (`"default" | "fast" | "thorough"`, default `"default"`) so users can override without editing agents
-- `skills/sprint-workflow/SKILL.md` — add `--batch` flag. When set, collect all eval criterion verifications into a single Batch API submission, poll, and map results back onto the per-criterion result file. Document the 50% discount and 24-hour SLA
+- `skills/harness-sprint/SKILL.md` — add `--batch` flag. When set, collect all eval criterion verifications into a single Batch API submission, poll, and map results back onto the per-criterion result file. Document the 50% discount and 24-hour SLA
 - `.harness/config.json` — add `batch.enabled` (default `false`), `batch.min_criteria` (default `20`, so tiny sprints stay synchronous)
 - `README.md` — document the new config knobs
 
-**Reuse:** existing subagent spawn points in `sprint-workflow`; no new agent types needed — thinking config lives on existing agents.
+**Reuse:** existing subagent spawn points in `harness-sprint`; no new agent types needed — thinking config lives on existing agents.
 
 ### Sprint 9 (Gap D — Gap 6): Full Transcript Capture
 
@@ -65,7 +65,7 @@ Each sprint's changes edit the agents, skills, templates, hooks, and config sche
 
 **Files to modify:**
 - Create `.harness/transcripts/` directory
-- `skills/sprint-workflow/SKILL.md` — after each Evaluator spawn, serialize the subagent transcript to `.harness/transcripts/sprint-{NN}-r{R}-t{T}.json` with shape:
+- `skills/harness-sprint/SKILL.md` — after each Evaluator spawn, serialize the subagent transcript to `.harness/transcripts/sprint-{NN}-r{R}-t{T}.json` with shape:
   ```json
   { "sprint": 6, "round": 1, "trial": 1,
     "messages": [...], "tool_calls": [...],
@@ -73,8 +73,8 @@ Each sprint's changes edit the agents, skills, templates, hooks, and config sche
     "timing": {"ttft_ms": ..., "total_ms": ...},
     "thinking_summary": "..." }
   ```
-- `agents/evaluator.md` — add instruction: at end of run, emit structured JSON trailer (machine-readable) in addition to current markdown eval file; sprint-workflow reads the trailer to assemble the transcript file
-- `skills/eval-summary/SKILL.md` — when reporting a FAIL criterion or grader disagreement, link the transcript file path in the summary output so humans can audit which tools the Evaluator actually called
+- `agents/evaluator.md` — add instruction: at end of run, emit structured JSON trailer (machine-readable) in addition to current markdown eval file; harness-sprint reads the trailer to assemble the transcript file
+- `skills/harness-summary/SKILL.md` — when reporting a FAIL criterion or grader disagreement, link the transcript file path in the summary output so humans can audit which tools the Evaluator actually called
 - `.harness/config.json` — add `transcripts.capture` (default `true`), `transcripts.retain_days` (default `30`, with a note that summary graduation needs at least 3 sprints of history)
 - `rules/harness-conventions.md` — document transcript schema
 
@@ -87,7 +87,7 @@ Each sprint's changes edit the agents, skills, templates, hooks, and config sche
 **Files to modify:**
 - `skills/sprint-contract/template.md` — add optional `## Edge Case Criteria` section, tracked separately from deterministic/LLM-judge criteria. Weights do not count toward the 100% total; edge-case pass rate is a distinct metric
 - `skills/sprint-contract/SKILL.md` — update negotiation rules to require Evaluator to check for edge-case coverage when the rubric is `web-app`, `api-service`, or `rag-system`
-- `skills/eval-summary/SKILL.md` — add "Edge Case Pass Rate" to the summary, separate from weighted score
+- `skills/harness-summary/SKILL.md` — add "Edge Case Pass Rate" to the summary, separate from weighted score
 - `agents/evaluator.md` — add Playwright MCP to available tools **conditional on** `config.project_type == "web-app"`; fall back to curl for other project types. Document in the evaluator that Visual Design dimension in `web-app` rubric requires Playwright if available, otherwise flag Visual Design findings as low-confidence and route to human review
 - `.harness/config.json` — add `evaluator_tools.playwright` (default `"auto"` = enable when `project_type: web-app`)
 - `agents/evaluator.md` — add **Adversarial Hygiene** section: (a) never infer PASS/FAIL from filenames or code comments; (b) before scoring, log the exact verification command executed; (c) in the structured trailer (Sprint 9), include a `verified_via_command: true/false` flag per criterion; the summary skill flags criteria where this is false as suspect
@@ -124,15 +124,15 @@ These are the only edits that happen outside the sprint loop — everything else
 
 | Concern | File |
 |---|---|
-| Retry vs trial loop | `skills/sprint-workflow/SKILL.md` |
+| Retry vs trial loop | `skills/harness-sprint/SKILL.md` |
 | Trial sandbox wiring | `agents/evaluator.md`, new `scripts/sandbox.sh` |
 | Task taxonomy emission | `skills/sprint-contract/SKILL.md` (writes `.tasks.json`) |
-| Pass@k/pass^k from trials | `skills/eval-summary/SKILL.md` |
-| Regression gate | `skills/sprint-workflow/SKILL.md` Step 0.5 |
-| Graduation writer | `skills/eval-summary/SKILL.md` |
+| Pass@k/pass^k from trials | `skills/harness-summary/SKILL.md` |
+| Regression gate | `skills/harness-sprint/SKILL.md` Step 0.5 |
+| Graduation writer | `skills/harness-summary/SKILL.md` |
 | Adaptive thinking config | `agents/*.md` frontmatter |
-| Batch API flag | `skills/sprint-workflow/SKILL.md`, `config.json` |
-| Transcript serialization | `skills/sprint-workflow/SKILL.md`, `agents/evaluator.md` |
+| Batch API flag | `skills/harness-sprint/SKILL.md`, `config.json` |
+| Transcript serialization | `skills/harness-sprint/SKILL.md`, `agents/evaluator.md` |
 | Edge-case section | `skills/sprint-contract/template.md` |
 | Playwright conditional | `agents/evaluator.md`, `config.json` |
 | Adversarial hygiene flags | `agents/evaluator.md`, transcript trailer |
@@ -142,7 +142,7 @@ These are the only edits that happen outside the sprint loop — everything else
 
 After each sprint the harness evaluates itself against the `eval-harness` rubric. Beyond that, end-to-end verification:
 
-1. **Sprint 6 trial loop** — Set `trials: 3` on a synthetic non-deterministic sprint (coin-flip criterion). Confirm `.harness/evals/sprint-X-r1-t1.md`, `-t2.md`, `-t3.md` exist with independent results. Confirm `skills/eval-summary` reports pass@3 ≈ 1−(1−0.5)³ ≈ 0.875 and pass^3 ≈ 0.125. With `trials: 1` (default), confirm no behavior change vs. today.
+1. **Sprint 6 trial loop** — Set `trials: 3` on a synthetic non-deterministic sprint (coin-flip criterion). Confirm `.harness/evals/sprint-X-r1-t1.md`, `-t2.md`, `-t3.md` exist with independent results. Confirm `skills/harness-summary` reports pass@3 ≈ 1−(1−0.5)³ ≈ 0.875 and pass^3 ≈ 0.125. With `trials: 1` (default), confirm no behavior change vs. today.
 2. **Sprint 7 regression gate** — Manually break a file that a graduated criterion depends on. Run `/harness-sprint`. Confirm abort with "regression failed" error before contract negotiation begins.
 3. **Sprint 8 thinking + batch** — Inspect a sprint transcript; confirm `thinking` blocks present. Set `batch.enabled: true` on a ≥20-criterion sprint; confirm a single Batch API call replaces N synchronous calls and eval results still land in `.harness/evals/`.
 4. **Sprint 9 transcripts** — After any eval, confirm `.harness/transcripts/sprint-N-r1-t1.json` exists with `messages`, `tool_calls`, `token_usage`. Confirm summary.md links the transcript for any FAIL criterion.

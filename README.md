@@ -118,10 +118,10 @@ eval-harness/                     # Plugin root
 ├── .claude-plugin/plugin.json    # Plugin manifest
 ├── skills/
 │   ├── harness-kickoff/          # Entry point: init + planning
-│   ├── sprint-workflow/          # Per-sprint contract→build→eval loop
+│   ├── harness-sprint/           # Per-sprint contract→build→eval loop
 │   ├── eval-rubric/              # Rubric loader + domain rubrics
 │   ├── sprint-contract/          # Contract template + negotiation protocol
-│   └── eval-summary/             # Cross-sprint analysis
+│   └── harness-summary/          # Cross-sprint analysis
 ├── agents/
 │   ├── planner.md                # Product strategist
 │   ├── generator.md              # Senior engineer

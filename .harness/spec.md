@@ -13,8 +13,8 @@ Upgrade trine-eval to fully implement Anthropic's published eval-driven developm
 3. **Reference solutions in contracts** — Contract template supports optional known-working outputs for calibration.
 4. **Weighted criteria** — Each criterion in a sprint contract carries a weight. The evaluator computes a weighted score, not just pass/fail count.
 5. **Environment isolation guidance** — Evaluator instructions specify clean-state requirements between trial runs.
-6. **Pass@k and pass^k metrics** — eval-summary computes consistency metrics across retry rounds.
-7. **Saturation graduation** — eval-summary identifies criteria that always pass and flags them for regression suite graduation.
+6. **Pass@k and pass^k metrics** — harness-summary computes consistency metrics across retry rounds.
+7. **Saturation graduation** — harness-summary identifies criteria that always pass and flags them for regression suite graduation.
 8. **Plugin manifest accuracy** — plugin.json reflects the current project name and structure.
 
 ### Should-have
@@ -34,7 +34,7 @@ Upgrade trine-eval to fully implement Anthropic's published eval-driven developm
 
 - Users invoke `/harness-kickoff` and `/harness-sprint` as before — no workflow changes
 - New contract fields (weights, negative criteria, grader type) are additive — old contracts still work
-- `eval-summary` gains new metric sections (pass@k, saturation) automatically
+- `harness-summary` gains new metric sections (pass@k, saturation) automatically
 - Config gains optional fields with backward-compatible defaults
 
 ## Technical Constraints
@@ -51,7 +51,7 @@ Upgrade trine-eval to fully implement Anthropic's published eval-driven developm
 2. All 8 playbook methodology steps have a corresponding mechanism in the harness
 3. Contract template supports weighted criteria, negative tests, and reference solutions
 4. Evaluator agent instructions enforce code→LLM→human grading hierarchy
-5. eval-summary computes pass@k, pass^k, and saturation metrics
+5. harness-summary computes pass@k, pass^k, and saturation metrics
 6. Plugin manifest and all cross-references are accurate
 
 ## Phase 2: Playbook Alignment (Sprints 6–10)
@@ -83,7 +83,7 @@ Phase 1 (sprints 1–5) closed the methodology gaps in trine-eval against Anthro
 ### Phase 2 Success Criteria
 
 1. With `trials: 1` (default), Phase 2 harness behaves identically to Phase 1 — no behavior change for pre-existing projects
-2. With `trials: k > 1`, eval-summary computes pass@k and pass^k from independent trial files, not retry rounds
+2. With `trials: k > 1`, harness-summary computes pass@k and pass^k from independent trial files, not retry rounds
 3. Every graduated criterion lives in `regression.json` and blocks new sprints on regression failure
 4. Agent frontmatter declares explicit adaptive-thinking effort levels tuned to agent role
 5. Batch API mode cuts eval-time API calls from N to 1 on sprints with ≥ `batch.min_criteria` criteria
