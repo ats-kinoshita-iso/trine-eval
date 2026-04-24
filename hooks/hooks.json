@@ -1,19 +1,34 @@
 {
-  "hooks": [
-    {
-      "event": "SessionStart",
-      "command": "if [ -f .harness/sprint-state.json ]; then cat .harness/sprint-state.json; elif [ -f .harness/progress.md ]; then cat .harness/progress.md; fi",
-      "description": "Read sprint state on session start to restore harness context after compaction or new session"
-    },
-    {
-      "event": "Stop",
-      "command": "if [ -d .harness ]; then bash -c 'echo \"## Session $(date -Iseconds)\" >> .harness/progress.md && echo \"Stopped. Current sprint state should be committed.\" >> .harness/progress.md'; fi",
-      "description": "Append session timestamp to progress log on stop"
-    },
-    {
-      "event": "PostToolUse",
-      "command": "if [ -d .harness ] && [ -f .harness/sprint-state.json ]; then bash -c 'LATEST=$(ls -t .harness/evals/sprint-*-r*.md 2>/dev/null | head -1); if [ -n \"$LATEST\" ]; then STAMP=$(date -Iseconds); python3 -c \"import json,sys; d=json.load(open(sys.argv[1])); d[\\\"last_updated\\\"]=sys.argv[2]; json.dump(d,open(sys.argv[1],\\\"w\\\"),indent=2)\" .harness/sprint-state.json \"$STAMP\" 2>/dev/null || true; fi'; fi",
-      "description": "After evaluation tool calls, update sprint-state.json last_updated timestamp to track eval progress"
-    }
-  ]
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -f .harness/sprint-state.json ]; then cat .harness/sprint-state.json; elif [ -f .harness/progress.md ]; then cat .harness/progress.md; fi"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -d .harness ]; then bash -c 'echo \"## Session $(date -Iseconds)\" >> .harness/progress.md && echo \"Stopped. Current sprint state should be committed.\" >> .harness/progress.md'; fi"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [ -d .harness ] && [ -f .harness/sprint-state.json ]; then bash -c 'LATEST=$(ls -t .harness/evals/sprint-*-r*.md 2>/dev/null | head -1); if [ -n \"$LATEST\" ]; then STAMP=$(date -Iseconds); python3 -c \"import json,sys; d=json.load(open(sys.argv[1])); d[\\\"last_updated\\\"]=sys.argv[2]; json.dump(d,open(sys.argv[1],\\\"w\\\"),indent=2)\" .harness/sprint-state.json \"$STAMP\" 2>/dev/null || true; fi'; fi"
+          }
+        ]
+      }
+    ]
+  }
 }

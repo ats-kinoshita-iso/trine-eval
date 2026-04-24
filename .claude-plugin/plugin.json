@@ -1,8 +1,9 @@
 {
   "name": "trine-eval",
   "version": "0.2.0",
-  "description": "trine-eval: Modular three-agent eval-driven development harness implementing Anthropic's Planner-Generator-Evaluator architecture",
-  "skills": ["skills/"],
-  "agents": ["agents/"],
-  "hooks": "hooks/hooks.json"
+  "description": "Modular three-agent eval-driven development harness implementing Anthropic's Planner-Generator-Evaluator architecture",
+  "author": {
+    "name": "ats-kinoshita-iso"
+  },
+  "license": "MIT"
 }
