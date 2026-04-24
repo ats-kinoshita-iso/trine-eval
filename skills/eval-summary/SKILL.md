@@ -28,7 +28,7 @@ Generate a cross-sprint evaluation summary by analyzing all completed sprint eva
 ```
 pass@k = 1 - (1 - p)^k
 ```
-where p is the per-trial pass rate (passed criteria / total criteria for a single evaluation round) and k is the number of evaluation rounds for that sprint.
+where p is the per-**trial** pass rate (passed criteria / total criteria for a single evaluation trial at fixed code state) and k is the number of **trials** for that sprint.
 
 Use pass@k when one success is sufficient — e.g., a code generation tool where the user picks the best output from multiple runs. High pass@k with low pass^k indicates the system can succeed but does so inconsistently.
 
@@ -39,11 +39,21 @@ pass^k = p^k
 
 Use pass^k when consistency is essential — e.g., a customer-facing agent where every interaction must succeed. At a 75% per-trial pass rate, pass^3 drops to approximately 42%.
 
-**How to compute from eval data:**
-1. For each sprint, collect the per-round pass rates from all `sprint-NN-rR.md` files
-2. Compute p as the average per-round pass rate across rounds
-3. k = number of evaluation rounds for that sprint
-4. Report both pass@k and pass^k per sprint and overall
+**How to compute from eval data (Phase 2: trial-based):**
+
+Compute pass@k and pass^k from **trial files** (`sprint-NN-rR-tT.md`), not round files (`sprint-NN-rR.md`).
+
+1. For each sprint, group eval files by round `R`. Within each round, trial files are named `sprint-NN-rR-tT.md` (when `config.trials > 1`) or the single file `sprint-NN-rR.md` (when `config.trials == 1`).
+2. For the most recent round `R_final` (the round whose code represents the shipped sprint), collect the per-trial pass rates from all trial files.
+3. Compute p as the average per-trial pass rate across those trials. If only one trial exists (single-trial mode), p is simply the round's pass rate and pass@1 = pass^1 = p.
+4. k = `config.trials` for that sprint (defaulting to 1).
+5. Report both pass@k and pass^k per sprint and overall.
+
+Trials measure consistency at a fixed code state (the Generator is not editing between trials), so p estimates the agent's true reliability. Retries, by contrast, change the code, so retry-round pass rates mix a fixed-bug signal into what should be a pure consistency measurement.
+
+**Deprecated (retry-derived) metric:** Prior to the trial loop, pass@k and pass^k were computed from retry rounds — i.e., `k` was the number of retry rounds and `p` was their averaged pass rate. That formulation is **deprecated** because it treats a fixed bug as evidence of inconsistency, inflating pass@k and deflating pass^k. When rendering the summary for pre-Phase-2 sprints that have only round files, label the metric `pass@rounds` / `pass^rounds` (deprecated) and note in the summary that statistically valid pass@k/pass^k requires at least 2 trials per round.
+
+**First-round-pass rate remains a separate metric.** It measures whether the Generator gets the implementation right before any retry feedback — a capability signal, not a consistency signal. Keep it in the per-sprint table as its own column.
 
 These metrics reveal whether the system is reliable (high pass^k) or merely capable (high pass@k but low pass^k). A large gap between pass@k and pass^k signals non-determinism that needs investigation.
 

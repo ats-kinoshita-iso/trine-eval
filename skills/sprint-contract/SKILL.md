@@ -63,6 +63,52 @@ Reference solutions provide known-working outputs for criteria where grader cali
 
 **Purpose:** Reference solutions calibrate grader accuracy. They give the evaluator a concrete example of what PASS looks like, reducing the chance of false-fail or false-pass judgments.
 
+## Task Taxonomy: sprint-NN.tasks.json
+
+After the contract is approved (Status: APPROVED from the Evaluator review), emit a sibling `.harness/contracts/sprint-{NN}.tasks.json` file alongside the markdown contract. This is the **machine-readable source of record** for the sprint's criteria — it feeds the regression gate (Sprint 7), the Batch API submission grouping (Sprint 8), transcript correlation by task_id (Sprint 9), and adversarial hygiene flags (Sprint 10). Do not skip it: later sprints assume it exists from Sprint 6 onward.
+
+**When to emit:** right after the Evaluator writes `**Status: APPROVED**` and before the Generator enters IMPLEMENTATION mode. Guarded by `config.taxonomy.emit_tasks_json` (default `true`).
+
+**Schema:** one entry per criterion in the approved contract — both Success Criteria (deterministic and LLM-judge) and Should-NOT gate criteria.
+
+```json
+{
+  "sprint": 6,
+  "tasks": [
+    {
+      "task_id": "s06-c1",
+      "criterion": "<verbatim criterion text from the contract>",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "jq -e '.trials' .harness/config.json",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s06-sn1",
+      "criterion": "<Should-NOT criterion text>",
+      "grader_type": "llm-judge",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": null,
+      "rubric_dimension": "generator_evaluator_separation"
+    }
+  ]
+}
+```
+
+**Field semantics:**
+
+- `task_id` — Stable identifier: `s<NN>-c<N>` for success criteria (numbered from 1), `s<NN>-sn<N>` for Should-NOT gates. Stability matters because Sprint 9 transcripts and Sprint 10 hygiene flags key off this id across trials.
+- `criterion` — Verbatim criterion text from the markdown contract (no paraphrasing). This is what the Evaluator and downstream tools read.
+- `grader_type` — `"deterministic"` or `"llm-judge"`, matching the tag in the markdown contract.
+- `weight` — The percentage weight from the markdown contract. Gate (Should-NOT) criteria use `0` — they are binary, not weighted.
+- `is_gate` — `true` for Should-NOT gates, `false` for scored success criteria.
+- `verification_command` — For deterministic criteria, a runnable shell command whose exit code or stdout determines PASS/FAIL. For llm-judge criteria, `null`. Sprint 7's regression gate executes these commands directly.
+- `rubric_dimension` — Which rubric dimension this criterion informs (e.g., `methodology_completeness`, `grading_architecture`). Used by Sprint 8 for batching by dimension and by eval-summary for per-dimension rollups.
+
+**Emission process:** The Generator (or main thread in minimal mode) writes the JSON file after reading the approved contract. The Evaluator does not need to review the JSON separately — it is a mechanical transcription of the approved markdown contract, and any drift between the two is caught by the Evaluator's subsequent reads of both files during the EVALUATION step.
+
 ## Guidelines for Good Criteria
 
 **Good criterion:** "GET /api/users returns 200 with a JSON array. Each user object contains id (number), name (string), and email (string)."
