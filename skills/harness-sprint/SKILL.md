@@ -20,6 +20,45 @@ You are running one sprint through the full Planner-Generator-Evaluator cycle. T
 
 If all sprints are complete, tell the user and suggest `/harness-summary`.
 
+## Step 0.5: Regression Gate
+
+Before negotiating any new contract, verify that every previously graduated capability still passes. A regression gate is necessary here — not later — because a new sprint's criteria are independent of prior capabilities: the new eval can grade PASS on fresh work while a graduated capability has silently broken. Running the gate *after* the new sprint's eval would let the system ship a green score even though it regressed, overstating system health in the metrics. Running it *before* contract negotiation means the sprint cannot even begin defining new work until existing capability is verified intact. This is why the gate is `fail_fast` by default, not a warning.
+
+### Guard conditions — when Step 0.5 is a no-op
+
+1. If `.harness/regression/regression.json` does **not** exist, skip this step entirely. This is the Phase 1 path: projects that have never graduated a criterion see no behavior change — there is no file to read, no command to run, no abort to trigger.
+2. If `.harness/regression/regression.json` exists but its `tasks` array is empty, skip this step. An empty suite is indistinguishable from no suite.
+3. If `config.regression.enabled` is explicitly `false`, skip this step. The operator has disabled the gate on purpose.
+4. Otherwise (file exists with a non-empty `tasks` array, and `regression.enabled` is truthy or absent — the auto-default), execute the gate as described below.
+
+### Execution
+
+1. Read `.harness/regression/regression.json`.
+2. For each entry in the `tasks` array:
+   - Execute `task.verification_command` **verbatim** — do not paraphrase, reconstruct, or substitute variables. The exact string recorded in `regression.json` is what ran when the criterion was graduated; running the same command preserves the audit chain.
+   - Record PASS if exit code is `0`, FAIL otherwise. Capture stdout, stderr, and exit code.
+3. Write an aggregate results file to `.harness/regression/runs/run-<UTC-ISO8601>.json` with shape:
+   ```json
+   { "timestamp": "2026-04-24T18:45:00Z", "sprint_about_to_run": 7,
+     "results": [
+       { "task_id": "s02-c4", "graduated_from_sprint": 5,
+         "verification_command": "...", "verdict": "PASS",
+         "exit_code": 0, "stdout": "...", "stderr": "..." }
+     ] }
+   ```
+4. If any task's verdict is FAIL:
+   - Read `config.regression.fail_fast` (default `true` when absent).
+   - If `fail_fast` is true: **abort the sprint**. Print the failing `task_id`s along with their `graduated_from_sprint` origin so the user immediately knows which capability regressed and which sprint graduated it. Do not proceed to Step 1.
+   - If `fail_fast` is false: print a warning, note the regression in `progress.md`, and continue to Step 1.
+5. If every task passes (or the step was skipped), continue to Step 1.
+
+### Config defaults
+
+- `config.regression.enabled` — default is *auto*: truthy when `regression.json` exists with a non-empty `tasks` array, falsy otherwise. A missing `regression` object in `config.json` is equivalent to `enabled: null` (auto).
+- `config.regression.fail_fast` — default `true`. A missing value means abort on any regression failure.
+
+These defaults guarantee that a pre-Phase-2 project with no `regression` object and no `regression.json` file experiences no behavior change.
+
 ## Step 1: Contract Negotiation
 
 If `components_enabled.contract_negotiation` is true in config:

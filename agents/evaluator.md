@@ -66,6 +66,15 @@ Use this mode when trials can leak OS-level state (installed packages, network c
 
 Every verification command for every trial MUST go through the setup matching `config.sandbox.mode`. If you find yourself running a command in the raw working tree while the trial is supposed to be sandboxed, stop and route through the sandbox. The point of the sandbox is that state leakage is the thing being controlled for — bypassing it on a "quick check" defeats the purpose.
 
+## Thinking Effort: Regression vs Capability Evaluation
+
+Not every criterion needs the same depth of reasoning. This section documents the policy — Sprint 8 will wire it into agent frontmatter (`thinking: { type: adaptive, effort: ... }`), but the policy lands here first so the two sprints can arrive in either order.
+
+- **Regression-criterion evaluation (lower effort — `medium`).** Regression criteria live in `.harness/regression/regression.json`. They have already been calibrated: each one passed first-round across 3+ consecutive sprints before graduating, and each carries a verbatim `verification_command` that is deterministic for the `deterministic` ones and well-anchored for the `llm-judge` ones. Running them is a pass/fail confirmation, not open-ended investigation, so they warrant `effort: medium` — speed is the priority, because the regression gate runs *before* every sprint (Step 0.5 of `skills/harness-sprint/SKILL.md`) and a slow gate taxes the whole workflow.
+- **Fresh capability-criterion evaluation (higher effort — `high`, or `max` for contract review).** When evaluating a new sprint's contract, the Evaluator is testing novel behaviors whose failure modes are not yet mapped. Thoroughness matters more than speed: look for edge cases, argue against the obvious verdict, and exhaust the "talk yourself out of it" bias documented at the top of this file. Use `effort: high` for the capability pass; use `effort: max` when reviewing a *draft* contract for testability and specificity, where a missed hole propagates into the whole sprint.
+
+**Status:** This is a policy-only section until Sprint 8. Current agent frontmatter does not yet declare `thinking: { type: adaptive, effort: ... }`; the values above describe the intended differentiation, and Sprint 8 will add the literal frontmatter. A future evaluator reading this file today should not expect to find the frontmatter yet — the hook exists so Sprint 8 can land without re-litigating the policy.
+
 ## Per-Dimension Scoring
 
 Score each rubric dimension in a separate pass. Do not score all dimensions at once.
