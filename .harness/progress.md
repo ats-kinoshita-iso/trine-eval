@@ -69,3 +69,13 @@
 - Date: 2026-04-24
 - Note: Phase 2 kickoff. Bootstrap step executed first (sprints.json appended with sprints 6–10; spec.md extended with Phase 2 section covering gaps 1–10). Sprint added `config.trials` (default 1), `config.sandbox.mode` (default "none"), and `config.taxonomy.emit_tasks_json` (default true); separated the trial loop from the retry loop in harness-sprint; added a Pre-eval Sandbox Setup section to the Evaluator; introduced `scripts/sandbox.sh`; rewrote the Consistency Metrics section to compute pass@k / pass^k from trial files; emitted the first `tasks.json` at `.harness/contracts/sprint-06.tasks.json`. End-to-end trial execution is deferred to a synthetic verification sprint per the gap-closure plan.
 - Rubric scores: Methodology 5/5, Grading 5/5, Separation 5/5, Context 4/5, Extensibility 5/5
+
+## Sprint 07: Capability/Regression Dual-Track
+- Status: PASS
+- Rounds: 1
+- Passed criteria: 13/13
+- Weighted score: 100%
+- Gates: 3/3
+- Date: 2026-04-24
+- Note: Closed Gap 4 (regression gate). Added `config.regression.{enabled, fail_fast}` with backward-compatible defaults; initialized `.harness/regression/` with empty `regression.json` and a README; introduced Step 0.5 Regression Gate in `skills/harness-sprint/SKILL.md` (runs each graduated task's verbatim `verification_command` before contract negotiation, writes aggregate results to `.harness/regression/runs/run-<UTC-ISO8601>.json`, aborts when `fail_fast` is true); rewired `skills/harness-summary/SKILL.md` saturation handling from prose recommendation to append-only writes of graduated tasks into `regression.json` (adding only the `graduated_from_sprint` field); landed the Sprint-8 wiring point in `agents/evaluator.md` as a policy-only thinking-effort note; documented the `regression.json` schema and gate semantics in `rules/harness-conventions.md`. End-to-end regression-abort verification deferred to a synthetic follow-up sprint per the gap-closure plan.
+- Rubric scores: Methodology 5/5, Grading 5/5, Separation 5/5, Context 5/5, Extensibility 5/5
