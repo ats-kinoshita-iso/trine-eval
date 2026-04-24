@@ -10,7 +10,7 @@ Generate a cross-sprint evaluation summary by analyzing all completed sprint eva
 
 ## How to Generate
 
-1. Read `.harness/config.json` for project context
+1. Read `.harness/config.json` for project context. Note `config.mode` (default `"standard"`) and `config.components_enabled.per_sprint_aci_review` — these determine whether ACI self-optimization runs batched here or was already captured per-sprint in the eval reports.
 2. Read `.harness/progress.md` for sprint completion status
 3. Read all files in `.harness/evals/` to collect evaluation results. Files named `sprint-NN-rR.md` contain per-round data; files named `sprint-NN.md` contain the final round's results only.
 4. Read all files in `.harness/contracts/` to understand what was promised vs delivered
@@ -89,6 +89,8 @@ Write the summary to `.harness/summary.md`:
 ```markdown
 # Eval Summary
 
+**Mode:** {config.mode}  <!-- "standard" or "minimal"; omit the line if the field is absent for backward compat -->
+
 ## Overview
 - Sprints completed: X
 - Overall pass rate: Y%
@@ -133,6 +135,12 @@ Also print the summary to the user for immediate review.
 ## ACI Self-Optimization from Eval Transcripts
 
 After generating the summary, review eval transcripts to identify improvements to tool and skill descriptions. This implements the playbook's guidance that "tool design is an eval target itself" and that agents optimizing tool descriptions can produce improvements "beyond expert human-written implementations."
+
+**Mode handling:**
+- When `config.components_enabled.per_sprint_aci_review` is `true` (standard mode default): each eval report has already been reviewed for grader-quality issues by the Evaluator itself. Here, surface those per-sprint findings — pull the Transcript Review observations from each `sprint-NN-rR.md` and consolidate into the summary's "Tool & Skill Description Improvements" section.
+- When `config.components_enabled.per_sprint_aci_review` is `false` (minimal mode default): per-sprint Transcript Review was skipped to save tokens. Perform a **single batched review** across all `.harness/evals/*.md` files here instead. This is cheaper than per-sprint review because repeated patterns are only flagged once.
+
+The extraction process below applies in both cases; batched mode just processes all evals in one pass.
 
 ### Extract Feedback from Eval Transcripts
 

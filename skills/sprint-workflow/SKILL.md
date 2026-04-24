@@ -24,9 +24,11 @@ If all sprints are complete, tell the user and suggest `/harness-summary`.
 
 If `components_enabled.contract_negotiation` is true in config:
 
-### 1a. Generator Proposes Contract
+### 1a. Propose Contract
 
-Spawn the Generator subagent:
+The contract (`.harness/contracts/sprint-{NN}.md`) gets drafted using the sprint-contract template either by the Generator subagent or by the main thread, depending on `components_enabled.generator_subagent`. The output file format and downstream consumers are identical in both branches.
+
+**If `components_enabled.generator_subagent` is true** (standard mode): spawn the Generator subagent in `CONTRACT_PROPOSAL` mode.
 - Tell it which sprint number and title it's working on
 - Tell it to read `.harness/spec.md` and `.harness/sprints.json`
 - Tell it to read any prior contracts in `.harness/contracts/` and eval results in `.harness/evals/`
@@ -34,9 +36,16 @@ Spawn the Generator subagent:
 - Tell it to write a draft contract to `.harness/contracts/sprint-{NN}.md` using the sprint-contract template
 - Tell it to ONLY write the contract — do NOT implement anything yet
 
+**If `components_enabled.generator_subagent` is false** (minimal mode): draft the contract in the main thread following `agents/generator.md` CONTRACT_PROPOSAL mode rules.
+- Read `.harness/spec.md`, `.harness/sprints.json`, the current sprint number and title, any prior contracts in `.harness/contracts/`, and prior eval results in `.harness/evals/`
+- Read the sprint-contract template at `skills/sprint-contract/template.md` and follow it
+- If `.harness/bootstrap/failure-catalog.json` exists, read it and fold relevant failures into the contract
+- Write the draft contract to `.harness/contracts/sprint-{NN}.md` with weighted **Success Criteria** split into `Deterministic` and `LLM-as-judge` groups (weights sum to 100%), **Should-NOT** gate criteria, **Reference Solutions** for the highest-weighted LLM-judge criterion, **Out of Scope**, and **Technical Notes**
+- Do not implement anything in this step — only produce the contract
+
 ### 1b. Evaluator Reviews Contract
 
-Spawn the Evaluator subagent:
+Spawn the Evaluator subagent (this happens in both modes — the Evaluator always runs forked):
 - Tell it to read the draft contract at `.harness/contracts/sprint-{NN}.md`
 - Tell it to review for: testability, completeness, and specificity
 - Tell it to append its feedback to the contract file under a `## Evaluator Review` section
@@ -46,22 +55,29 @@ Spawn the Evaluator subagent:
 ### 1c. Negotiation Loop
 
 Read the contract file. If status is NEEDS REVISION and negotiation round < `contract_negotiation_rounds`:
-- Spawn Generator again to revise the contract based on feedback
-- Spawn Evaluator again to review the revision
+- Revise the contract based on feedback — in standard mode, spawn Generator in `CONTRACT_REVISION` mode; in minimal mode, revise the contract in the main thread following the Evaluator's feedback line by line, editing `.harness/contracts/sprint-{NN}.md` directly
+- Spawn Evaluator again to review the revision (always forked, both modes)
 - Repeat until APPROVED or max rounds reached
 
 If max rounds reached without approval, proceed with the latest version and note this in progress.md.
 
-If `contract_negotiation` is disabled, the Generator writes the contract and it's automatically approved.
+If `contract_negotiation` is disabled, whoever drafted the contract (Generator or main thread) writes it once and it's automatically approved.
 
 ## Step 2: Implementation
 
-Spawn the Generator subagent:
+**If `components_enabled.generator_subagent` is true** (standard mode): spawn the Generator subagent in `IMPLEMENTATION` mode.
 - Tell it the sprint contract is finalized at `.harness/contracts/sprint-{NN}.md`
 - Tell it to implement everything specified in the contract
 - Tell it to commit working code with conventional commit format: `feat(sprint-{NN}): <description>`
 - Tell it to self-review before declaring done, but NOT to grade itself
 - Tell it to read prior eval results if this is a retry round, and fix the specific issues cited
+
+**If `components_enabled.generator_subagent` is false** (minimal mode): implement in the main thread following `agents/generator.md` IMPLEMENTATION mode rules.
+- Read the finalized contract at `.harness/contracts/sprint-{NN}.md`
+- Read prior eval results in `.harness/evals/sprint-{NN}.md` if this is a retry round — the Evaluator cited exact file paths and line numbers; fix those specific issues
+- Plan the implementation approach, then implement, committing after each meaningful unit of work using `feat(sprint-{NN}): <description>` (or `fix(sprint-{NN}): <what was fixed>` on retry rounds)
+- If a design decision affects future sprints, note it in the contract file under `## Technical Notes`
+- Self-review against the contract's success criteria before proceeding to evaluation, but do not grade your own work — that is the Evaluator's job. Verify completeness only (criteria addressed, code compiles/runs, no obvious bugs, commits clean).
 
 ## Step 3: Evaluation
 
@@ -93,11 +109,12 @@ After the Evaluator finishes, read `.harness/evals/sprint-{NN}-r{R}.md` and chec
 If the verdict is FAIL and retry count < `max_retries` from config:
 
 1. Increment retry count
-2. Go back to Step 2, but this time tell the Generator:
+2. Go back to Step 2 with the same `components_enabled.generator_subagent` branch that was used initially. In standard mode, tell the Generator to:
    - Read the eval results at `.harness/evals/sprint-{NN}.md`
    - Focus on fixing the specific FAIL criteria
    - The Evaluator cited exact file paths and line numbers — address those
    - Commit fixes with: `fix(sprint-{NN}): <what was fixed>`
+   In minimal mode, the main thread reads the eval results and applies the same fixes itself.
 3. Then go to Step 3 for re-evaluation
 4. The Evaluator writes fresh results to `.harness/evals/sprint-{NN}-r{R}.md` (next round number), then the workflow copies it to `.harness/evals/sprint-{NN}.md`
 
