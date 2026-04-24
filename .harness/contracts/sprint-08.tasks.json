@@ -1,0 +1,149 @@
+{
+  "sprint": 8,
+  "tasks": [
+    {
+      "task_id": "s08-c1",
+      "criterion": "planner.md declares adaptive-thinking frontmatter at effort medium: agents/planner.md's YAML frontmatter contains a thinking key with type: adaptive and effort: medium.",
+      "grader_type": "deterministic",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": "grep -q '^thinking:' agents/planner.md && grep -qE 'type:[[:space:]]*adaptive' agents/planner.md && grep -qE 'effort:[[:space:]]*medium' agents/planner.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s08-c2",
+      "criterion": "generator.md declares adaptive-thinking frontmatter at effort medium: agents/generator.md's YAML frontmatter contains a thinking key with type: adaptive and effort: medium. This is the IMPLEMENTATION-mode baseline; per-mode overrides for CONTRACT_PROPOSAL and CONTRACT_REVISION are documented in the body.",
+      "grader_type": "deterministic",
+      "weight": 7,
+      "is_gate": false,
+      "verification_command": "grep -q '^thinking:' agents/generator.md && grep -qE 'type:[[:space:]]*adaptive' agents/generator.md && grep -qE 'effort:[[:space:]]*medium' agents/generator.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s08-c3",
+      "criterion": "evaluator.md declares adaptive-thinking frontmatter at effort high: agents/evaluator.md's YAML frontmatter contains a thinking key with type: adaptive and effort: high. high is the capability-eval baseline; the body documents medium for regression-criterion evaluation (Sprint 7 wiring point) and max for CONTRACT_REVIEW.",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -q '^thinking:' agents/evaluator.md && grep -qE 'type:[[:space:]]*adaptive' agents/evaluator.md && grep -qE 'effort:[[:space:]]*high' agents/evaluator.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s08-c4",
+      "criterion": "harness-summary SKILL declares adaptive-thinking frontmatter at effort max: skills/harness-summary/SKILL.md's YAML frontmatter contains a thinking key with type: adaptive and effort: max. Summary work is analysis-heavy (cross-sprint trends, saturation, ACI review) and benefits from max effort.",
+      "grader_type": "deterministic",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": "grep -q '^thinking:' skills/harness-summary/SKILL.md && grep -qE 'type:[[:space:]]*adaptive' skills/harness-summary/SKILL.md && grep -qE 'effort:[[:space:]]*max' skills/harness-summary/SKILL.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s08-c5",
+      "criterion": "config.json schema extended with thinking.profile: .harness/config.json contains a thinking object with a profile key whose value is one of \"default\", \"fast\", or \"thorough\".",
+      "grader_type": "deterministic",
+      "weight": 7,
+      "is_gate": false,
+      "verification_command": "jq -e '.thinking.profile == \"default\" or .thinking.profile == \"fast\" or .thinking.profile == \"thorough\"' .harness/config.json",
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s08-c6",
+      "criterion": "config.json schema extended with batch fields: .harness/config.json contains a batch object with keys enabled (boolean) and min_criteria (integer). Defaults: enabled: false and min_criteria: 20.",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "jq -e '.batch | has(\"enabled\") and has(\"min_criteria\") and (.enabled | type == \"boolean\") and (.min_criteria | type == \"number\")' .harness/config.json",
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s08-c7",
+      "criterion": "harness-sprint SKILL contains a Batch API section: skills/harness-sprint/SKILL.md contains a Batch section referencing batch.enabled, batch.min_criteria, the guard condition, the submit/poll/map-back workflow, the 50% discount and 24-hour SLA, and the synchronous fallback.",
+      "grader_type": "deterministic",
+      "weight": 14,
+      "is_gate": false,
+      "verification_command": "grep -qiE '^## .*Batch|^### .*Batch' skills/harness-sprint/SKILL.md && grep -q 'batch.enabled' skills/harness-sprint/SKILL.md && grep -q 'batch.min_criteria' skills/harness-sprint/SKILL.md && grep -q '50%' skills/harness-sprint/SKILL.md && grep -qE '24[- ]hour' skills/harness-sprint/SKILL.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s08-c8",
+      "criterion": "README.md documents the new config knobs: README.md contains documentation for thinking.profile (mentioning the three values default / fast / thorough), batch.enabled, and batch.min_criteria.",
+      "grader_type": "deterministic",
+      "weight": 5,
+      "is_gate": false,
+      "verification_command": "grep -q 'thinking.profile' README.md && grep -q 'default' README.md && grep -q 'fast' README.md && grep -q 'thorough' README.md && grep -q 'batch.enabled' README.md && grep -q 'batch.min_criteria' README.md",
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s08-c9",
+      "criterion": "sprint-08.tasks.json is emitted: .harness/contracts/sprint-08.tasks.json exists, is valid JSON, has a top-level sprint: 8 field and a tasks array with one entry per criterion in this contract (including gate criteria with is_gate: true, weight: 0).",
+      "grader_type": "deterministic",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": "jq -e '.sprint == 8 and (.tasks | length) >= 13 and (.tasks | all(has(\"task_id\") and has(\"grader_type\") and has(\"weight\") and has(\"is_gate\")))' .harness/contracts/sprint-08.tasks.json",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s08-c10",
+      "criterion": "Per-mode thinking overrides are internally consistent: A reader of agents/planner.md, agents/generator.md, agents/evaluator.md, and skills/harness-summary/SKILL.md can explain the frontmatter baseline for each (planner/generator: medium, evaluator: high, summary: max), the per-mode overrides in each agent's body (Generator CONTRACT_PROPOSAL/REVISION > IMPLEMENTATION; Evaluator CONTRACT_REVIEW at max, capability EVALUATION at high, regression-criterion evaluation at medium), and that the Sprint-7 policy-only caveat is updated to reflect frontmatter wiring.",
+      "grader_type": "llm-judge",
+      "weight": 11,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s08-c11",
+      "criterion": "Backward compatibility is explicit and correct: A pre-Phase-2 project with no thinking object and no batch object in config.json runs the harness identically to Phase 1. Each new config field has a documented default. Adaptive-thinking frontmatter is advisory — if the runtime ignores it, agents still run with prior model-default behavior.",
+      "grader_type": "llm-judge",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s08-c12",
+      "criterion": "Batch threshold rationale is justified, not just asserted: The Batch section in skills/harness-sprint/SKILL.md explains why batch.enabled: false is the default (24-hour SLA unsuitable for tight iteration) and why batch.min_criteria: 20 is the threshold (break-even point where 50% discount compounds; small sprints pay more in latency than they save).",
+      "grader_type": "llm-judge",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s08-c13",
+      "criterion": "thinking.profile override semantics are clear: The documentation explains how default / fast / thorough map to effort vectors across the four agents/skills (fast = shift down clamped at medium; thorough = shift up clamped at max), how to set the profile in config.json, and how per-mode overrides compose on top of the profile-adjusted baseline.",
+      "grader_type": "llm-judge",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s08-sn1",
+      "criterion": "No silent behavior change for pre-Phase-2 configs: A project whose .harness/config.json lacks both the thinking object and the batch object must run the harness identically to Phase 1 — no batch submission, no missing-key errors, every agent spawn proceeds with pre-Sprint-8 semantics.",
+      "grader_type": "llm-judge",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": null,
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s08-sn2",
+      "criterion": "No modification of prior sprint artifacts: .harness/evals/sprint-0[1-7]* and .harness/contracts/sprint-0[1-7]* must be unchanged from HEAD at the start of this sprint (append-only rule).",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "test -z \"$(git diff HEAD -- .harness/evals/sprint-0[1-7]* .harness/contracts/sprint-0[1-7]*)\"",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s08-sn3",
+      "criterion": "Sprint-7 evaluator thinking-effort policy is preserved, not contradicted: Regression at medium, capability at high, contract review at max — the Sprint-8 frontmatter and body must not introduce contradicting values.",
+      "grader_type": "llm-judge",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": null,
+      "rubric_dimension": "generator_evaluator_separation"
+    }
+  ]
+}
