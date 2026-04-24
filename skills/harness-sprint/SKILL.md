@@ -169,6 +169,21 @@ The retry loop in Step 4 is unchanged: a FAIL verdict (aggregated across trials 
 
 After the Evaluator finishes, read the appropriate file (`sprint-{NN}-r{R}.md` for single-trial or the trial files for multi-trial) and check the verdict. Copy the latest eval to `.harness/evals/sprint-{NN}.md` so the Generator always has a stable path for the latest eval.
 
+### 3d. Batch API Mode (optional)
+
+Read `config.batch.enabled` (default `false`) and `config.batch.min_criteria` (default `20`). If both `batch.enabled` is true AND the sprint contract has at least `batch.min_criteria` criteria, route the capability-eval verification step through Anthropic's Batch API instead of the per-criterion synchronous calls in Step 3b. Otherwise, run Step 3b synchronously as before — this is the default path.
+
+**Protocol:**
+
+1. Read `.harness/contracts/sprint-{NN}.tasks.json`. For every task with a non-null `verification_command`, collect one batch request item containing `task_id`, `verification_command`, `grader_type`, and `rubric_dimension`.
+2. Submit the collected items as a single Batch API request. Record the batch id to `.harness/progress.md` so session-resumption can find an in-flight batch.
+3. Poll the batch until status is `ended`. Batch jobs carry a 24-hour SLA — the hard upper bound on when results return — so do not design the retry loop around sub-hour turnaround. In practice most jobs complete faster, but the invariant is the SLA.
+4. When the batch completes, map each result entry back to its `task_id` and write the per-criterion PASS/FAIL evidence into `.harness/evals/sprint-{NN}-r{R}.md` using the same format as the synchronous path. LLM-judge criteria fall back to the synchronous path — batch is reserved for deterministic `verification_command` tasks.
+
+**Why this is opt-in and gated.** The Batch API offers a 50% token discount, but only in exchange for the 24-hour SLA. The discount compounds only on large eval suites where per-call savings offset the wall-clock latency; small sprints pay more in latency than they save in tokens, so the default `batch.min_criteria: 20` threshold keeps short feedback loops synchronous. The `batch.enabled: false` default preserves Phase-1 behavior exactly — a project that never sets the flag never goes near the Batch API, and the tight contract→build→eval iteration cycle is unaffected. The break-even is roughly the point at which per-sprint criterion count crosses ~20: below that, submission overhead plus the 24-hour turnaround dominates; above it, the 50% token savings compound enough to justify the latency.
+
+**Fallback.** If the Batch API call fails for any reason (submission error, timeout beyond 24 hours, malformed result), fall back to synchronous Step 3b and note the failure in `.harness/progress.md`. Never silently drop criteria — every criterion must have a recorded PASS/FAIL with evidence before the sprint can complete.
+
 ## Step 4: Retry Loop
 
 If the verdict is FAIL and retry count < `max_retries` from config:
