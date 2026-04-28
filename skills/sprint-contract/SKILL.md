@@ -52,6 +52,28 @@ Use Should-NOT criteria for:
 - Security invariants (don't expose stack traces, don't leak credentials)
 - Architectural boundaries (don't violate separation of concerns)
 
+## Edge Case Criteria
+
+Edge case criteria are an **optional** third class of contract criterion, distinct from the 100%-weighted Success Criteria and from Should-NOT gates. They are tracked separately because they answer a different question.
+
+- **Success Criteria** ask: "Does the deliverable do what it should?" Weighted to 100% in aggregate; the weighted score is the headline pass-rate metric.
+- **Should-NOT Criteria** ask: "Does the deliverable avoid behaviors it shouldn't?" Binary gates; any failure blocks the sprint.
+- **Edge Case Criteria** ask: "Does the deliverable handle ambiguous, boundary, or adversarial inputs correctly?" Tracked as a separate **edge-case pass rate** metric in `harness-summary`, *not* folded into the weighted total.
+
+**Why separate, not folded into the weighted total.** Folding edge cases into the 100% weighted score would be a one-sided eval — the same failure mode Anthropic's playbook calls out as "positive-case-and-negative-case-by-luck." An agent that passes only the obvious positive cases would earn the same weighted score whether or not it correctly declined the ambiguous ones; the asymmetry would be invisible. Reporting edge-case pass rate as a distinct metric makes the asymmetry visible and lets the operator decide how to weight robustness vs. core functionality. If a sprint scores 100% weighted but 30% on edge cases, that is a genuinely different outcome from 100% weighted with 95% on edge cases — and the eval should surface that difference.
+
+**Why optional.** Not every sprint is the right place for edge-case criteria. A sprint that delivers a pure mechanical refactor or a documentation-only change adds no signal from edge-case scoring. The contract template includes the section as an optional slot; sprints that omit it produce the same `tasks.json` shape they would have produced before Sprint 10 — Should-NOT gates and weighted Success Criteria continue to be the only two entry classes.
+
+**Per-rubric guidance.** During contract review, the Evaluator should propose edge-case coverage when the rubric is one of:
+
+- **`web-app`** — well-known edge cases include: empty form submissions, max-length input fields, malformed URLs, concurrent state updates, browsers with JavaScript disabled, viewport extremes (320px and 4K), keyboard-only navigation.
+- **`api-service`** — empty request bodies, oversized payloads, malformed JSON, concurrent identical requests, rate-limit boundaries, expired auth tokens, idempotency edge cases.
+- **`rag-system`** — empty queries, very long queries, queries with no matching documents, queries that span document boundaries, queries containing the answer key verbatim, citation hallucination on out-of-corpus queries.
+
+For `cli-tool` and `eval-harness` deliverables, the Evaluator may skip the edge-case recommendation — those rubrics typically encode their edge-case concerns directly in the dimension scoring tables, and adding a separate edge-case section adds noise without signal.
+
+**How edge cases are graded.** Each edge case criterion is graded PASS or FAIL using the same code-based-first hierarchy as Success Criteria. The difference is what the harness does with the result: edge-case PASS/FAIL counts go into the **Edge Case Pass Rate** metric (see `skills/harness-summary/SKILL.md`), not into the weighted score. A sprint with 10 edge case criteria where 7 pass reports an Edge Case Pass Rate of 70% — independent of whether the weighted score was 100% or 60%.
+
 ## Reference Solutions
 
 Reference solutions provide known-working outputs for criteria where grader calibration is valuable. They are **optional** — not every criterion needs one.

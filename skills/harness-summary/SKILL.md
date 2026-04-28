@@ -99,12 +99,27 @@ A criterion is **saturated** when it passes on the first evaluation round across
 
 **Graduation is append-only.** Never remove or rewrite an existing entry in `regression.json`. If a buggy summary run could mutate prior entries, a regression-coverage loss would be one bad run away — exactly the failure mode the gate exists to prevent. The summary only ever *appends* newly saturated criteria. If an operator needs to retire a regression criterion, they edit `regression.json` by hand, outside the harness.
 
+### Edge Case Pass Rate
+
+Sprint contracts may declare an optional **Edge Case Criteria** section (see `skills/sprint-contract/SKILL.md` for the rationale and template). Edge case criteria test ambiguous, boundary, and adversarial inputs — empty inputs, very large inputs, concurrent requests, malformed payloads, queries with no matches. They are **not** weighted and **not** counted toward the 100% weighted score.
+
+The summary reports their results separately as **Edge Case Pass Rate** — a distinct row in the per-sprint table and an aggregate value across sprints.
+
+**Why separate from the weighted score.** Folding edge cases into the weighted total creates the one-sided-eval failure mode Anthropic's playbook calls out: an agent that only passes obvious positive cases earns the same headline score as one that also handles ambiguous inputs. Reporting Edge Case Pass Rate as its own metric makes that asymmetry visible — a sprint that scores 100% weighted but 30% on edge cases looks materially different from one with 100% weighted and 95% on edge cases.
+
+**How to compute.** For each sprint, count `edge_case_passed / edge_case_total` over the criteria in the contract's `## Edge Case Criteria` section (or 0/0 = N/A when the section is omitted). Aggregate across sprints by summing passes and totals separately, not by averaging per-sprint rates. Report N/A explicitly when no sprint declared edge-case criteria — the absence of edge cases is meaningful information, not a zero.
+
+**Per-rubric expectations.** The metric is most meaningful for `web-app`, `api-service`, and `rag-system` projects whose rubrics carry well-known edge-case domains (browser viewport extremes, empty/oversized API payloads, queries with no matching documents). For `cli-tool` and `eval-harness` projects, Edge Case Pass Rate often shows N/A — those rubrics encode edge-case concerns inside the dimension scoring tables rather than as separate criteria.
+
+**Render in the per-sprint table.** Add an `Edge Case Pass Rate` column to the per-sprint table; show `N/A` when the sprint declared no edge cases.
+
 ### Recommendations
 - Based on patterns, what should the next sprint focus on?
 - Are there systemic issues that rubric changes could address?
 - Should any harness components be disabled based on performance? (per the `components_enabled` config)
 - Which criteria should be graduated from capability eval to regression suite?
 - Where is the largest gap between pass@k and pass^k? (indicates where to invest in consistency)
+- Is Edge Case Pass Rate consistently below the weighted score? (indicates one-sided optimization — the agent passes obvious cases but skids on ambiguous ones)
 
 ### Transcript Links for FAIL Criteria and Grader Disagreements
 

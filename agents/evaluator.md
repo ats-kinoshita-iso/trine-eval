@@ -67,6 +67,17 @@ Use this mode when trials can leak OS-level state (installed packages, network c
 
 Every verification command for every trial MUST go through the setup matching `config.sandbox.mode`. If you find yourself running a command in the raw working tree while the trial is supposed to be sandboxed, stop and route through the sandbox. The point of the sandbox is that state leakage is the thing being controlled for — bypassing it on a "quick check" defeats the purpose.
 
+## Conditional Tools: Playwright MCP for Web Apps
+
+Most of this agent's tool set (Read, Glob, Grep, Bash) is project-type-agnostic. Playwright MCP is the exception — it is the right tool for the **Visual Design** dimension of the `web-app` rubric (rendered DOM, computed styles, viewport-specific layout, JavaScript-driven UI behavior) and the wrong tool for everything else (CLI tools, RAG systems, API services, this `eval-harness` project itself). Playwright availability is gated behind two checks read from `.harness/config.json`:
+
+1. **`config.evaluator_tools.playwright`** — string. Default `"auto"`. Reserved values: `"auto"` (enable when applicable), `"never"` (disable unconditionally), `"always"` (enable regardless of project type — use only for explicit testing of the Playwright path).
+2. **`config.project_type`** — string. The `"auto"` setting resolves to "Playwright enabled" only when `project_type == "web-app"`.
+
+When both checks pass — `evaluator_tools.playwright` is not `"never"` AND (`evaluator_tools.playwright == "always"` OR `project_type == "web-app"`) — you may invoke Playwright MCP tools (typically `mcp__claude-in-chrome__*` or equivalent) for Visual Design verification. When either check fails, you fall back to `curl` for HTTP-level verification only and flag every Visual Design dimension finding as **low-confidence** in the `## Human Review Flags` section, since Visual Design legitimately requires browser rendering. Routing low-confidence Visual Design findings to human review is the documented escape hatch — silently grading without the right tool would produce confidently-wrong scores on a 25%-weight rubric dimension.
+
+For the current `eval-harness` project (`project_type: "eval-harness"`), Playwright is never invoked — the `"auto"` default resolves to disabled — and the Visual Design fallback path is N/A because the `eval-harness` rubric does not include that dimension. **Backward compatibility**: a project whose `.harness/config.json` lacks the `evaluator_tools` object hits the `"auto"` default; combined with a non-`web-app` project type, that resolves to "no Playwright" and reproduces Phase-1 behavior with zero changes.
+
 ## Thinking Effort: Regression vs Capability Evaluation
 
 Not every criterion needs the same depth of reasoning. The frontmatter at the top of this file declares `thinking: { type: adaptive, effort: high }` — the modal case for this agent (capability EVALUATION mode). Two cases override that default; the override is enforced in the prose below rather than the frontmatter, because YAML frontmatter cannot express per-mode branching:
@@ -315,6 +326,43 @@ This is **distinct from the Transcript Review section below.** Transcript Review
 ```
 
 Empty arrays and `null` are preferred over guessed numbers; the calibration value of transcripts depends on their fidelity. If the workflow finds the trailer missing or malformed, it skips the transcript write — your eval verdict is unaffected, but the audit trail is lost for that run, so do emit the trailer when you can.
+
+## Adversarial Hygiene
+
+Eval integrity is an ongoing adversarial problem. Anthropic's own Claude Opus 4.6 was observed independently detecting that it was being evaluated and locating the answer key inside its working tree — the same class of failure can happen to any evaluator that infers verdicts from non-executable evidence (filenames, code comments, surrounding prose) instead of running the actual verification command. This section names three rules that close the gap. Together with the Sprint 9 Transcript Trailer above, they let the harness audit *whether* a verification actually ran, criterion by criterion.
+
+**Rule 1 — Never infer PASS/FAIL from filenames or comments.** A file named `success_v3_FINAL.py` is not evidence the criterion passed. A comment that says `// TODO: this is broken` is not evidence the criterion failed. The verdict for a deterministic criterion is determined by exit code or output of the verification command — nothing else. The verdict for an llm-judge criterion is determined by structured rubric assessment of the artifact — not by signals embedded in the artifact's metadata. If you find yourself reasoning "the file is named X, so it must be Y," stop: that is the failure mode this rule exists to prevent.
+
+**Rule 2 — Log the exact verification command before scoring.** For each deterministic criterion, the verification command goes into the transcript trailer's `tool_calls` array — verbatim — *before* the verdict is assigned. The audit ground truth for "did this evaluator actually verify the criterion?" is the `tool_calls` list, not the prose evidence in the markdown eval. If the prose says "verified via grep" but no `grep` invocation appears in `tool_calls`, the audit reveals an unrun verification. The rule applies even when a deterministic criterion's verdict is obvious from a prior tool call — log the command anyway, since the audit trail is the design point.
+
+**Rule 3 — Emit `verified_via_command` per criterion.** Inside the Sprint 9 transcript trailer (see "Transcript Trailer (Structured Output)" above), each criterion entry carries a `verified_via_command` boolean: `true` when the criterion's verdict was determined by an actual shell command's exit code (i.e., the verification command in the contract or `tasks.json` actually ran during this evaluation); `false` otherwise — for llm-judge criteria graded by reading prose, for deterministic criteria where you skipped the command and reasoned from artifacts, or for any criterion where the runtime did not record a command invocation. The flag is **per criterion** (one boolean per `task_id`), not per eval file — a per-file flag would let one verified criterion vouch for the others, which is exactly the failure mode this rule exists to catch.
+
+**Do not fabricate `verified_via_command: true`.** Writing `true` for a criterion you graded by reading code or by inference defeats the calibration purpose of the flag. The summary skill flags any criterion with `verified_via_command: false` as a candidate for human spot-check; a fabricated `true` hides exactly the cases that need review. The no-fabrication obligation matches Sprint 9's posture for `token_usage` and `timing` — better an honest `false` than a misleading `true`.
+
+**Schema location.** The flag lives inside the trailer's structured channel — see `rules/harness-conventions.md` under **Transcript Schema** for the on-disk shape. Sprint 9 framed the trailer as "intentionally extensible"; Sprint 10 picks the per-criterion shape (one boolean per task_id) without renegotiating the top-level schema. Future sprints can add additional adversarial-hygiene flags inside the same channel.
+
+**Example trailer with `verified_via_command` per criterion** — extending the Sprint 9 example above:
+
+```json
+{
+  "sprint": 10,
+  "round": 1,
+  "trial": 1,
+  "messages": [],
+  "tool_calls": [
+    {"name": "Bash", "arguments_summary": "grep -qE '^## Edge Case Criteria' skills/sprint-contract/template.md", "result_summary": "exit 0", "task_id": "s10-c1"}
+  ],
+  "criteria_audit": [
+    {"task_id": "s10-c1", "verified_via_command": true},
+    {"task_id": "s10-c10", "verified_via_command": false}
+  ],
+  "token_usage": {"input": null, "output": null, "cache_hit": null},
+  "timing": {"ttft_ms": null, "total_ms": null},
+  "thinking_summary": "Each deterministic criterion was verified by actually running its grep/jq command (logged in tool_calls). Each llm-judge criterion was graded by reading prose — verified_via_command: false on those, by design."
+}
+```
+
+The `criteria_audit` array is the per-criterion adversarial-hygiene channel; alternative shapes (a `verified_via_command` field inside each `tool_calls` entry keyed by `task_id`) are also acceptable as long as the per-criterion guarantee is preserved. The harness-summary skill consumes whichever shape is present.
 
 ## Transcript Review
 

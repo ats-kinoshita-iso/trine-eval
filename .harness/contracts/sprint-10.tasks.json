@@ -1,0 +1,140 @@
+{
+  "sprint": 10,
+  "tasks": [
+    {
+      "task_id": "s10-c1",
+      "criterion": "## Edge Case Criteria section appears in the sprint-contract template: skills/sprint-contract/template.md contains a level-2 heading exactly equal to ## Edge Case Criteria. The new section is the contract slot future sprints use to declare optional edge-case criteria (separate from the 100%-weighted Success Criteria and from Should-NOT gates).",
+      "grader_type": "deterministic",
+      "weight": 5,
+      "is_gate": false,
+      "verification_command": "grep -qE '^## Edge Case Criteria' skills/sprint-contract/template.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s10-c2",
+      "criterion": "skills/sprint-contract/SKILL.md documents the Edge Case Criteria taxonomy: skill file contains a level-2 heading exactly equal to ## Edge Case Criteria AND uses the literal phrase edge-case pass rate (or the case/punctuation variant edge case pass rate) AND mentions at least one project rubric type (web-app) that warrants edge-case coverage.",
+      "grader_type": "deterministic",
+      "weight": 7,
+      "is_gate": false,
+      "verification_command": "grep -qE '^## Edge Case Criteria' skills/sprint-contract/SKILL.md && grep -qiE 'edge.case pass rate' skills/sprint-contract/SKILL.md && grep -q 'web-app' skills/sprint-contract/SKILL.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s10-c3",
+      "criterion": "Edge Case Pass Rate is a distinct metric in the harness-summary skill: skills/harness-summary/SKILL.md contains the literal string Edge Case Pass Rate (case-sensitive — distinct from prose mentions of edge cases). The phrase appears in the context of the summary output format so the metric is rendered separately from the weighted score.",
+      "grader_type": "deterministic",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": "grep -q 'Edge Case Pass Rate' skills/harness-summary/SKILL.md",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s10-c4",
+      "criterion": "## Adversarial Hygiene section is added to the Evaluator with explicit verified_via_command semantics: agents/evaluator.md contains a level-2 heading exactly equal to ## Adversarial Hygiene AND the string verified_via_command appears at least 3 times in the file. The threshold of 3 forces the new section to introduce the flag, reference its schema location, and either show an example or reiterate the no-fabrication rule.",
+      "grader_type": "deterministic",
+      "weight": 12,
+      "is_gate": false,
+      "verification_command": "grep -qE '^## Adversarial Hygiene' agents/evaluator.md && [ $(grep -c 'verified_via_command' agents/evaluator.md) -ge 3 ]",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s10-c5",
+      "criterion": "Playwright MCP is added to the Evaluator conditional on config.project_type == web-app with a documented Visual Design fallback: agents/evaluator.md mentions Playwright (the literal string Playwright) AND mentions project_type AND mentions visual design (case-insensitive). The combination tests that the Evaluator's tools section now (a) names Playwright as a conditional MCP tool, (b) ties enablement to the project type, and (c) addresses the Visual Design dimension explicitly.",
+      "grader_type": "deterministic",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "grep -q 'Playwright' agents/evaluator.md && grep -q 'project_type' agents/evaluator.md && grep -qi 'visual design' agents/evaluator.md",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s10-c6",
+      "criterion": "config.json declares evaluator_tools.playwright == auto: .harness/config.json contains a top-level evaluator_tools object with a playwright key set to the string auto.",
+      "grader_type": "deterministic",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "jq -e '.evaluator_tools.playwright == \"auto\"' .harness/config.json",
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s10-c7",
+      "criterion": "rules/harness-conventions.md documents Edge Case Criteria, evaluator_tools.playwright, and the per-criterion verified_via_command semantics: conventions file contains a level-2 heading exactly equal to ## Edge Case Criteria AND the literal string evaluator_tools.playwright AND the string verified_via_command appears at least 3 times in the file.",
+      "grader_type": "deterministic",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "grep -qE '^## Edge Case Criteria' rules/harness-conventions.md && grep -q 'evaluator_tools.playwright' rules/harness-conventions.md && [ $(grep -c 'verified_via_command' rules/harness-conventions.md) -ge 3 ]",
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s10-c8",
+      "criterion": "README.md Phase 2 Configuration Knobs section documents evaluator_tools.playwright: README.md contains the literal string evaluator_tools.playwright. The string is absent in pre-Sprint-10 README, so the grep correctly fails until the README is updated.",
+      "grader_type": "deterministic",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "grep -q 'evaluator_tools.playwright' README.md",
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s10-c9",
+      "criterion": "sprint-10.tasks.json is emitted: file exists, valid JSON, top-level sprint:10 and tasks array with 12 success criteria + 3 Should-NOT gates = 15 entries minimum, each with the Sprint-6 schema fields task_id, criterion, grader_type, weight, is_gate, verification_command, rubric_dimension.",
+      "grader_type": "deterministic",
+      "weight": 5,
+      "is_gate": false,
+      "verification_command": "jq -e '.sprint == 10 and (.tasks | length) >= 15 and (.tasks | all(has(\"task_id\") and has(\"grader_type\") and has(\"weight\") and has(\"is_gate\")))' .harness/contracts/sprint-10.tasks.json",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s10-c10",
+      "criterion": "Backward compatibility is explicit and correct: updated agents/evaluator.md, .harness/config.json, rules/harness-conventions.md, skills/sprint-contract/SKILL.md, skills/sprint-contract/template.md, and skills/harness-summary/SKILL.md together make it unambiguous that a project whose .harness/config.json predates Phase 2 (no evaluator_tools object) experiences no functional behavior change. (a) evaluator_tools.playwright: auto resolves to Playwright disabled when project_type != web-app; (b) the ## Edge Case Criteria contract section is optional; (c) the verified_via_command per-criterion flag lives inside Sprint 9's failure-tolerant trailer extraction. End-to-end Playwright runtime invocation, edge-case pass-rate aggregation, and adversarial-hygiene flag enforcement are deferred to a synthetic verification sprint per the gap-closure plan.",
+      "grader_type": "llm-judge",
+      "weight": 13,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s10-c11",
+      "criterion": "Edge-case taxonomy rationale is justified, not just asserted: documentation across skills/sprint-contract/SKILL.md, skills/sprint-contract/template.md, skills/harness-summary/SKILL.md, and rules/harness-conventions.md should explain why edge-case criteria are tracked separately from the 100%-weighted Success Criteria and from Should-NOT gates. A reader should come away understanding: edge cases test the agent's judgment under ambiguity (the playbook's one-sided-evals failure mode); folding edge cases into the weighted total would let an agent earn the same weighted score by passing only obvious positive cases; tracking edge-case pass rate as its own metric makes the asymmetry visible. The rationale should also explain why edge cases are optional per contract.",
+      "grader_type": "llm-judge",
+      "weight": 11,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s10-c12",
+      "criterion": "Adversarial-hygiene verified_via_command rationale is justified: documentation across agents/evaluator.md and rules/harness-conventions.md should explain why the verified_via_command flag is recorded per criterion (not per eval file or per sprint). A reader should come away understanding: the playbook flags as a real adversarial risk that an evaluator can infer PASS/FAIL from filenames or code comments without running the actual verification command (Anthropic's Opus 4.6 was observed independently detecting eval state and finding answer keys); a per-eval-file flag is too coarse — one criterion correctly verified does not vouch for the others; a per-criterion flag forces the Evaluator to record, for each of N criteria, whether it actually executed the verification command. The summary skill flags any criterion where verified_via_command: false as suspect. The no-fabrication obligation matches Sprint 9's posture for token_usage and timing.",
+      "grader_type": "llm-judge",
+      "weight": 13,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s10-sn1",
+      "criterion": "No silent behavior change for pre-Phase-2 configs: A project whose .harness/config.json lacks the evaluator_tools object and whose contract files predate Sprint 10 must run the harness identically to Phase 1 / earlier Phase 2 sprints: no Playwright is invoked (eval-harness project's project_type is not web-app, so the auto default resolves to disabled regardless of what the field declares); no edge-case section is required in any contract; the verified_via_command flag's absence from a legacy evaluator's transcript trailer does not change the eval verdict (Sprint 9's failure-tolerant extraction continues to apply).",
+      "grader_type": "llm-judge",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": null,
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s10-sn2",
+      "criterion": "No modification of prior sprint artifacts: .harness/evals/sprint-0[1-9]* and .harness/contracts/sprint-0[1-9]* must be unchanged from HEAD at the start of this sprint (append-only rule from rules/harness-conventions.md).",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "test -z \"$(git diff HEAD -- .harness/evals/sprint-0[1-9]* .harness/contracts/sprint-0[1-9]*)\"",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s10-sn3",
+      "criterion": "No fabrication of verified_via_command and no inference of PASS/FAIL from filenames or comments: schema documentation must not allow the Evaluator to populate verified_via_command: true on a criterion for which no shell command was actually executed. The Adversarial Hygiene section in agents/evaluator.md must (a) forbid inferring PASS/FAIL from filenames or comments, (b) require logging the exact verification command before scoring (so the trailer's tool_calls array is the audit ground truth), and (c) require the Evaluator to set verified_via_command: false when no command was run, rather than assuming true.",
+      "grader_type": "llm-judge",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": null,
+      "rubric_dimension": "grading_architecture"
+    }
+  ]
+}

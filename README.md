@@ -115,6 +115,8 @@ These optional fields extend `.harness/config.json` with backward-compatible def
 
 - **`trials`** / **`sandbox.mode`** / **`taxonomy.emit_tasks_json`** — see Sprint 6 documentation. Defaults `1`, `"none"`, `true` reproduce Phase-1 behavior.
 
+- **`evaluator_tools.playwright`** — string. Default `"auto"`. Reserved values: `"auto"` (Playwright MCP enabled when `project_type == "web-app"`, disabled otherwise — recommended default), `"never"` (disable unconditionally — used when running a `web-app` project without Playwright installed; the Evaluator falls back to `curl` and routes Visual Design findings to human review), `"always"` (enable regardless of project type — for explicit testing of the Playwright path). Backward compatibility: a config that lacks the `evaluator_tools` object hits `"auto"`, which combined with any non-`web-app` project type resolves to "Playwright disabled" — exactly Phase-1 behavior.
+
 ## Adding Custom Rubrics
 
 1. Create a new file in `skills/eval-rubric/rubrics/your-type.md`
