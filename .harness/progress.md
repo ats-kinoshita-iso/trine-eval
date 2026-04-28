@@ -79,3 +79,23 @@
 - Date: 2026-04-24
 - Note: Closed Gap 4 (regression gate). Added `config.regression.{enabled, fail_fast}` with backward-compatible defaults; initialized `.harness/regression/` with empty `regression.json` and a README; introduced Step 0.5 Regression Gate in `skills/harness-sprint/SKILL.md` (runs each graduated task's verbatim `verification_command` before contract negotiation, writes aggregate results to `.harness/regression/runs/run-<UTC-ISO8601>.json`, aborts when `fail_fast` is true); rewired `skills/harness-summary/SKILL.md` saturation handling from prose recommendation to append-only writes of graduated tasks into `regression.json` (adding only the `graduated_from_sprint` field); landed the Sprint-8 wiring point in `agents/evaluator.md` as a policy-only thinking-effort note; documented the `regression.json` schema and gate semantics in `rules/harness-conventions.md`. End-to-end regression-abort verification deferred to a synthetic follow-up sprint per the gap-closure plan.
 - Rubric scores: Methodology 5/5, Grading 5/5, Separation 5/5, Context 5/5, Extensibility 5/5
+## Session 2026-04-28T13:14:42-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-04-28T13:15:35-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-04-28T13:23:24-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-04-28T13:27:12-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-04-28T13:48:24-04:00
+Stopped. Current sprint state should be committed.
+
+## Sprint 08: Claude 4.6 Adaptive Thinking and Batch API
+- Status: PASS
+- Rounds: 1
+- Passed criteria: 13/13
+- Weighted score: 100%
+- Gates: 3/3
+- Date: 2026-04-28
+- Note: Closed Gap 5 (adaptive thinking) and Gap 7 (Batch API). Added `thinking: { type: adaptive, effort: ... }` inline frontmatter to `agents/planner.md` (medium), `agents/generator.md` (medium), `agents/evaluator.md` (high), and `skills/harness-summary/SKILL.md` (max); rewrote the Sprint-7 "policy-only" Thinking Effort section in `agents/evaluator.md` so it now describes per-mode overrides (medium for regression eval, high default for capability eval, max for contract review) tied to a blast-radius rationale, with the disclaimer text removed; added `config.thinking.profile` (default `"default"`, reserved values `"fast"` and `"thorough"`), `config.batch.enabled` (default `false`), and `config.batch.min_criteria` (default `20`) to `.harness/config.json`; added Step 3d Batch API Mode to `skills/harness-sprint/SKILL.md` documenting the trigger condition (enabled AND criterion count ≥ `min_criteria`), 50% discount + 24-hour SLA, and the per-criterion result-shape preservation invariant; added a Phase 2 Configuration Knobs section to `README.md`; emitted `.harness/contracts/sprint-08.tasks.json` with 16 entries (13 success + 3 gates). Contract took 2 negotiation rounds (round 1 NEEDS REVISION on three blockers — tasks.json threshold `>= 13` → `>= 16`, multi-line YAML grep → inline-format mandate, README permutation regex → independent existence checks; all fixed in round 2 APPROVED). End-to-end Batch API HTTP submission and `thinking.profile` runtime dispatch are deferred to post-Sprint-10 verification per the gap-closure plan.
+- Rubric scores: Methodology 5/5, Grading 5/5, Separation 5/5, Context 5/5, Extensibility 5/5
