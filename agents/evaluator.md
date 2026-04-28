@@ -271,6 +271,51 @@ Human calibration results improve future grading accuracy through three mechanis
 2. **Rubric threshold adjustments** — Systematic disagreements on a rubric dimension (e.g., the LLM consistently grades Code Quality higher than humans) signal that the rubric's score descriptions need tightening. Update the dimension's 1-5 table with more specific boundary conditions.
 3. **Inter-annotator agreement** — Periodically have two humans independently grade the same criteria. High agreement validates the rubric; low agreement indicates the criteria or rubric need more specificity.
 
+## Transcript Trailer (Structured Output)
+
+In addition to your markdown eval at `.harness/evals/sprint-{NN}-r{R}-t{T}.md` (or `-r{R}.md` when `config.trials == 1`), emit a structured JSON trailer at the end of that same file under a final `## Transcript Trailer` heading, as a fenced ` ```json ` code block. The trailer is the source data for `.harness/transcripts/sprint-{NN}-r{R}-t{T}.json`: the harness-sprint workflow's Step 3e reads your markdown file, extracts this code block, parses it as JSON, and writes it to the transcripts directory. The full schema lives in `rules/harness-conventions.md` under **Transcript Schema**; this section enumerates what you must include and how to handle fields you cannot directly observe.
+
+This is **distinct from the Transcript Review section below.** Transcript Review is about reading prior markdown evals to spot grader-quality issues; the Transcript Trailer is the new structured-data channel that makes evaluator behavior auditable across runs. Transcript Review consumes existing eval transcripts to improve future grading; Transcript Trailer produces the structured record those reviews will key off going forward.
+
+**Required schema (top-level keys):**
+
+- `"sprint"` — integer, the sprint number you graded.
+- `"round"` — integer, round 1 for the initial eval, R+1 for retry round R.
+- `"trial"` — integer, 1 for single-trial mode, otherwise the 1..config.trials index.
+- `"messages"` — array of `{role, content}` objects summarizing the message exchange during your evaluation. May be a high-level summary (one entry per major phase) when the full message array is not directly available to you. Empty array `[]` is allowed when no summary is feasible.
+- `"tool_calls"` — array of `{name, arguments_summary, result_summary}` objects, one per tool call you made during the eval. You know what tools you called — list them. The `arguments_summary` and `result_summary` fields are short (one line each) — they are summaries, not full payloads.
+- `"token_usage"` — object with integer keys `"input"`, `"output"`, `"cache_hit"`. **These are runtime-supplied; if your runtime does not expose them, write `null` for each. Do not guess or estimate.** Fabricated token counts would produce misleading audit data and contradict the calibration purpose of transcript capture.
+- `"timing"` — object with integer keys `"ttft_ms"`, `"total_ms"`. **Runtime-supplied per the same rule as `token_usage` — use `null` when unknown. Do not fabricate.**
+- `"thinking_summary"` — string. Your one-paragraph summary of how you reasoned about this evaluation overall. Sprint 8's adaptive-thinking declaration means your internal reasoning is otherwise lost; this field captures the audit trail.
+
+**Why each field exists:**
+
+- `messages` exists because reading the actual model output is the only way to verify a grader's reasoning chain across runs. A FAIL verdict's "evidence" prose says what the evaluator concluded; the message array shows how it got there.
+- `tool_calls` exists because adversarial-hygiene checks (Sprint 10's `verified_via_command` flag) need to confirm a verification command actually ran — the listed tool calls are the ground truth for that check.
+- `token_usage` exists because cost regressions are otherwise invisible. A grader that drifts to spending 10× the tokens for the same verdicts is a real signal, but only if usage is recorded.
+- `timing` exists because slow evals are themselves a quality signal — they often correlate with grader confusion or runaway thinking.
+- `thinking_summary` exists because the adaptive-thinking declaration from Sprint 8 produces internal reasoning that is otherwise lost when only the markdown eval is preserved. Without this field, the structured channel cannot capture the evaluator's high-level approach.
+
+**Example trailer (note runtime-supplied fields set to `null` when unknown):**
+
+```json
+{
+  "sprint": 9,
+  "round": 1,
+  "trial": 1,
+  "messages": [{"role": "user", "content": "Read the contract and grade each criterion."}],
+  "tool_calls": [
+    {"name": "Bash", "arguments_summary": "test -d .harness/transcripts", "result_summary": "exit 0"},
+    {"name": "Bash", "arguments_summary": "jq -e ... config.json", "result_summary": "exit 0"}
+  ],
+  "token_usage": {"input": null, "output": null, "cache_hit": null},
+  "timing": {"ttft_ms": null, "total_ms": null},
+  "thinking_summary": "Tested every deterministic criterion via grep/jq, then read the prose for LLM-judge criteria. The backward-compat criterion was the closest call — verified by..."
+}
+```
+
+Empty arrays and `null` are preferred over guessed numbers; the calibration value of transcripts depends on their fidelity. If the workflow finds the trailer missing or malformed, it skips the transcript write — your eval verdict is unaffected, but the audit trail is lost for that run, so do emit the trailer when you can.
+
 ## Transcript Review
 
 **Skip this entire section if `config.components_enabled.per_sprint_aci_review` is `false`** (minimal mode default). ACI self-optimization still runs, but batched across all evals at `/harness-summary` time rather than per-sprint — see the ACI Self-Optimization section of `skills/harness-summary/SKILL.md`.

@@ -106,6 +106,24 @@ A criterion is **saturated** when it passes on the first evaluation round across
 - Which criteria should be graduated from capability eval to regression suite?
 - Where is the largest gap between pass@k and pass^k? (indicates where to invest in consistency)
 
+### Transcript Links for FAIL Criteria and Grader Disagreements
+
+When rendering a FAIL criterion entry or a grader-disagreement entry in the summary output, link the corresponding structured transcript at `.harness/transcripts/sprint-NN-rR-tT.json` (multi-trial) or `.harness/transcripts/sprint-NN-rR.json` (single-trial). The transcript pairs 1:1 with the eval markdown and contains the structured record described in `rules/harness-conventions.md` under **Transcript Schema** — `messages`, `tool_calls`, `token_usage`, `timing`, and `thinking_summary` for that run.
+
+**Why FAIL and disagreement entries specifically — and not every PASS row.** PASS verdicts on deterministic criteria are usually self-explanatory: the verification command exited 0, and that exit code is the answer. A human auditor scanning the summary does not typically need the transcript for those rows. FAIL entries and grader disagreements are the points where the verdict alone is insufficient — the auditor needs to see what tools the Evaluator called, what evidence it weighed, and how it got from observation to conclusion. Linking transcripts only at those entries keeps the summary readable while preserving audit access exactly where it matters; linking every row would dilute the signal and turn the summary into a wall of paths.
+
+**How to render the link.** Add a `Transcript:` line under the FAIL criterion's evidence (or the grader-disagreement entry), pointing to the transcript file with a relative path. Example for a multi-trial FAIL:
+
+```markdown
+### Sprint 4, Criterion 8 — FAIL
+**Evidence:** PostToolUse hook only echoed; did not update `sprint-state.json`.
+**Transcript:** `.harness/transcripts/sprint-04-r1-t1.json`
+```
+
+For single-trial mode, the transcript path is `.harness/transcripts/sprint-NN-rR.json`. If the transcript file does not exist (the evaluator did not emit a parseable trailer for that run), omit the line — do NOT print a broken link. Transcripts are append-only-when-available, so missing transcripts are a known and acceptable state.
+
+**Grader-disagreement entries** include any criterion where a code-based grader and the LLM-judge would have produced different verdicts (per the Evaluator's `## Human Review Flags` section in the eval report). These are the calibration touch-points where the structured transcript matters most — the FAIL/PASS gap reflects rubric ambiguity, and the transcript captures the reasoning that produced each verdict.
+
 ## Output Format
 
 Write the summary to `.harness/summary.md`:

@@ -193,6 +193,24 @@ If either condition is false, the synchronous path documented in Step 3b runs as
 
 **What this section does not promise.** It does not promise faster turnaround than synchronous calls — the tradeoff is cost for latency, not the reverse. It does not promise that the batch API request is wired up against a live `ANTHROPIC_API_KEY` in this sprint; the harness ships the protocol and the trigger conditions, while end-to-end batch submission against the live endpoint is verified post-Sprint-10 per the gap-closure plan.
 
+### 3e. Transcript Capture (optional)
+
+This subsection runs after the Evaluator's markdown eval lands. It extracts a structured JSON trailer from the evaluator's eval file and writes a sibling transcript file to `.harness/transcripts/`. The structured channel is the audit-grade record the harness-summary skill links from FAIL criteria and grader-disagreement entries — see `skills/harness-summary/SKILL.md`. The schema lives in `rules/harness-conventions.md` under the **Transcript Schema** section.
+
+**Trigger.** Read `config.transcripts.capture` from `.harness/config.json` (default `true` when the `transcripts` object is present; absent means the legacy/Phase-1 default applies, see Backward compatibility below). If `config.transcripts.capture` is explicitly `false`, skip this step entirely. Otherwise proceed.
+
+**Why a markdown trailer, not a runtime hook.** Sprint 9 ships the protocol — the Evaluator emits the structured payload at the end of its existing markdown eval, and the workflow extracts it. This avoids requiring runtime instrumentation of the evaluator subagent's message stream while still producing a machine-readable transcript file. End-to-end transcript writing against a live evaluator subagent is deferred to a synthetic verification sprint per the gap-closure plan, matching Sprint 8's posture for `thinking.profile`.
+
+**Trailer extraction protocol.** Two independent implementers must produce equivalent transcript files from the same evaluator markdown eval, so the protocol is precise:
+
+1. **Locate the trailer.** Read the markdown eval file just produced by the Evaluator (`.harness/evals/sprint-{NN}-r{R}-t{T}.md` for multi-trial, or `.harness/evals/sprint-{NN}-r{R}.md` for single-trial). Find the last `## Transcript Trailer` heading in the file. The body of that section is a fenced ` ```json ` code block containing the structured JSON payload the Evaluator produced. The Evaluator's instruction for emitting this block lives in `agents/evaluator.md`.
+2. **Parse the trailer.** Extract the JSON between the fences and parse it. If the `## Transcript Trailer` section is missing, the fence is malformed, the JSON does not parse, or required top-level fields are absent, **skip the rest of this step** — do NOT fail the eval and do NOT fabricate a transcript. The eval verdict is unaffected; transcripts are an audit artifact, not a grading input. This failure-tolerant posture matches the regression gate's stance from Sprint 7.
+3. **Write the transcript.** Write the parsed JSON verbatim to `.harness/transcripts/sprint-{NN}-r{R}-t{T}.json` (multi-trial) or `.harness/transcripts/sprint-{NN}-r{R}.json` (single-trial mode). The file naming mirrors the markdown eval naming so transcript-to-eval pairing is unambiguous.
+
+**Backward compatibility.** A project whose `.harness/config.json` lacks the `transcripts` object and whose `agents/evaluator.md` predates Sprint 9 experiences no functional behavior change: the legacy evaluator does not emit a `## Transcript Trailer` section, so step 2 above falls into the failure-tolerant branch and no transcript file is written. The `config.transcripts.capture: true` default applies to fresh installs that picked up the updated agent file; for legacy projects, the no-op fallback preserves Phase-1 disk state. When `config.transcripts.capture` is explicitly `false`, this entire step is skipped and no extraction is attempted.
+
+**What this section does not promise.** It does not promise that runtime-instrumented fields (`token_usage`, `timing`) are populated with real values — those fields are nullable and best-effort, per `rules/harness-conventions.md`. It does not promise retention enforcement; the `transcripts.retain_days` knob is a documented policy and cleanup runs out-of-band. It does not promise that every Evaluator implementation will emit a parseable trailer — the protocol's failure-tolerance is the design choice, not a bug.
+
 ## Step 4: Retry Loop
 
 If the verdict is FAIL and retry count < `max_retries` from config:
