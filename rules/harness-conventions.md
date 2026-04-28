@@ -19,3 +19,46 @@ The harness uses two file formats for distinct purposes:
 - **Markdown** — Human-readable prose and notes. Use for: `progress.md`, `spec.md`, sprint contracts, eval reports. Markdown is better for session logs, design rationale, and any content that benefits from rich formatting.
 
 Both formats should be kept in sync where they overlap (e.g., sprint status appears in both `sprint-state.json` and `progress.md`). When they conflict, JSON is authoritative for structured state.
+
+## Trial vs Retry
+
+The harness has two independent loops that are easy to confuse — and conflating them produces statistically invalid pass@k / pass^k, because a fixed bug starts looking like evidence of inconsistency.
+
+- **Trial** — A measurement run at **fixed code state**. Trials exist to estimate how reliable the current implementation is. Multiple trials are independent samples of the same agent doing the same task, differing only in trial-time non-determinism (model stochasticity, timing, sandbox entropy). Trials are controlled by `config.trials` (default `1`). Files: `sprint-NN-rR-tT.md`, where `T` is the trial index within round `R`. When `trials == 1`, the `-tT` suffix is omitted and the file is `sprint-NN-rR.md` (Phase 1 backward compatibility).
+- **Retry** — A **bug-fix iteration**. Retries exist to let the Generator edit code in response to Evaluator feedback. Code changes between retries; trial counts do not need to. Retries are controlled by `config.max_retries`. Files: the round counter `R` increments with each retry.
+
+Pass@k and pass^k are computed from trial files only (see `skills/harness-summary/SKILL.md`). Retry-round pass rates remain useful as a separate `first-round-pass` / retry-efficiency signal, but they are not a valid consistency metric.
+
+## tasks.json Schema
+
+After contract approval, `.harness/contracts/sprint-NN.md` is accompanied by a sibling `.harness/contracts/sprint-NN.tasks.json`. This is the machine-readable source of record for the sprint's criteria — Sprint 7's regression gate, Sprint 8's Batch API scheduler, Sprint 9's transcripts, and Sprint 10's adversarial hygiene flags all key off it.
+
+Fields:
+
+- `task_id` — Stable id. `s<NN>-c<N>` for scored success criteria, `s<NN>-sn<N>` for Should-NOT gates. Downstream tools reference tasks by this id across trials and sprints, so it must not be renamed after approval.
+- `criterion` — Verbatim criterion text copied from the markdown contract. No paraphrasing.
+- `grader_type` — `"deterministic"` or `"llm-judge"`.
+- `weight` — Integer percentage. Success criteria carry the weights declared in the markdown contract (summing to 100%); gate criteria use `0` because they are not weighted.
+- `is_gate` — `true` for Should-NOT gates, `false` otherwise.
+- `verification_command` — Runnable shell command for deterministic criteria; `null` for llm-judge.
+- `rubric_dimension` — Which rubric dimension this criterion informs. Used for per-dimension summary rollups.
+
+Emission is guarded by `config.taxonomy.emit_tasks_json` (default `true`). See `skills/sprint-contract/SKILL.md` for the full specification and an example.
+
+## regression.json Schema and Gate Semantics
+
+`.harness/regression/regression.json` is the append-only graduation output of the harness's saturation detection. It is **not** a hand-curated list — `skills/harness-summary/SKILL.md` appends entries to it as criteria saturate (first-round-pass across 3+ consecutive sprints), and `skills/harness-sprint/SKILL.md` Step 0.5 reads it on every sprint to gate new contract negotiation.
+
+**Role.** `regression.json` is the downstream product of a single pipeline: sprint contracts → `tasks.json` → saturation detection → `regression.json` → Step 0.5 gate. Entries are copied verbatim from the producing sprint's `.harness/contracts/sprint-NN.tasks.json`, so every field a regression runner needs is already calibrated by the contract negotiation that produced it.
+
+**Schema.** Each entry in the top-level `tasks` array carries the same fields as a `tasks.json` entry — `task_id`, `criterion`, `grader_type`, `weight`, `is_gate`, `verification_command`, `rubric_dimension` — plus one added field:
+
+- `graduated_from_sprint` — Integer. The sprint number whose eval first demonstrated saturation (typically the 3rd consecutive first-round-pass sprint). Used for audit trails: every regression failure is traced back to the sprint that justified adding the entry.
+
+No fields from `tasks.json` are renamed or dropped. The added field is the only Sprint-7 schema extension.
+
+**Append-only.** The harness never removes or rewrites existing entries. A buggy summary run could otherwise destroy historical regression coverage in a single write; the append-only rule makes graduation loss impossible by construction. Operators who want to retire a regression criterion do so by hand, outside the harness.
+
+**Gate semantics.** `skills/harness-sprint/SKILL.md` Step 0.5 runs every entry's `verification_command` — verbatim, with no paraphrase — before contract negotiation for a new sprint. Each task's PASS (exit 0) or FAIL (non-zero) verdict is recorded to `.harness/regression/runs/run-<UTC-ISO8601>.json`. If any task fails and `config.regression.fail_fast` is true (default), the sprint aborts with the failing `task_id` and `graduated_from_sprint` so the operator knows which capability regressed. The gate is `fail_fast` by default because a new sprint's criteria are independent of prior capabilities — the new eval can grade PASS on fresh work while a graduated capability has silently broken, and shipping that green score would overstate system health.
+
+**Backward compatibility.** If `regression.json` does not exist, or its `tasks` array is empty, or `config.regression.enabled` is explicitly `false`, Step 0.5 is a no-op. Projects that predate Phase 2 and never graduate a criterion experience no behavior change.

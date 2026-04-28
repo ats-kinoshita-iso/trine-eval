@@ -1,0 +1,149 @@
+{
+  "sprint": 7,
+  "tasks": [
+    {
+      "task_id": "s07-c1",
+      "criterion": "config.json schema extended with regression fields: .harness/config.json contains a regression object with keys enabled (boolean) and fail_fast (boolean). Values may be literal booleans or null (to signal \"use default\").",
+      "grader_type": "deterministic",
+      "weight": 7,
+      "is_gate": false,
+      "verification_command": "jq -e '.regression | has(\"enabled\") and has(\"fail_fast\")' .harness/config.json",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s07-c2",
+      "criterion": ".harness/regression/ directory and README exist: The path .harness/regression/ exists as a directory, contains a regression.json file that is valid JSON with a top-level tasks array (may be empty on initialization), and contains a README.md explaining what the directory is for.",
+      "grader_type": "deterministic",
+      "weight": 7,
+      "is_gate": false,
+      "verification_command": "test -d .harness/regression && jq -e '.tasks | type == \"array\"' .harness/regression/regression.json && test -f .harness/regression/README.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s07-c3",
+      "criterion": "regression.json entries match the tasks.json schema: Every entry in .harness/regression/regression.json's tasks array (when non-empty) contains the fields task_id, criterion, grader_type, weight, is_gate, verification_command, rubric_dimension, plus one Sprint-7-added field graduated_from_sprint (integer). An empty tasks array passes vacuously.",
+      "grader_type": "deterministic",
+      "weight": 7,
+      "is_gate": false,
+      "verification_command": "jq -e '.tasks | all(has(\"task_id\") and has(\"criterion\") and has(\"grader_type\") and has(\"weight\") and has(\"is_gate\") and has(\"verification_command\") and has(\"rubric_dimension\") and has(\"graduated_from_sprint\"))' .harness/regression/regression.json",
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s07-c4",
+      "criterion": "harness-sprint SKILL contains a Step 0.5 Regression Gate section: skills/harness-sprint/SKILL.md contains a heading whose text matches Step 0.5 and includes the word Regression (case-insensitive). The section must be positioned between Step 0 and Step 1.",
+      "grader_type": "deterministic",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "grep -nE '^## Step 0\\.5' skills/harness-sprint/SKILL.md | grep -i regression",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s07-c5",
+      "criterion": "Step 0.5 reads regression.json and runs each verification_command: The Step 0.5 section in skills/harness-sprint/SKILL.md explicitly references the path .harness/regression/regression.json, iterating the tasks array and executing each task's verification_command, aborting the sprint when any verification_command fails and regression.fail_fast is true, and writing a timestamped results file under .harness/regression/runs/.",
+      "grader_type": "deterministic",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "grep -q 'regression/regression.json' skills/harness-sprint/SKILL.md && grep -q 'verification_command' skills/harness-sprint/SKILL.md && grep -q 'fail_fast' skills/harness-sprint/SKILL.md && grep -q 'regression/runs' skills/harness-sprint/SKILL.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s07-c6",
+      "criterion": "harness-summary writes graduated criteria into regression.json: skills/harness-summary/SKILL.md documents that saturated criteria (first-round-pass for 3+ consecutive sprints) are appended to .harness/regression/regression.json as machine-readable entries, not merely listed as recommendations in the summary markdown. Graduation is append-only.",
+      "grader_type": "deterministic",
+      "weight": 12,
+      "is_gate": false,
+      "verification_command": "grep -q '\\.harness/regression/regression.json' skills/harness-summary/SKILL.md && grep -qiE 'append|graduat' skills/harness-summary/SKILL.md",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s07-c7",
+      "criterion": "evaluator.md notes thinking effort for regression vs capability: agents/evaluator.md contains a note stating that regression-criterion evaluation uses a lower thinking effort (medium) while fresh capability-criterion evaluation uses a higher effort (high or max). Sprint 8 wiring point.",
+      "grader_type": "deterministic",
+      "weight": 7,
+      "is_gate": false,
+      "verification_command": "grep -qi 'regression' agents/evaluator.md && grep -qiE 'effort|thinking' agents/evaluator.md && grep -qiE 'medium' agents/evaluator.md && grep -qiE 'high|max' agents/evaluator.md",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s07-c8",
+      "criterion": "harness-conventions.md documents the regression.json schema: rules/harness-conventions.md contains a section describing regression.json — its role (append-only graduation output), its schema (the same fields as tasks.json plus graduated_from_sprint), and the gate semantics.",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -q 'regression.json' rules/harness-conventions.md && grep -q 'graduated_from_sprint' rules/harness-conventions.md && grep -qi 'append-only\\|append only' rules/harness-conventions.md",
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s07-c9",
+      "criterion": "sprint-07.tasks.json is emitted: .harness/contracts/sprint-07.tasks.json exists, is valid JSON, has a top-level sprint: 7 field and a tasks array with one entry per criterion in this contract (including gate criteria).",
+      "grader_type": "deterministic",
+      "weight": 7,
+      "is_gate": false,
+      "verification_command": "jq -e '.sprint == 7 and (.tasks | length) >= 12 and (.tasks | all(has(\"task_id\") and has(\"grader_type\") and has(\"weight\") and has(\"is_gate\")))' .harness/contracts/sprint-07.tasks.json",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s07-c10",
+      "criterion": "Backward compatibility is explicit and correct: The updated skills/harness-sprint/SKILL.md Step 0.5 section makes it unambiguous that a project whose .harness/regression/regression.json does not exist — or whose tasks array is empty — experiences no behavior change from Phase 1. The config knobs regression.enabled and regression.fail_fast must each have a documented default.",
+      "grader_type": "llm-judge",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s07-c11",
+      "criterion": "Regression graduation semantics are clear: A reader of the updated skills/harness-summary/SKILL.md saturation section should be able to explain (a) the graduation trigger, (b) which fields are copied vs added (graduated_from_sprint), (c) why graduation is append-only.",
+      "grader_type": "llm-judge",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s07-c12",
+      "criterion": "Fail-fast rationale is justified, not just asserted: The skills/harness-sprint/SKILL.md Step 0.5 section should explain why regression failure must abort before contract negotiation rather than continuing as a warning.",
+      "grader_type": "llm-judge",
+      "weight": 5,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s07-c13",
+      "criterion": "Regression is positioned as the output of saturation, not a parallel system: Documentation makes clear that regression.json is the downstream product of existing saturation detection logic, with Sprint 6 tasks.json as the source of record.",
+      "grader_type": "llm-judge",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s07-sn1",
+      "criterion": "No silent behavior change for pre-Phase-2 configs: A project whose .harness/config.json lacks the regression object and whose repository has no .harness/regression/regression.json file must run the harness identically to Phase 1.",
+      "grader_type": "llm-judge",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": null,
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s07-sn2",
+      "criterion": "No modification of prior sprint artifacts: .harness/evals/sprint-0[1-6]* and .harness/contracts/sprint-0[1-6]* must be unchanged from HEAD.",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "test -z \"$(git diff HEAD -- .harness/evals/sprint-0[1-6]* .harness/contracts/sprint-0[1-6]*)\"",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s07-sn3",
+      "criterion": "No ad-hoc regression commands — only tasks.json verification commands execute. Step 0.5 must run verbatim the verification_command string recorded on each task in regression.json.",
+      "grader_type": "llm-judge",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": null,
+      "rubric_dimension": "generator_evaluator_separation"
+    }
+  ]
+}

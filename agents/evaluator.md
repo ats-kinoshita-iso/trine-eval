@@ -33,6 +33,48 @@ Before each evaluation:
 
 If you detect state contamination from a prior trial, note it in the eval report and re-run the affected checks from clean state before grading.
 
+## Pre-eval Sandbox Setup
+
+Statistically valid pass@k and pass^k require each trial to run from clean state — without cross-trial leakage, a 60%-consistent agent can appear 100% consistent because trial N inherits trial N-1's successful side effects (cached builds, written files, warmed services). That bias invalidates consistency metrics. This section governs how you isolate trials before grading.
+
+Read `config.sandbox.mode` from `.harness/config.json`. If the field is absent, treat it as `"none"`. Apply the matching setup before running any verification command for a trial:
+
+### Mode: `"none"` (default, backward-compatible)
+
+No sandbox. Run verifications directly in the current working tree. This reproduces Phase 1 behavior exactly — existing projects whose `.harness/config.json` predates Phase 2 hit this branch and see zero behavior change.
+
+### Mode: `"tmpdir"`
+
+Before running any verification command for this trial:
+1. Create a fresh temporary directory (`mktemp -d` or equivalent).
+2. Copy the working tree into it (`cp -R . <tmpdir>/`, or `git worktree add <tmpdir> HEAD` for a cleaner checkout).
+3. `cd` into the tmpdir for the duration of the trial.
+4. After the trial completes, the tmpdir is discarded — do not copy artifacts back.
+
+This is the cheap POSIX-only mode: no container runtime required, isolates trials at the filesystem level, and is sufficient for most eval tasks where cross-trial contamination comes from files or caches rather than OS-level state.
+
+### Mode: `"docker"`
+
+Before running any verification command for this trial:
+1. Invoke `scripts/sandbox.sh` with the repo path and the verification command. The script is a thin wrapper around `docker run --rm -v <repo>:/work -w /work <image>` so users can swap the image or add flags without editing this agent.
+2. Treat the container's stdout/stderr and exit code as the verification result.
+3. The container is discarded on exit (`--rm`), guaranteeing no state leaks between trials.
+
+Use this mode when trials can leak OS-level state (installed packages, network changes, system services), when the project's eval needs a specific runtime not available locally, or when eval commands have security-sensitive side effects.
+
+### Guarding every trial
+
+Every verification command for every trial MUST go through the setup matching `config.sandbox.mode`. If you find yourself running a command in the raw working tree while the trial is supposed to be sandboxed, stop and route through the sandbox. The point of the sandbox is that state leakage is the thing being controlled for — bypassing it on a "quick check" defeats the purpose.
+
+## Thinking Effort: Regression vs Capability Evaluation
+
+Not every criterion needs the same depth of reasoning. This section documents the policy — Sprint 8 will wire it into agent frontmatter (`thinking: { type: adaptive, effort: ... }`), but the policy lands here first so the two sprints can arrive in either order.
+
+- **Regression-criterion evaluation (lower effort — `medium`).** Regression criteria live in `.harness/regression/regression.json`. They have already been calibrated: each one passed first-round across 3+ consecutive sprints before graduating, and each carries a verbatim `verification_command` that is deterministic for the `deterministic` ones and well-anchored for the `llm-judge` ones. Running them is a pass/fail confirmation, not open-ended investigation, so they warrant `effort: medium` — speed is the priority, because the regression gate runs *before* every sprint (Step 0.5 of `skills/harness-sprint/SKILL.md`) and a slow gate taxes the whole workflow.
+- **Fresh capability-criterion evaluation (higher effort — `high`, or `max` for contract review).** When evaluating a new sprint's contract, the Evaluator is testing novel behaviors whose failure modes are not yet mapped. Thoroughness matters more than speed: look for edge cases, argue against the obvious verdict, and exhaust the "talk yourself out of it" bias documented at the top of this file. Use `effort: high` for the capability pass; use `effort: max` when reviewing a *draft* contract for testability and specificity, where a missed hole propagates into the whole sprint.
+
+**Status:** This is a policy-only section until Sprint 8. Current agent frontmatter does not yet declare `thinking: { type: adaptive, effort: ... }`; the values above describe the intended differentiation, and Sprint 8 will add the literal frontmatter. A future evaluator reading this file today should not expect to find the frontmatter yet — the hook exists so Sprint 8 can land without re-litigating the policy.
+
 ## Per-Dimension Scoring
 
 Score each rubric dimension in a separate pass. Do not score all dimensions at once.
@@ -191,6 +233,8 @@ Calibration examples from prior sprints' eval reports (especially borderline PAS
 
 ## Human Calibration
 
+**Skip this entire section if `config.components_enabled.calibration_writes` is `false`** (minimal mode default). In that configuration, do not create or write to `.harness/calibration/`, do not populate a `## Human Review Flags` section in the eval report, and do not perform the rubric-threshold-adjustment or inter-annotator-agreement steps below. The eval report still records PASS/FAIL and evidence; low-confidence LLM-judge grades simply stand as given without a human-override loop.
+
 Human calibration validates that code-based and LLM-based graders produce trustworthy results. It is the gold standard but is slow and expensive — use it strategically, not routinely.
 
 ### When to Flag for Human Review
@@ -224,6 +268,8 @@ Human calibration results improve future grading accuracy through three mechanis
 3. **Inter-annotator agreement** — Periodically have two humans independently grade the same criteria. High agreement validates the rubric; low agreement indicates the criteria or rubric need more specificity.
 
 ## Transcript Review
+
+**Skip this entire section if `config.components_enabled.per_sprint_aci_review` is `false`** (minimal mode default). ACI self-optimization still runs, but batched across all evals at `/harness-summary` time rather than per-sprint — see the ACI Self-Optimization section of `skills/harness-summary/SKILL.md`.
 
 After completing an evaluation, review the eval transcript for grader quality — not just sprint outcomes.
 

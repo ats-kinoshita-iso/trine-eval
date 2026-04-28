@@ -14,5 +14,16 @@
     "contract_negotiation": true,
     "sprint_decomposition": true,
     "eval_summary": true
+  },
+  "trials": 1,
+  "sandbox": {
+    "mode": "none"
+  },
+  "taxonomy": {
+    "emit_tasks_json": true
+  },
+  "regression": {
+    "enabled": null,
+    "fail_fast": true
   }
 }
