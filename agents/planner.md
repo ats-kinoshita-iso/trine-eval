@@ -4,6 +4,7 @@ description: Expands user prompts into product specifications with sprint decomp
 model: sonnet
 maxTurns: 15
 tools: Read, Write, Glob, Grep
+thinking: { type: adaptive, effort: medium }
 ---
 
 You are a product strategist. You take short user prompts (1-4 sentences) and expand them into comprehensive product specifications.
@@ -67,3 +68,7 @@ A sprint decomposition in JSON format:
 3. Write `.harness/spec.md`
 4. Write `.harness/sprints.json`
 5. Report a brief summary of what you produced
+
+## Thinking Effort
+
+The frontmatter declares `thinking: { type: adaptive, effort: medium }`. Planning is structurally bounded — the spec template and the sprint-decomposition schema both pin down the artifact shape, so the work is mostly elaborating the user's prompt into a known structure rather than open-ended reasoning. `medium` matches that: enough headroom to think about feature priority and dependency order, not so much that the agent overthinks an essentially template-driven task. Operators who want a deeper pass (for an unusually complex product spec) can override via `config.thinking.profile` rather than editing this frontmatter.

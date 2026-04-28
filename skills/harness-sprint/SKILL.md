@@ -169,6 +169,30 @@ The retry loop in Step 4 is unchanged: a FAIL verdict (aggregated across trials 
 
 After the Evaluator finishes, read the appropriate file (`sprint-{NN}-r{R}.md` for single-trial or the trial files for multi-trial) and check the verdict. Copy the latest eval to `.harness/evals/sprint-{NN}.md` so the Generator always has a stable path for the latest eval.
 
+### 3d. Batch API Mode (optional)
+
+This subsection applies inside Step 3 — it routes the per-criterion verifications the Evaluator would otherwise perform synchronously through Anthropic's Batch API. It is a **cost optimization, not a latency optimization** — the published Batch API contract trades a 50% discount on input/output tokens for a 24-hour SLA.
+
+**Trigger.** The batch path activates only when **both** of the following are true:
+
+1. `config.batch.enabled == true` (the field is read from `.harness/config.json`; default `false`).
+2. The sprint contract's criterion count (success criteria + Should-NOT gates, the same count emitted in `sprint-{NN}.tasks.json`) is greater than or equal to `config.batch.min_criteria` (default `20`).
+
+If either condition is false, the synchronous path documented in Step 3b runs as today. A `.harness/config.json` lacking the `batch` object is equivalent to the default — `enabled: false`, `min_criteria: 20` — and the harness behaves exactly as in Phase 1 with no batch submission attempted.
+
+**Why a threshold.** Batch overhead (request packaging, polling, result mapping) is fixed; the per-criterion savings scale with criterion count. Small sprints stay synchronous so contributors keep tight feedback loops; large suites (≥ `min_criteria`) absorb the overhead and earn the 50% discount on the bulk of their token spend.
+
+**Execution (when the batch path activates).**
+
+1. **Collect.** For each criterion in `.harness/contracts/sprint-{NN}.tasks.json`, build a Batch API request unit: deterministic criteria carry their `verification_command` and a structured "did the command exit 0?" prompt; LLM-judge criteria carry their criterion text plus the rubric dimension. Each unit is keyed by its `task_id` so results map back unambiguously.
+2. **Submit.** POST a single batch to Anthropic's `/v1/messages/batches` endpoint. The submission contains every criterion as a custom-id-tagged request inside one batch envelope — N criteria collapse to 1 API call.
+3. **Poll.** Wait for the batch to reach a terminal state. The 24-hour SLA is the upper bound; in practice batches typically complete sooner, but the workflow must not assume sub-hour latency. Configure operator-side timeouts to allow the documented 24 hours.
+4. **Map back.** Parse the batch response, demultiplex by `custom_id` (= `task_id`), and write each result into its corresponding `## N. Criterion ...` slot in `.harness/evals/sprint-{NN}-r{R}.md` (or `-t{T}.md` for multi-trial). The per-criterion file shape is byte-for-byte identical to the synchronous path — downstream consumers (the regression gate at Step 0.5, the saturation detector in `harness-summary`, the Generator on retry) cannot tell whether batch or synchronous produced the file. **This invariant is critical.** Changing the file shape would cascade into every Sprint 7 / 9 / 10 deliverable.
+
+**Backward compatibility.** With `config.batch.enabled == false` (the default), Step 3d is a no-op — the synchronous Step 3b path runs as in Phase 1. With `config.batch.enabled == true` but a small sprint (criterion count < `config.batch.min_criteria`), the batch path is *not* activated and Step 3b still runs synchronously. A project whose `.harness/config.json` lacks the `batch` object hits the default-false branch and sees zero behavior change.
+
+**What this section does not promise.** It does not promise faster turnaround than synchronous calls — the tradeoff is cost for latency, not the reverse. It does not promise that the batch API request is wired up against a live `ANTHROPIC_API_KEY` in this sprint; the harness ships the protocol and the trigger conditions, while end-to-end batch submission against the live endpoint is verified post-Sprint-10 per the gap-closure plan.
+
 ## Step 4: Retry Loop
 
 If the verdict is FAIL and retry count < `max_retries` from config:

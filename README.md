@@ -101,6 +101,20 @@ The harness ships with four rubrics. Set the project type during kickoff or in `
 
 The `components_enabled` section lets you simplify the harness as models improve. For example, disabling `contract_negotiation` skips the Evaluator's contract review — the Generator's proposed criteria are accepted directly.
 
+### Phase 2 Configuration Knobs
+
+These optional fields extend `.harness/config.json` with backward-compatible defaults. A config that omits them runs exactly as in Phase 1.
+
+- **`thinking.profile`** — one of `"default"`, `"fast"`, or `"thorough"`. Default: `"default"`, which preserves Phase-1 behavior (no override applied to agent-level adaptive-thinking effort declared in agent frontmatter). The `"fast"` and `"thorough"` values are reserved for a future override dispatcher; the default is the only path that mutates today's behavior, and it does not. Each role's effort level is declared in the agent's own frontmatter (`agents/planner.md`, `agents/generator.md`, `agents/evaluator.md`, and the `harness-summary` skill) — `medium` for routine planning and implementation, `high` for capability evaluation, and `max` for contract review and cross-sprint summary analysis.
+
+- **`batch.enabled`** — boolean. Default: `false`. When `true` and a sprint has at least `batch.min_criteria` criteria, eval verifications are submitted as a single Anthropic Batch API call (50% discount on input/output tokens, 24-hour SLA). Batch is a cost optimization, not a latency optimization. With the default `false`, evaluations run synchronously as in Phase 1.
+
+- **`batch.min_criteria`** — integer. Default: `20`. Sprints with fewer criteria stay synchronous even when `batch.enabled` is `true` — the batch overhead is only worth absorbing on large suites. The criterion count compared against this threshold is the same count emitted in `sprint-{NN}.tasks.json` (success criteria + Should-NOT gates).
+
+- **`regression.enabled`** / **`regression.fail_fast`** — see `rules/harness-conventions.md`. The defaults are auto (truthy iff `regression.json` has a non-empty `tasks` array) and `true` (abort on regression failure). Pre-Phase-2 projects whose `.harness/config.json` lacks the `regression` object see no behavior change.
+
+- **`trials`** / **`sandbox.mode`** / **`taxonomy.emit_tasks_json`** — see Sprint 6 documentation. Defaults `1`, `"none"`, `true` reproduce Phase-1 behavior.
+
 ## Adding Custom Rubrics
 
 1. Create a new file in `skills/eval-rubric/rubrics/your-type.md`

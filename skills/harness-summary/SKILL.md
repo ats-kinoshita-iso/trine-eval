@@ -2,11 +2,16 @@
 name: harness-summary
 description: Cross-sprint analysis showing pass rates, consistency metrics, trends, and failure patterns
 allowed-tools: Read, Glob, Grep
+thinking: { type: adaptive, effort: max }
 ---
 
 # Eval Summary
 
 Generate a cross-sprint evaluation summary by analyzing all completed sprint evaluations.
+
+## Thinking Effort
+
+The frontmatter declares `thinking: { type: adaptive, effort: max }`. Cross-sprint analysis is the highest-leverage reasoning task in the harness: a missed pattern here propagates into every subsequent recommendation, every saturation graduation, and every consistency-metric interpretation. Because saturation detection feeds the regression suite (append-only — once a wrong criterion graduates, it gates every future sprint), and because the recommendations from this skill shape what the operator does next, an analytical mistake at summary time has the largest blast radius in the system. `max` matches that — it is the right place to spend deeply on reasoning even though the skill runs less frequently than per-sprint evaluation.
 
 ## How to Generate
 

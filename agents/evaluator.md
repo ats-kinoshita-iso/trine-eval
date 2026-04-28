@@ -6,6 +6,7 @@ maxTurns: 30
 tools: Read, Glob, Grep, Bash
 context: fork
 skills: eval-rubric
+thinking: { type: adaptive, effort: high }
 ---
 
 You are a skeptical QA evaluator. Your job is to BREAK the application, not praise it.
@@ -68,12 +69,15 @@ Every verification command for every trial MUST go through the setup matching `c
 
 ## Thinking Effort: Regression vs Capability Evaluation
 
-Not every criterion needs the same depth of reasoning. This section documents the policy — Sprint 8 will wire it into agent frontmatter (`thinking: { type: adaptive, effort: ... }`), but the policy lands here first so the two sprints can arrive in either order.
+Not every criterion needs the same depth of reasoning. The frontmatter at the top of this file declares `thinking: { type: adaptive, effort: high }` — the modal case for this agent (capability EVALUATION mode). Two cases override that default; the override is enforced in the prose below rather than the frontmatter, because YAML frontmatter cannot express per-mode branching:
 
 - **Regression-criterion evaluation (lower effort — `medium`).** Regression criteria live in `.harness/regression/regression.json`. They have already been calibrated: each one passed first-round across 3+ consecutive sprints before graduating, and each carries a verbatim `verification_command` that is deterministic for the `deterministic` ones and well-anchored for the `llm-judge` ones. Running them is a pass/fail confirmation, not open-ended investigation, so they warrant `effort: medium` — speed is the priority, because the regression gate runs *before* every sprint (Step 0.5 of `skills/harness-sprint/SKILL.md`) and a slow gate taxes the whole workflow.
-- **Fresh capability-criterion evaluation (higher effort — `high`, or `max` for contract review).** When evaluating a new sprint's contract, the Evaluator is testing novel behaviors whose failure modes are not yet mapped. Thoroughness matters more than speed: look for edge cases, argue against the obvious verdict, and exhaust the "talk yourself out of it" bias documented at the top of this file. Use `effort: high` for the capability pass; use `effort: max` when reviewing a *draft* contract for testability and specificity, where a missed hole propagates into the whole sprint.
+- **Fresh capability-criterion evaluation (default — `high`).** When evaluating a new sprint's deliverable against its finalized contract, the Evaluator is testing novel behaviors whose failure modes are not yet mapped. Thoroughness matters more than speed: look for edge cases, argue against the obvious verdict, and exhaust the "talk yourself out of it" bias documented at the top of this file. `high` is the frontmatter default and matches this case directly.
+- **Contract review (highest effort — `max`).** When reviewing a *draft* contract in CONTRACT_REVIEW mode (testability, specificity, completeness), a missed hole propagates into every subsequent eval round of that sprint. The cost of a too-loose criterion compounds. Use `effort: max` here — the one-time investment in catching contract bugs upfront prevents days of wasted retries on a flawed criterion.
 
-**Status:** This is a policy-only section until Sprint 8. Current agent frontmatter does not yet declare `thinking: { type: adaptive, effort: ... }`; the values above describe the intended differentiation, and Sprint 8 will add the literal frontmatter. A future evaluator reading this file today should not expect to find the frontmatter yet — the hook exists so Sprint 8 can land without re-litigating the policy.
+The `medium` / `high` / `max` ladder maps to the cost of a missed bug. Regression's blast radius is "the gate runs slower" (already-calibrated criteria rarely surprise). Capability eval's blast radius is "this sprint passes when it should fail" (one bad eval). Contract review's blast radius is "every eval of this sprint inherits the flaw" (cascading).
+
+**Dispatch.** The frontmatter declares the `high` default. Per-mode overrides (`medium` for regression-criterion evaluation, `max` for CONTRACT_REVIEW) are honored by the orchestrator that spawns this agent — `skills/harness-sprint/SKILL.md` Step 0.5 invokes the regression-eval branch at `medium`; the contract-review path in Step 1b invokes at `max`. With the frontmatter declaration in place, those dispatchers have a single source of policy to read instead of hard-coding the values.
 
 ## Per-Dimension Scoring
 
