@@ -19,6 +19,16 @@
       "rubric_dimension": "methodology_completeness",
       "graduated_from_sprint": 12,
       "rationale": "Eval results and contracts for prior sprints are append-only (per spec.md). This invariant uses git ls-files | git diff HEAD to detect modifications to any committed Sprint 1-11 artifact. The current sprint (sprint-12) is excluded so in-progress work doesn't trip the gate."
+    },
+    {
+      "task_id": "harness-verified-via-command-audit",
+      "verification_command": "bash -c 'set -e; failed=0; for f in $(git ls-files \".harness/evals/sprint-*-r*.md\"); do if grep -q \"^## Transcript Trailer\" \"$f\"; then if ! python tests/audit-verified-via-command.py \"$f\" >/dev/null 2>&1; then echo \"FABRICATION DETECTED: $f\"; failed=1; fi; fi; done; exit $failed'",
+      "grader_type": "deterministic",
+      "weight": 5,
+      "is_gate": true,
+      "rubric_dimension": "methodology_completeness",
+      "graduated_from_sprint": 13,
+      "rationale": "Sprint 10 introduced the criteria_audit / verified_via_command channel; Sprints 11 and 12 each produced clean audits, making the pattern saturated at 3 consecutive sprints (S10/S11/S12). This invariant runs the audit script against every committed eval round file that has a Transcript Trailer (skipping pre-Sprint-9 evals that predate the schema). Catches both new fabrication in fresh evals and retroactive edits that introduce false verified_via_command:true flags. Phase 1 evals (no trailer) are safely skipped via the grep guard."
     }
   ]
 }
