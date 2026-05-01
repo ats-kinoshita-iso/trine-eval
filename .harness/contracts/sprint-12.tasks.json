@@ -1,0 +1,131 @@
+{
+  "sprint": 12,
+  "tasks": [
+    {
+      "task_id": "s12-c1",
+      "criterion": "Evaluator agent declares Write in its tool list: agents/evaluator.md frontmatter contains Write in the tools: field.",
+      "grader_type": "deterministic",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": "awk '/^---$/{c++; next} c==1' agents/evaluator.md | grep -E '^tools:.*Write'",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s12-c2",
+      "criterion": "Generic regression invariants are appended to .harness/regression/regression.json: tasks array contains at least 2 entries with full schema, at least one uses git ls-files with sprint-*.md glob, and none use the sprint-0[0-9] glob (which would silently miss Sprint 10+).",
+      "grader_type": "deterministic",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "python -c \"import json; d=json.load(open('.harness/regression/regression.json')); ts=d['tasks']; assert len(ts)>=2 and all('task_id' in t and 'verification_command' in t and 'graduated_from_sprint' in t and 'grader_type' in t and 'weight' in t and 'is_gate' in t and 'rubric_dimension' in t for t in ts) and any('git ls-files' in t['verification_command'] for t in ts) and not any('sprint-0[0-9]' in t['verification_command'] for t in ts); print('PASS')\"",
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s12-c3",
+      "criterion": "Sprint-contract skill enforces reference-solution-must and adds the deterministic-criterion authoring checklist with five trap categories.",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -qE '^#{2,3} .*Before Submitting' skills/sprint-contract/SKILL.md && grep -qiE 'must have a reference solution' skills/sprint-contract/SKILL.md && grep -qi 'authoring checklist' skills/sprint-contract/SKILL.md && grep -qi 'multi-line' skills/sprint-contract/SKILL.md && grep -qi 'permutation' skills/sprint-contract/SKILL.md && grep -qi 'pre-existing' skills/sprint-contract/SKILL.md && grep -qi 'weight sum' skills/sprint-contract/SKILL.md && grep -qiE 'prose[ -]vs[\\.\\ -]+verification' skills/sprint-contract/SKILL.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s12-c4",
+      "criterion": "Harness-sprint skill documents the Evaluator-fallback escape valve and the thinking.profile runtime translation with default/fast/thorough reserved values.",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -qE '^#{2,3} .*[Ee]valuator [Ff]allback' skills/harness-sprint/SKILL.md && grep -qi 'tool limitation' skills/harness-sprint/SKILL.md && grep -qE '^#{2,3} .*thinking\\.profile' skills/harness-sprint/SKILL.md && grep -q '\"default\"' skills/harness-sprint/SKILL.md && grep -q '\"fast\"' skills/harness-sprint/SKILL.md && grep -q '\"thorough\"' skills/harness-sprint/SKILL.md",
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s12-c5",
+      "criterion": "Batch API runtime hookup script exists with offline/online dual mode: tests/batch-api-smoke.py emits [SKIP] when ANTHROPIC_API_KEY is unset and exits 0 when set (dry-run only, never sends to network).",
+      "grader_type": "deterministic",
+      "weight": 12,
+      "is_gate": false,
+      "verification_command": "bash -c 'unset ANTHROPIC_API_KEY; python tests/batch-api-smoke.py | grep -q \"\\[SKIP\\]\" && ANTHROPIC_API_KEY=sk-test-fake python tests/batch-api-smoke.py'",
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s12-c6",
+      "criterion": "Playwright MCP runtime hookup script exists with offline/online dual mode: tests/playwright-smoke.py emits [SKIP] when probe file is absent and exits 0; when probe present, attempts to import playwright and exits 0 either way.",
+      "grader_type": "deterministic",
+      "weight": 12,
+      "is_gate": false,
+      "verification_command": "bash -c 'rm -f tests/.playwright-available; python tests/playwright-smoke.py | grep -q \"\\[SKIP\\]\" && touch tests/.playwright-available; python tests/playwright-smoke.py; rc=$?; rm -f tests/.playwright-available; test $rc -eq 0'",
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s12-c7",
+      "criterion": "Edge-case multi-sprint aggregation in harness-summary: skills/harness-summary/SKILL.md describes cross-sprint edge case logic; sprint-fy fixture exists with Edge Case Criteria heading; tests/edge-case-aggregate.py emits aggregate edge-case pass rate.",
+      "grader_type": "deterministic",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "grep -qiE 'cross.sprint edge.case' skills/harness-summary/SKILL.md && test -f tests/fixture-project/.harness/contracts/sprint-fy.md && test -f tests/fixture-project/.harness/evals/sprint-fy-r1.md && grep -qE '^## Edge Case Criteria' tests/fixture-project/.harness/contracts/sprint-fy.md && python tests/edge-case-aggregate.py | grep -qE 'aggregate edge.case pass rate'",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s12-c8",
+      "criterion": "sprint-12.tasks.json is emitted: valid JSON with sprint:12, 14 entries, each with task_id/grader_type/weight/is_gate.",
+      "grader_type": "deterministic",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "python -c \"import json; d=json.load(open('.harness/contracts/sprint-12.tasks.json')); assert d['sprint']==12 and len(d['tasks'])>=14 and all('task_id' in t and 'grader_type' in t and 'weight' in t and 'is_gate' in t for t in d['tasks']); print('PASS')\"",
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s12-c9",
+      "criterion": "Sprint 12 round-1 eval was authored by the forked-context Evaluator subagent (not main-thread fallback): no Process Note section; thinking_summary consistent with subagent reasoning; audit script exits 0.",
+      "grader_type": "llm-judge",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s12-c10",
+      "criterion": "External-service guarding correctness across all four hookups: each external-service-dependent path either operates on local files, is guarded by env-var/probe-file check that emits [SKIP] and exits 0, or uses dry-run/mock semantics that never touch the network.",
+      "grader_type": "llm-judge",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s12-c11",
+      "criterion": "Backward compatibility audit: Sprint 12 commits do not modify Sprint 11 fixture files or any Sprint 1-10 contracts/evals; audit-report.md reports zero suspect entries.",
+      "grader_type": "llm-judge",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s12-sn1",
+      "criterion": "No regression of Sprint 11 deliverables: git diff HEAD over the listed Sprint 11 paths must produce empty output.",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "test -z \"$(git diff HEAD -- tests/fixture-project/.harness/config.json tests/fixture-project/.harness/contracts/sprint-fx.md tests/fixture-project/.harness/contracts/sprint-fx.tasks.json tests/fixture-project/.harness/dependent.txt 'tests/fixture-project/.harness/evals/sprint-fx-r1-t*.md' tests/fixture-project/.harness/regression/regression.json tests/fixture-project/.harness/summary.md tests/fixture-project/.harness/transcripts/sprint-fx-r1-t1.json tests/audit-verified-via-command.py tests/check-thinking-frontmatter.py tests/generate-audit-report.py tests/verify-runtime-hookups.sh)\"",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s12-sn2",
+      "criterion": "External-service paths emit [SKIP] cleanly with exit 0 when service unavailable: every new external-service script must produce a [SKIP] log line and exit 0 in the absence of any external service. No path is allowed to print [FAIL], raise an unhandled exception, or exit non-zero because a service is unavailable.",
+      "grader_type": "llm-judge",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": null,
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s12-sn3",
+      "criterion": "No fabrication of verified_via_command: true in the Sprint 12 transcript trailer: every entry with verified_via_command:true must have a matching task_id in tool_calls (audit script returns exit 0).",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "python tests/audit-verified-via-command.py .harness/evals/sprint-12-r1.md",
+      "rubric_dimension": "methodology_completeness"
+    }
+  ]
+}

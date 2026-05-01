@@ -113,6 +113,20 @@ The summary reports their results separately as **Edge Case Pass Rate** — a di
 
 **Render in the per-sprint table.** Add an `Edge Case Pass Rate` column to the per-sprint table; show `N/A` when the sprint declared no edge cases.
 
+#### Cross-sprint edge case aggregation
+
+The cross-sprint edge case aggregate is a single number computed across every sprint that declared an `## Edge Case Criteria` section. The formula is:
+
+```
+cross-sprint edge-case pass rate = total edge-case PASS / total edge-case criteria
+```
+
+where `total edge-case PASS` sums the PASS counts across every contributing sprint and `total edge-case criteria` sums the totals. Sprints that omit the edge-case section contribute neither to the numerator nor the denominator. When no sprint has declared edge cases, render the aggregate as `N/A`, matching the per-sprint convention.
+
+**Why summing rather than averaging.** A sprint with 1 edge-case criterion (1/1 PASS) and a sprint with 20 edge-case criteria (10/20 PASS) average to 75% if you average per-sprint rates, but the true aggregate is 11/21 = 52%. Averaging per-sprint rates over-weights sprints that declared few edge cases. Summing passes and totals separately preserves the rate's meaning across sprint sizes — the aggregate answers "of every edge case ever evaluated, what fraction passed" rather than "what is the mean per-sprint edge-case rate."
+
+**Where to render.** Add the aggregate as a new line beneath the per-sprint Edge Case Pass Rate column, in the Overview section: `Cross-sprint edge-case pass rate: P/T = X%` (or `N/A`). The aggregator script `tests/edge-case-aggregate.py` computes this value from the fixture project; the production summary computes it identically from the parent `.harness/contracts/` and `.harness/evals/` trees.
+
 ### Recommendations
 - Based on patterns, what should the next sprint focus on?
 - Are there systemic issues that rubric changes could address?

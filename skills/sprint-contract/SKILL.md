@@ -131,6 +131,28 @@ After the contract is approved (Status: APPROVED from the Evaluator review), emi
 
 **Emission process:** The Generator (or main thread in minimal mode) writes the JSON file after reading the approved contract. The Evaluator does not need to review the JSON separately — it is a mechanical transcription of the approved markdown contract, and any drift between the two is caught by the Evaluator's subsequent reads of both files during the EVALUATION step.
 
+## Before Submitting: Authoring Checklist
+
+Before handing the contract to the Evaluator, the author (Generator subagent or main thread in minimal mode) walks the following checklist. Each item below was empirically caught in a prior sprint's negotiation round; the checklist exists to prevent recurrences, not to enumerate hypothetical traps.
+
+**The reference-solution-must rule.** The highest-weighted LLM-as-judge criterion **must have a reference solution**. Without one, the grader has no calibration anchor, two independent evaluators are likely to disagree, and the criterion's pass/fail signal becomes noise. If multiple criteria are tied at the top weight, the most subjective of them gets the reference solution. Lower-weighted LLM-judge criteria are encouraged but not required to carry one.
+
+### Authoring Checklist (five trap categories)
+
+These are the recurring authoring mistakes the Evaluator has flagged across Sprints 6–11. Walk every deterministic criterion through all five before submission.
+
+1. **multi-line trap.** Does the verification command use a single-line `grep` or `grep -q` over content that actually spans multiple lines? YAML frontmatter blocks, multi-line code fences, and JSON pretty-printed across multiple lines are common offenders — `grep` matches on a line at a time. When the target genuinely spans lines, switch to `awk` over the relevant block (as in Sprint 12 C1's `awk '/^---$/{c++; next} c==1'` for frontmatter), or use `python` to parse the file. If a `grep` pattern looks like it should match a multi-key YAML or multi-line JSON value, it almost certainly will not.
+
+2. **permutation trap.** Does the verification command rely on a regex that requires elements to appear in a specific order, when the order is not actually contractually required? `grep -E 'A.*B.*C'` is fragile against any reordering by the implementer — and rewriting in alphabetical order is a legitimate refactor. Prefer chained independent `grep -q` calls (`grep -q A && grep -q B && grep -q C`) so the verification stays robust to ordering.
+
+3. **pre-existing trap.** Does the verification command match content that ALREADY exists in the file before the sprint starts? A criterion that grades PASS on the unmodified pre-Sprint-N codebase is not a criterion — it's a tautology. Before submitting, run each verification command against the current `HEAD` (no implementation yet) and confirm the result is FAIL. When a needed phrase happens to already exist (e.g., `weight sum` already in `skills/sprint-contract/SKILL.md` line 33), add a unique-marker anchor (`Authoring Checklist`) that quarantines the new content from the existing match.
+
+4. **weight sum trap.** Do the per-criterion weights sum to exactly 100%? Add them up by hand or with a one-liner before submitting. Sums of 95%, 105%, 110% are the most common — they slip past visual inspection because criteria look reasonable individually. The Evaluator will reject any contract whose weights do not sum to 100%.
+
+5. **prose-vs-verification trap.** Does the criterion's English prose actually describe what the verification command runs? When the prose says "verify the file contains a markdown table" but the command is `grep -q '|'`, the prose is over-promising — the grader is grading something narrower than the prose claims. Either tighten the prose to match the command exactly, or strengthen the command to verify what the prose claims. The two must be the same test.
+
+If any item fails, fix the contract before invoking the Evaluator. Catching these at authoring time saves a negotiation round.
+
 ## Guidelines for Good Criteria
 
 **Good criterion:** "GET /api/users returns 200 with a JSON array. Each user object contains id (number), name (string), and email (string)."

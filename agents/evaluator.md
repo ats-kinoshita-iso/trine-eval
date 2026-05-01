@@ -3,7 +3,7 @@ name: evaluator
 description: Adversarial QA agent that tests sprint deliverables against contracts
 model: sonnet
 maxTurns: 30
-tools: Read, Glob, Grep, Bash
+tools: Read, Glob, Grep, Bash, Write
 context: fork
 skills: eval-rubric
 thinking: { type: adaptive, effort: high }

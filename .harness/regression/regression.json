@@ -1,3 +1,24 @@
 {
-  "tasks": []
+  "tasks": [
+    {
+      "task_id": "harness-tasks-json-coverage",
+      "verification_command": "bash -c 'set -e; missing=0; for f in $(git ls-files \".harness/contracts/sprint-*.md\"); do n=$(basename \"$f\" .md); if [ \"$n\" = \"sprint-fx\" ] || [ \"$n\" = \"sprint-fy\" ]; then continue; fi; t=\".harness/contracts/$n.tasks.json\"; if [ \"$n\" \\!= \"sprint-01\" ] && [ \"$n\" \\!= \"sprint-02\" ] && [ \"$n\" \\!= \"sprint-03\" ] && [ \"$n\" \\!= \"sprint-04\" ] && [ \"$n\" \\!= \"sprint-05\" ]; then if [ ! -f \"$t\" ]; then echo \"MISSING $t\"; missing=1; fi; fi; done; exit $missing'",
+      "grader_type": "deterministic",
+      "weight": 5,
+      "is_gate": true,
+      "rubric_dimension": "extensibility",
+      "graduated_from_sprint": 12,
+      "rationale": "From Sprint 6 onward, every sprint contract must emit a sibling tasks.json. This invariant uses git ls-files with the full sprint-*.md glob (matches 2-digit sprint numbers like sprint-10) so the gate protects every prior sprint's artifacts and excludes the synthetic fixture sprints (sprint-fx, sprint-fy) which live under tests/fixture-project/."
+    },
+    {
+      "task_id": "harness-historical-artifacts-immutable",
+      "verification_command": "bash -c 'set -e; sprints=$(git ls-files \".harness/contracts/sprint-*.md\" \".harness/evals/sprint-*.md\" | grep -v \"sprint-12\"); if [ -z \"$sprints\" ]; then echo \"no historical artifacts found\"; exit 1; fi; diff_out=$(git diff HEAD -- $sprints); if [ -n \"$diff_out\" ]; then echo \"HISTORICAL ARTIFACTS MODIFIED:\"; echo \"$diff_out\" | head -50; exit 1; fi; exit 0'",
+      "grader_type": "deterministic",
+      "weight": 5,
+      "is_gate": true,
+      "rubric_dimension": "methodology_completeness",
+      "graduated_from_sprint": 12,
+      "rationale": "Eval results and contracts for prior sprints are append-only (per spec.md). This invariant uses git ls-files | git diff HEAD to detect modifications to any committed Sprint 1-11 artifact. The current sprint (sprint-12) is excluded so in-progress work doesn't trip the gate."
+    }
+  ]
 }

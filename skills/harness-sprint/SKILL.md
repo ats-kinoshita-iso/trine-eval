@@ -272,3 +272,30 @@ When resuming a harness session after interruption or context compaction:
 5. **Read `.harness/progress.md`** for human-readable session notes that may provide additional context about what was happening when the session ended
 
 If `sprint-state.json` does not exist (pre-Sprint-4 harness), fall back to the legacy method: read `progress.md` and git log only.
+
+## Operational Notes
+
+### Evaluator Fallback
+
+The Evaluator subagent runs forked (`context: fork` in `agents/evaluator.md`) and writes its eval markdown directly via the `Write` tool. This is the **default and preferred** path — forked context preserves Generator/Evaluator separation, which is one of the harness's core invariants.
+
+**When the fallback applies.** If the Evaluator subagent fails to write the eval file due to a **tool limitation** (e.g., the agent's `tools:` frontmatter does not include `Write`, the agent's environment cannot execute a long heredoc reliably, or the subagent dispatch itself fails for infrastructure reasons), the main thread may transcribe the eval markdown into `.harness/evals/sprint-{NN}-r{R}.md` so the sprint can complete. This is an **escape valve, not a feature** — every fallback invocation is a regression in Generator/Evaluator separation that must be flagged.
+
+**How to flag a fallback eval.** When the main thread writes the eval, it must add a `## Process Note` section near the top of the eval file explicitly disclosing:
+- That the eval was authored by the main-thread orchestrator, not a forked Evaluator subagent
+- The reason for the fallback (cite the specific tool limitation or dispatch failure)
+- Which deterministic verification commands were run verbatim from the contract (so the audit chain is preserved even though the authorship is degraded)
+
+**Why this matters.** The Sprint 11 round-1 eval was written via this fallback because the Evaluator's `tools:` line did not include `Write`. Sprint 12 closed the underlying tool limitation by adding `Write` to the agent's frontmatter, so the fallback should not fire under normal operation from Sprint 12 onward. The eval-summary skill and rubric `generator_evaluator_separation` dimension penalize fallback eval rounds — a sprint whose eval was written via fallback typically scores 3/5 on that dimension instead of 5/5, regardless of the underlying technical correctness of the verifications.
+
+### thinking.profile
+
+`config.thinking.profile` (added in Sprint 8) is a per-installation knob that selects how the harness translates the agent-frontmatter `thinking: { type: adaptive, effort: ... }` declarations into the runtime API parameters Anthropic's API expects. The reserved values are intentionally small.
+
+**Reserved values and their runtime translation.**
+
+- `"default"` → standard adaptive thinking. Each agent's frontmatter `effort: medium|high|max` maps to a budget consistent with the model's adaptive defaults. No override is applied at the orchestrator layer. This is the value the harness ships with.
+- `"fast"` → no extended thinking. The orchestrator strips `thinking` from outgoing API requests regardless of the agent's frontmatter declaration. Trades accuracy for latency and cost; appropriate for CI smoke checks or operator iterations on contract drafting.
+- `"thorough"` → high-budget extended thinking. The orchestrator forces a high `budget_tokens` setting on every thinking-enabled message, overriding the per-agent `effort` to its highest tier. Trades latency and cost for the highest reasoning quality available; appropriate for adversarial evaluation rounds or complex contract review.
+
+**Documentation-only in Sprint 12.** The Sprint 12 deliverable for `thinking.profile` is the translation table above — a documentation criterion. The orchestrator-side wire-up that actually consumes `config.thinking.profile` and rewrites outgoing `thinking: {...}` parameters runs in the Claude Code runtime and is exercised end-to-end only when the harness drives a live API call through the new dispatcher. Sprint 12 ships the protocol and the values; the runtime hookup is observable when a downstream sprint or applied-harness use case exercises the live pipeline. The protocol-vs-runtime split here matches Sprint 8's posture for Batch API and Sprint 9's posture for transcript emission.
