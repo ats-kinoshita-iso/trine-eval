@@ -110,6 +110,20 @@
       ],
       "estimated_complexity": "high",
       "dependencies": [6, 8, 9]
+    },
+    {
+      "number": 11,
+      "title": "Synthetic verification — Phase 2 runtime hookups (offline)",
+      "features": [
+        "trial-loop-runtime",
+        "sandbox-tmpdir-isolation",
+        "regression-abort-runtime",
+        "transcript-emission-runtime",
+        "verified-via-command-audit",
+        "fixture-project-scaffold"
+      ],
+      "estimated_complexity": "high",
+      "dependencies": [6, 7, 9, 10]
     }
   ]
 }

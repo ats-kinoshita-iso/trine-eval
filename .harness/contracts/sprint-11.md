@@ -1,6 +1,4 @@
-# Sprint 11 (DRAFT) Contract: Synthetic Verification of Phase 2 Runtime Hookups
-
-> **DRAFT** — This contract is a proposal, not yet an active sprint. To activate: append a Sprint 11 entry to `.harness/sprints.json`, rename this file to `sprint-11.md`, then run `/harness-sprint 11`.
+# Sprint 11 Contract: Synthetic Verification of Phase 2 Runtime Hookups
 
 ## What I Will Build
 
