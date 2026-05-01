@@ -124,6 +124,22 @@
       ],
       "estimated_complexity": "high",
       "dependencies": [6, 7, 9, 10]
+    },
+    {
+      "number": 12,
+      "title": "External-service runtime hookups + Sprint 11 follow-ups",
+      "features": [
+        "evaluator-write-tool",
+        "batch-api-runtime-hookup",
+        "playwright-runtime-hookup",
+        "thinking-profile-runtime-dispatch",
+        "edge-case-multi-sprint-aggregation",
+        "generic-regression-invariants",
+        "contract-skill-authoring-rules",
+        "evaluator-fallback-documentation"
+      ],
+      "estimated_complexity": "high",
+      "dependencies": [10, 11]
     }
   ]
 }
