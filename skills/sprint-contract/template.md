@@ -23,6 +23,11 @@ These define behaviors that must NOT occur. Graded PASS when the behavior is abs
 
 1. {Behavior that should not happen}: {How to verify absence}
 
+## Edge Case Criteria
+Optional. Edge case criteria are a third class of criterion, distinct from the 100%-weighted Success Criteria above and from the Should-NOT gates. They test behavior on ambiguous, boundary, or adversarial inputs (empty inputs, very large inputs, concurrent requests, malformed payloads, queries with no matches) and are tracked separately as an **edge-case pass rate** metric in `harness-summary` — they do NOT carry weights and do NOT count toward the weighted total. Omit this section entirely when not applicable; including it is most valuable for `web-app`, `api-service`, and `rag-system` rubrics. See `skills/sprint-contract/SKILL.md` for the rationale (why separate, why optional, why per-rubric guidance).
+
+1. {Edge-case behavior to test}: {What to check and what constitutes PASS}
+
 ## Reference Solutions
 Optional. Provide known-working outputs for criteria where grader calibration is valuable.
 Especially useful for LLM-as-judge criteria to reduce inter-judge disagreement.

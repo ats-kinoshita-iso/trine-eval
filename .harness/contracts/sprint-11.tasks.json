@@ -1,0 +1,140 @@
+{
+  "sprint": 11,
+  "tasks": [
+    {
+      "task_id": "s11-c1",
+      "criterion": "Fixture project structure exists: tests/fixture-project/ directory exists with config.json declaring trials: 3 and sandbox.mode: tmpdir, plus contracts/sprint-fx.md and contracts/sprint-fx.tasks.json.",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "test -d tests/fixture-project && test -f tests/fixture-project/.harness/config.json && test -f tests/fixture-project/.harness/contracts/sprint-fx.md && test -f tests/fixture-project/.harness/contracts/sprint-fx.tasks.json && python -c \"import json; d=json.load(open('tests/fixture-project/.harness/config.json')); assert d['trials']==3 and d['sandbox']['mode']=='tmpdir'\"",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s11-c2",
+      "criterion": "Trial files emitted in clean state: three trial files exist at tests/fixture-project/.harness/evals/sprint-fx-r1-t{1,2,3}.md, each stamped with its trial number.",
+      "grader_type": "deterministic",
+      "weight": 9,
+      "is_gate": false,
+      "verification_command": "test -f tests/fixture-project/.harness/evals/sprint-fx-r1-t1.md && test -f tests/fixture-project/.harness/evals/sprint-fx-r1-t2.md && test -f tests/fixture-project/.harness/evals/sprint-fx-r1-t3.md && grep -q '\\*\\*Trial:\\*\\* 1' tests/fixture-project/.harness/evals/sprint-fx-r1-t1.md && grep -q '\\*\\*Trial:\\*\\* 2' tests/fixture-project/.harness/evals/sprint-fx-r1-t2.md && grep -q '\\*\\*Trial:\\*\\* 3' tests/fixture-project/.harness/evals/sprint-fx-r1-t3.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s11-c3",
+      "criterion": "pass@k / pass^k computed from trial files in fixture summary: tests/fixture-project/.harness/summary.md exists and reports both metrics for sprint FX.",
+      "grader_type": "deterministic",
+      "weight": 9,
+      "is_gate": false,
+      "verification_command": "test -f tests/fixture-project/.harness/summary.md && grep -q 'pass@k' tests/fixture-project/.harness/summary.md && grep -q 'pass^k' tests/fixture-project/.harness/summary.md && grep -qE 'sprint.fx' tests/fixture-project/.harness/summary.md",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s11-c4",
+      "criterion": "Sandbox tmpdir mode produces side-effect isolation: verification script demonstrates three distinct tmpdir paths with markers that do not leak across trials.",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "bash tests/verify-runtime-hookups.sh sandbox-isolation",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s11-c5",
+      "criterion": "Regression abort fires when graduated criterion fails: verification script breaks dependent file, simulates Step 0.5 directly (no recursive harness invocation), expects abort with task_id and graduated_from_sprint named, restores file.",
+      "grader_type": "deterministic",
+      "weight": 9,
+      "is_gate": false,
+      "verification_command": "bash tests/verify-runtime-hookups.sh regression-abort",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s11-c6",
+      "criterion": "Real transcript JSON file emitted: hand-crafted fixture transcript at tests/fixture-project/.harness/transcripts/sprint-fx-r1-t1.json exists with all eight Sprint 9 schema fields plus the Sprint 10 criteria_audit array.",
+      "grader_type": "deterministic",
+      "weight": 9,
+      "is_gate": false,
+      "verification_command": "python -c \"import json; d=json.load(open('tests/fixture-project/.harness/transcripts/sprint-fx-r1-t1.json')); required=['sprint','round','trial','messages','tool_calls','token_usage','timing','thinking_summary','criteria_audit']; assert all(k in d for k in required) and len(d['criteria_audit'])>=1; print('PASS')\"",
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s11-c7",
+      "criterion": "verified_via_command ground-truth audit script: tests/audit-verified-via-command.py exists and returns exit 0 against Sprint 10's transcript trailer (every verified_via_command=true entry is backed by a tool_calls task_id).",
+      "grader_type": "deterministic",
+      "weight": 9,
+      "is_gate": false,
+      "verification_command": "python tests/audit-verified-via-command.py .harness/evals/sprint-10-r1.md",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s11-c8",
+      "criterion": "Adaptive-thinking frontmatter dispatch is observable: tests/check-thinking-frontmatter.py asserts effort=medium for planner and generator, high for evaluator, max for harness-summary.",
+      "grader_type": "deterministic",
+      "weight": 7,
+      "is_gate": false,
+      "verification_command": "python tests/check-thinking-frontmatter.py",
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s11-c9",
+      "criterion": "sprint-11.tasks.json is emitted with at least 15 entries (9 deterministic + 3 LLM-judge + 3 Should-NOT gates), each with task_id, grader_type, weight, is_gate.",
+      "grader_type": "deterministic",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "python -c \"import json; d=json.load(open('.harness/contracts/sprint-11.tasks.json')); assert d['sprint']==11 and len(d['tasks'])>=15 and all('task_id' in t and 'grader_type' in t and 'weight' in t and 'is_gate' in t for t in d['tasks']); print('PASS')\"",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s11-c10",
+      "criterion": "Backward compatibility audit is correct: a reader of tests/fixture-project/ and the verification script comes away confident nothing modifies the parent .harness/ directory or files outside tests/, and the script does not require ANTHROPIC_API_KEY, Docker, Playwright MCP, or network access. Sprint 12 deferrals are explicitly named in Out of Scope.",
+      "grader_type": "llm-judge",
+      "weight": 11,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s11-c11",
+      "criterion": "pass@k / pass^k numerical correctness: a reader of tests/fixture-project/.harness/summary.md can verify the reported pass@3 and pass^3 are arithmetically consistent with the per-trial pass rates within ±0.001, and the values are labeled 'trial-derived (statistically valid)'.",
+      "grader_type": "llm-judge",
+      "weight": 9,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s11-c12",
+      "criterion": "Adversarial hygiene audit findings are reported: tests/audit-report.md summarizes consistent / suspect / expected-false categories per Sprint 6–10 eval with audit-logic verification language a reader can validate.",
+      "grader_type": "llm-judge",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s11-sn1",
+      "criterion": "Fixture project must not pollute the parent harness: git diff HEAD must produce empty output for .harness/evals/sprint-0[1-9]*, .harness/evals/sprint-10*, .harness/contracts/sprint-0[1-9]*, .harness/contracts/sprint-10*, .harness/regression/regression.json, .harness/transcripts/.",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "test -z \"$(git diff HEAD -- .harness/evals/sprint-0[1-9]* .harness/evals/sprint-10* .harness/contracts/sprint-0[1-9]* .harness/contracts/sprint-10* .harness/regression/regression.json .harness/transcripts/)\"",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s11-sn2",
+      "criterion": "Verification script must not require external services: no ANTHROPIC_API_KEY, Docker, Playwright MCP, or network beyond Git. Externally-gated paths must emit [SKIP] and exit 0, not fail silently.",
+      "grader_type": "llm-judge",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": null,
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s11-sn3",
+      "criterion": "No fabrication of verified_via_command: true: every newly written transcript trailer must report verified_via_command: true only where a corresponding tool_calls entry exists. The audit script enforces this; the verification script must propagate the audit's exit code.",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "python tests/audit-verified-via-command.py tests/fixture-project/.harness/transcripts/sprint-fx-r1-t1.json",
+      "rubric_dimension": "generator_evaluator_separation"
+    }
+  ]
+}

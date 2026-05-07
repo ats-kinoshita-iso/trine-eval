@@ -1,0 +1,6 @@
+Dependent fixture file for Sprint 11 regression-abort verification.
+
+Sprint 11's verify-runtime-hookups.sh regression-abort subcommand temporarily
+moves this file aside, runs the simulated Step 0.5 over regression.json,
+expects an abort, then restores this file. If you see this file in a normal
+state, the fixture is in its "passing" baseline.

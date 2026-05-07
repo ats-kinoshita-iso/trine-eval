@@ -169,6 +169,48 @@ The retry loop in Step 4 is unchanged: a FAIL verdict (aggregated across trials 
 
 After the Evaluator finishes, read the appropriate file (`sprint-{NN}-r{R}.md` for single-trial or the trial files for multi-trial) and check the verdict. Copy the latest eval to `.harness/evals/sprint-{NN}.md` so the Generator always has a stable path for the latest eval.
 
+### 3d. Batch API Mode (optional)
+
+This subsection applies inside Step 3 — it routes the per-criterion verifications the Evaluator would otherwise perform synchronously through Anthropic's Batch API. It is a **cost optimization, not a latency optimization** — the published Batch API contract trades a 50% discount on input/output tokens for a 24-hour SLA.
+
+**Trigger.** The batch path activates only when **both** of the following are true:
+
+1. `config.batch.enabled == true` (the field is read from `.harness/config.json`; default `false`).
+2. The sprint contract's criterion count (success criteria + Should-NOT gates, the same count emitted in `sprint-{NN}.tasks.json`) is greater than or equal to `config.batch.min_criteria` (default `20`).
+
+If either condition is false, the synchronous path documented in Step 3b runs as today. A `.harness/config.json` lacking the `batch` object is equivalent to the default — `enabled: false`, `min_criteria: 20` — and the harness behaves exactly as in Phase 1 with no batch submission attempted.
+
+**Why a threshold.** Batch overhead (request packaging, polling, result mapping) is fixed; the per-criterion savings scale with criterion count. Small sprints stay synchronous so contributors keep tight feedback loops; large suites (≥ `min_criteria`) absorb the overhead and earn the 50% discount on the bulk of their token spend.
+
+**Execution (when the batch path activates).**
+
+1. **Collect.** For each criterion in `.harness/contracts/sprint-{NN}.tasks.json`, build a Batch API request unit: deterministic criteria carry their `verification_command` and a structured "did the command exit 0?" prompt; LLM-judge criteria carry their criterion text plus the rubric dimension. Each unit is keyed by its `task_id` so results map back unambiguously.
+2. **Submit.** POST a single batch to Anthropic's `/v1/messages/batches` endpoint. The submission contains every criterion as a custom-id-tagged request inside one batch envelope — N criteria collapse to 1 API call.
+3. **Poll.** Wait for the batch to reach a terminal state. The 24-hour SLA is the upper bound; in practice batches typically complete sooner, but the workflow must not assume sub-hour latency. Configure operator-side timeouts to allow the documented 24 hours.
+4. **Map back.** Parse the batch response, demultiplex by `custom_id` (= `task_id`), and write each result into its corresponding `## N. Criterion ...` slot in `.harness/evals/sprint-{NN}-r{R}.md` (or `-t{T}.md` for multi-trial). The per-criterion file shape is byte-for-byte identical to the synchronous path — downstream consumers (the regression gate at Step 0.5, the saturation detector in `harness-summary`, the Generator on retry) cannot tell whether batch or synchronous produced the file. **This invariant is critical.** Changing the file shape would cascade into every Sprint 7 / 9 / 10 deliverable.
+
+**Backward compatibility.** With `config.batch.enabled == false` (the default), Step 3d is a no-op — the synchronous Step 3b path runs as in Phase 1. With `config.batch.enabled == true` but a small sprint (criterion count < `config.batch.min_criteria`), the batch path is *not* activated and Step 3b still runs synchronously. A project whose `.harness/config.json` lacks the `batch` object hits the default-false branch and sees zero behavior change.
+
+**What this section does not promise.** It does not promise faster turnaround than synchronous calls — the tradeoff is cost for latency, not the reverse. It does not promise that the batch API request is wired up against a live `ANTHROPIC_API_KEY` in this sprint; the harness ships the protocol and the trigger conditions, while end-to-end batch submission against the live endpoint is verified post-Sprint-10 per the gap-closure plan.
+
+### 3e. Transcript Capture (optional)
+
+This subsection runs after the Evaluator's markdown eval lands. It extracts a structured JSON trailer from the evaluator's eval file and writes a sibling transcript file to `.harness/transcripts/`. The structured channel is the audit-grade record the harness-summary skill links from FAIL criteria and grader-disagreement entries — see `skills/harness-summary/SKILL.md`. The schema lives in `rules/harness-conventions.md` under the **Transcript Schema** section.
+
+**Trigger.** Read `config.transcripts.capture` from `.harness/config.json` (default `true` when the `transcripts` object is present; absent means the legacy/Phase-1 default applies, see Backward compatibility below). If `config.transcripts.capture` is explicitly `false`, skip this step entirely. Otherwise proceed.
+
+**Why a markdown trailer, not a runtime hook.** Sprint 9 ships the protocol — the Evaluator emits the structured payload at the end of its existing markdown eval, and the workflow extracts it. This avoids requiring runtime instrumentation of the evaluator subagent's message stream while still producing a machine-readable transcript file. End-to-end transcript writing against a live evaluator subagent is deferred to a synthetic verification sprint per the gap-closure plan, matching Sprint 8's posture for `thinking.profile`.
+
+**Trailer extraction protocol.** Two independent implementers must produce equivalent transcript files from the same evaluator markdown eval, so the protocol is precise:
+
+1. **Locate the trailer.** Read the markdown eval file just produced by the Evaluator (`.harness/evals/sprint-{NN}-r{R}-t{T}.md` for multi-trial, or `.harness/evals/sprint-{NN}-r{R}.md` for single-trial). Find the last `## Transcript Trailer` heading in the file. The body of that section is a fenced ` ```json ` code block containing the structured JSON payload the Evaluator produced. The Evaluator's instruction for emitting this block lives in `agents/evaluator.md`.
+2. **Parse the trailer.** Extract the JSON between the fences and parse it. If the `## Transcript Trailer` section is missing, the fence is malformed, the JSON does not parse, or required top-level fields are absent, **skip the rest of this step** — do NOT fail the eval and do NOT fabricate a transcript. The eval verdict is unaffected; transcripts are an audit artifact, not a grading input. This failure-tolerant posture matches the regression gate's stance from Sprint 7.
+3. **Write the transcript.** Write the parsed JSON verbatim to `.harness/transcripts/sprint-{NN}-r{R}-t{T}.json` (multi-trial) or `.harness/transcripts/sprint-{NN}-r{R}.json` (single-trial mode). The file naming mirrors the markdown eval naming so transcript-to-eval pairing is unambiguous.
+
+**Backward compatibility.** A project whose `.harness/config.json` lacks the `transcripts` object and whose `agents/evaluator.md` predates Sprint 9 experiences no functional behavior change: the legacy evaluator does not emit a `## Transcript Trailer` section, so step 2 above falls into the failure-tolerant branch and no transcript file is written. The `config.transcripts.capture: true` default applies to fresh installs that picked up the updated agent file; for legacy projects, the no-op fallback preserves Phase-1 disk state. When `config.transcripts.capture` is explicitly `false`, this entire step is skipped and no extraction is attempted.
+
+**What this section does not promise.** It does not promise that runtime-instrumented fields (`token_usage`, `timing`) are populated with real values — those fields are nullable and best-effort, per `rules/harness-conventions.md`. It does not promise retention enforcement; the `transcripts.retain_days` knob is a documented policy and cleanup runs out-of-band. It does not promise that every Evaluator implementation will emit a parseable trailer — the protocol's failure-tolerance is the design choice, not a bug.
+
 ## Step 4: Retry Loop
 
 If the verdict is FAIL and retry count < `max_retries` from config:
@@ -230,3 +272,30 @@ When resuming a harness session after interruption or context compaction:
 5. **Read `.harness/progress.md`** for human-readable session notes that may provide additional context about what was happening when the session ended
 
 If `sprint-state.json` does not exist (pre-Sprint-4 harness), fall back to the legacy method: read `progress.md` and git log only.
+
+## Operational Notes
+
+### Evaluator Fallback
+
+The Evaluator subagent runs forked (`context: fork` in `agents/evaluator.md`) and writes its eval markdown directly via the `Write` tool. This is the **default and preferred** path — forked context preserves Generator/Evaluator separation, which is one of the harness's core invariants.
+
+**When the fallback applies.** If the Evaluator subagent fails to write the eval file due to a **tool limitation** (e.g., the agent's `tools:` frontmatter does not include `Write`, the agent's environment cannot execute a long heredoc reliably, or the subagent dispatch itself fails for infrastructure reasons), the main thread may transcribe the eval markdown into `.harness/evals/sprint-{NN}-r{R}.md` so the sprint can complete. This is an **escape valve, not a feature** — every fallback invocation is a regression in Generator/Evaluator separation that must be flagged.
+
+**How to flag a fallback eval.** When the main thread writes the eval, it must add a `## Process Note` section near the top of the eval file explicitly disclosing:
+- That the eval was authored by the main-thread orchestrator, not a forked Evaluator subagent
+- The reason for the fallback (cite the specific tool limitation or dispatch failure)
+- Which deterministic verification commands were run verbatim from the contract (so the audit chain is preserved even though the authorship is degraded)
+
+**Why this matters.** The Sprint 11 round-1 eval was written via this fallback because the Evaluator's `tools:` line did not include `Write`. Sprint 12 closed the underlying tool limitation by adding `Write` to the agent's frontmatter, so the fallback should not fire under normal operation from Sprint 12 onward. The eval-summary skill and rubric `generator_evaluator_separation` dimension penalize fallback eval rounds — a sprint whose eval was written via fallback typically scores 3/5 on that dimension instead of 5/5, regardless of the underlying technical correctness of the verifications.
+
+### thinking.profile
+
+`config.thinking.profile` (added in Sprint 8) is a per-installation knob that selects how the harness translates the agent-frontmatter `thinking: { type: adaptive, effort: ... }` declarations into the runtime API parameters Anthropic's API expects. The reserved values are intentionally small.
+
+**Reserved values and their runtime translation.**
+
+- `"default"` → standard adaptive thinking. Each agent's frontmatter `effort: medium|high|max` maps to a budget consistent with the model's adaptive defaults. No override is applied at the orchestrator layer. This is the value the harness ships with.
+- `"fast"` → no extended thinking. The orchestrator strips `thinking` from outgoing API requests regardless of the agent's frontmatter declaration. Trades accuracy for latency and cost; appropriate for CI smoke checks or operator iterations on contract drafting.
+- `"thorough"` → high-budget extended thinking. The orchestrator forces a high `budget_tokens` setting on every thinking-enabled message, overriding the per-agent `effort` to its highest tier. Trades latency and cost for the highest reasoning quality available; appropriate for adversarial evaluation rounds or complex contract review.
+
+**Documentation-only in Sprint 12.** The Sprint 12 deliverable for `thinking.profile` is the translation table above — a documentation criterion. The orchestrator-side wire-up that actually consumes `config.thinking.profile` and rewrites outgoing `thinking: {...}` parameters runs in the Claude Code runtime and is exercised end-to-end only when the harness drives a live API call through the new dispatcher. Sprint 12 ships the protocol and the values; the runtime hookup is observable when a downstream sprint or applied-harness use case exercises the live pipeline. The protocol-vs-runtime split here matches Sprint 8's posture for Batch API and Sprint 9's posture for transcript emission.

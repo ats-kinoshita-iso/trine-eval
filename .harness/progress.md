@@ -79,3 +79,91 @@
 - Date: 2026-04-24
 - Note: Closed Gap 4 (regression gate). Added `config.regression.{enabled, fail_fast}` with backward-compatible defaults; initialized `.harness/regression/` with empty `regression.json` and a README; introduced Step 0.5 Regression Gate in `skills/harness-sprint/SKILL.md` (runs each graduated task's verbatim `verification_command` before contract negotiation, writes aggregate results to `.harness/regression/runs/run-<UTC-ISO8601>.json`, aborts when `fail_fast` is true); rewired `skills/harness-summary/SKILL.md` saturation handling from prose recommendation to append-only writes of graduated tasks into `regression.json` (adding only the `graduated_from_sprint` field); landed the Sprint-8 wiring point in `agents/evaluator.md` as a policy-only thinking-effort note; documented the `regression.json` schema and gate semantics in `rules/harness-conventions.md`. End-to-end regression-abort verification deferred to a synthetic follow-up sprint per the gap-closure plan.
 - Rubric scores: Methodology 5/5, Grading 5/5, Separation 5/5, Context 5/5, Extensibility 5/5
+## Session 2026-04-28T13:14:42-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-04-28T13:15:35-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-04-28T13:23:24-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-04-28T13:27:12-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-04-28T13:48:24-04:00
+Stopped. Current sprint state should be committed.
+
+## Sprint 08: Claude 4.6 Adaptive Thinking and Batch API
+- Status: PASS
+- Rounds: 1
+- Passed criteria: 13/13
+- Weighted score: 100%
+- Gates: 3/3
+- Date: 2026-04-28
+- Note: Closed Gap 5 (adaptive thinking) and Gap 7 (Batch API). Added `thinking: { type: adaptive, effort: ... }` inline frontmatter to `agents/planner.md` (medium), `agents/generator.md` (medium), `agents/evaluator.md` (high), and `skills/harness-summary/SKILL.md` (max); rewrote the Sprint-7 "policy-only" Thinking Effort section in `agents/evaluator.md` so it now describes per-mode overrides (medium for regression eval, high default for capability eval, max for contract review) tied to a blast-radius rationale, with the disclaimer text removed; added `config.thinking.profile` (default `"default"`, reserved values `"fast"` and `"thorough"`), `config.batch.enabled` (default `false`), and `config.batch.min_criteria` (default `20`) to `.harness/config.json`; added Step 3d Batch API Mode to `skills/harness-sprint/SKILL.md` documenting the trigger condition (enabled AND criterion count ≥ `min_criteria`), 50% discount + 24-hour SLA, and the per-criterion result-shape preservation invariant; added a Phase 2 Configuration Knobs section to `README.md`; emitted `.harness/contracts/sprint-08.tasks.json` with 16 entries (13 success + 3 gates). Contract took 2 negotiation rounds (round 1 NEEDS REVISION on three blockers — tasks.json threshold `>= 13` → `>= 16`, multi-line YAML grep → inline-format mandate, README permutation regex → independent existence checks; all fixed in round 2 APPROVED). End-to-end Batch API HTTP submission and `thinking.profile` runtime dispatch are deferred to post-Sprint-10 verification per the gap-closure plan.
+- Rubric scores: Methodology 5/5, Grading 5/5, Separation 5/5, Context 5/5, Extensibility 5/5
+## Session 2026-04-28T16:22:05-04:00
+Stopped. Current sprint state should be committed.
+
+## Sprint 09: Full Transcript Capture
+- Status: PASS
+- Rounds: 1
+- Passed criteria: 11/11
+- Weighted score: 100%
+- Gates: 3/3
+- Date: 2026-04-28
+- Note: Closed Gap 6 (full transcript capture). Added `config.transcripts.{capture,retain_days}` (defaults `true` / `30`) to `.harness/config.json`; created `.harness/transcripts/` with a README documenting naming convention and schema pointer; added a "## Transcript Trailer (Structured Output)" section to `agents/evaluator.md` that instructs the evaluator to emit a fenced JSON block at the end of each markdown eval and explains why each field exists, with `token_usage` and `timing` explicitly marked runtime-supplied / nullable / no-fabrication; added a Step 3e Transcript Capture section to `skills/harness-sprint/SKILL.md` describing the three-step trailer extraction protocol (locate → parse-with-malformed-fallback → write) with explicit failure-tolerant semantics; added a "## Transcript Schema" section to `rules/harness-conventions.md` documenting all eight top-level fields (`"sprint"`, `"round"`, `"trial"`, `"messages"`, `"tool_calls"`, `"token_usage"`, `"timing"`, `"thinking_summary"`), the file-path convention, and the backward-compatibility posture matching Sprint 8's `thinking.profile` framing; added a "### Transcript Links for FAIL Criteria and Grader Disagreements" section to `skills/harness-summary/SKILL.md` with explicit causal rationale for linking only FAIL/disagreement entries; emitted `.harness/contracts/sprint-09.tasks.json` with 14 entries (11 success + 3 gates). Contract APPROVED on round 1 (no blockers; reviewer confirmed all four Sprint-7/8 trap categories — tasks.json threshold, single-line-grep multi-line trap, permutation regex, pre-existing-content false positives — were avoided). End-to-end transcript file emission against a live evaluator subagent is deferred to a synthetic verification sprint per the gap-closure plan, matching Sprint 8's posture for `thinking.profile`.
+- Rubric scores: Methodology 5/5, Grading 5/5, Separation 5/5, Context 5/5, Extensibility 5/5
+## Session 2026-04-28T17:16:44-04:00
+Stopped. Current sprint state should be committed.
+
+## Sprint 10: Completeness — Edge Cases, Playwright, Adversarial Hygiene
+- Status: PASS
+- Rounds: 1
+- Passed criteria: 12/12
+- Weighted score: 100%
+- Gates: 3/3
+- Date: 2026-04-28
+- Note: Closed Gaps 8 (edge cases), 9 (Playwright MCP), 10 (adversarial hygiene). Added optional `## Edge Case Criteria` section to `skills/sprint-contract/template.md` and full taxonomy + per-rubric guidance to `skills/sprint-contract/SKILL.md` (web-app/api-service/rag-system get edge-case proposals; cli-tool/eval-harness skip); added "Edge Case Pass Rate" as a distinct metric to `skills/harness-summary/SKILL.md` with rationale for why it is *not* folded into the weighted total (one-sided-eval failure mode). Added "## Conditional Tools: Playwright MCP for Web Apps" section to `agents/evaluator.md` gating Playwright on `config.evaluator_tools.playwright` + `project_type == "web-app"` with documented Visual Design fallback to curl + low-confidence human review; added "## Adversarial Hygiene" section with three rules (no inference from filenames/comments; log verification commands before scoring; emit per-criterion `verified_via_command` in the Sprint 9 trailer) and a no-fabrication obligation matching `token_usage`/`timing` posture. Added `evaluator_tools.playwright` (default `"auto"`) to `.harness/config.json`; added "## Edge Case Criteria", "## Conditional Evaluator Tools", and "## Adversarial Hygiene: verified_via_command Per Criterion" sections to `rules/harness-conventions.md`; added Sprint 10 entry to README.md Phase 2 Configuration Knobs. Emitted `.harness/contracts/sprint-10.tasks.json` with 15 entries (12 success + 3 gates). Contract APPROVED on round 1 (Evaluator confirmed all four Sprint 7/8/9 trap categories — tasks.json threshold, single-line-grep multi-line trap, permutation regexes, pre-existing-content false positives — avoided; flagged three minor non-blocking items: C7 prose inaccuracy about pre-existing count, C10/C12 missing reference solutions, C6 missing Python-fallback note). Eval round 1 PASSED with the new `criteria_audit` array populated (10 of 15 entries with `verified_via_command: true` for actual shell-command-graded criteria; 5 with `false` for prose-graded LLM-judge and gates — no fabrication, demonstrating the new audit channel works as designed). End-to-end Playwright invocation, edge-case rate aggregation, and `verified_via_command` runtime auto-population are deferred to a synthetic verification sprint per the gap-closure plan, matching Sprint 8/9 posture.
+- Rubric scores: Methodology 4/5, Grading 5/5, Separation 5/5, Context 4/5, Extensibility 4/5
+## Session 2026-04-28T19:42:38-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-04-28T19:55:37-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-04-28T20:01:56-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-04-30T22:18:01-04:00
+Stopped. Current sprint state should be committed.
+
+## Sprint 11: Synthetic Verification — Phase 2 Runtime Hookups (Offline)
+- Status: PASS
+- Rounds: 1
+- Passed criteria: 15/15
+- Weighted score: 100%
+- Gates: 3/3
+- Date: 2026-04-30
+- Note: Closed the runtime-verification gap deferred during Phase 2 (Sprints 6/7/9/10) via a self-contained `tests/fixture-project/` harness instance plus offline verification scripts. Built: (1) `tests/fixture-project/` with config (`trials: 3`, `sandbox.mode: "tmpdir"`), one-criterion `sprint-fx.md` contract, three `sprint-fx-r1-tT.md` trial files, `summary.md` reporting `pass@k`/`pass^k` as trial-derived (statistically valid), `regression.json` with one graduated entry, hand-crafted `sprint-fx-r1-t1.json` transcript with full Sprint 9 + Sprint 10 schema; (2) `tests/audit-verified-via-command.py` (adversarial-hygiene audit script — exits 0 when every `verified_via_command: true` entry has a matching `tool_calls` `task_id`); (3) `tests/check-thinking-frontmatter.py` (asserts `effort=medium` for planner/generator, `high` for evaluator, `max` for harness-summary); (4) `tests/verify-runtime-hookups.sh` with subcommands `sandbox-isolation` (three distinct tmpdir paths verified), `regression-abort` (Step 0.5 simulated directly without recursive harness invocation), `transcript-write`, `audit-sprint10`, `audit-report`, `nondet-trial`, `all`; (5) `tests/generate-audit-report.py` walks Sprint 6–10 evals and writes `tests/audit-report.md` (10 consistent / 0 suspect / 5 expected-false entries from Sprint 10's trailer; Sprint 9 correctly flagged "no per-criterion audit channel"); (6) `.harness/contracts/sprint-11.tasks.json` with 15 entries (9 deterministic + 3 LLM-judge + 3 Should-NOT gates). Contract took 2 negotiation rounds (round 1 NEEDS REVISION on five blockers — weight sum 110% not 100%, C2 unverifiable mtime claim, C5 recursive-invocation language conflicting with Out of Scope, C6 "triggers an evaluator run" conflicting with SN2 offline, SN1 prose mismatch with `git diff HEAD` command; all five fixed in round 2 APPROVED). Three Evaluator subagent attempts to write `sprint-11-r1.md` failed because the Evaluator agent's tool list (`Read, Glob, Grep, Bash` — no `Write`) cannot reliably emit markdown+JSON eval files via Bash heredocs; one of the failed attempts truncated `sprint-08-r1.md` from 133 to 12 lines (restored from `git checkout HEAD --`). Evaluation completed in main thread with every deterministic verification command run verbatim from the contract; main-thread fallback is reflected as Separation 3/5 in rubric scores and called out in Human Review Flags. Self-audit: `python tests/audit-verified-via-command.py .harness/evals/sprint-11-r1.md` returns exit 0 — every `verified_via_command: true` (s11-c1..s11-c9, s11-sn1, s11-sn3) has a matching `tool_calls` `task_id`; the four prose-graded entries (s11-c10..s11-c12, s11-sn2) honestly marked `false`. End-to-end Batch API HTTP submission, Playwright MCP invocation, edge-case multi-sprint aggregation, and `thinking.profile` runtime dispatch remain deferred to Sprint 12 per the contract's Out of Scope section. Two follow-ups for Sprint 12: (a) add `Write` to `agents/evaluator.md` tools list to eliminate the heredoc trap; (b) ship the external-service runtime hookups.
+- Rubric scores: Methodology 5/5, Grading 5/5, Separation 3/5, Context 4/5, Extensibility 5/5
+## Session 2026-04-30T23:25:19-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-05-01T02:12:15-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-05-01T02:25:57-04:00
+Stopped. Current sprint state should be committed.
+
+## Sprint 12: External-Service Runtime Hookups + Sprint 11 Follow-ups
+- Status: PASS
+- Rounds: 1
+- Passed criteria: 14/14
+- Weighted score: 100%
+- Gates: 3/3
+- Date: 2026-05-01
+- Note: Closed external-service runtime hookups (Batch API offline/online dual-mode at `tests/batch-api-smoke.py`, Playwright MCP probe-file gating at `tests/playwright-smoke.py`, cross-sprint edge-case aggregation at `tests/edge-case-aggregate.py` with `sprint-fy` fixture pairing Sprint 11's `sprint-fx`) plus the four mechanical follow-ups Sprint 11's eval flagged: (a) Write added to `agents/evaluator.md` frontmatter (C1) — closes Sprint 11's tool-limitation root cause; (b) two generic regression invariants appended to `.harness/regression/regression.json` (C2) using `git ls-files sprint-*.md` globs that match 2-digit sprint numbers + `graduated_from_sprint: 12`; (c) sprint-contract authoring checklist with five empirical trap categories (multi-line, permutation, pre-existing, weight sum, prose-vs-verification) and the reference-solution-must rule landed in `skills/sprint-contract/SKILL.md` (C3); (d) Evaluator Fallback escape-valve + `thinking.profile` translation table (default→standard adaptive, fast→no thinking, thorough→high-budget) added to `skills/harness-sprint/SKILL.md` (C4). Emitted `.harness/contracts/sprint-12.tasks.json` with 14 entries (8 deterministic + 3 LLM-judge + 3 Should-NOT gates), weights sum to 100%. Contract APPROVED on round 1 — Evaluator confirmed all five Sprint 7/8/9/10/11 trap categories were avoided. Round-1 eval was Evaluator-subagent-authored in forked context (the analytical work — verification commands, scoring, criteria_audit, thinking_summary — all came from the trine-eval:evaluator subagent's response; main thread only persisted bytes to `.harness/evals/sprint-12-r1.md` because the cached plugin's `tools:` line lags the Sprint 12 source change at `agents/evaluator.md:6`). No `## Process Note` section was needed — analytical authorship is forked-context. Self-audit: `python tests/audit-verified-via-command.py .harness/evals/sprint-12-r1.md` returns exit 0 — every `verified_via_command: true` entry (s12-c1..s12-c8, s12-sn1) has a matching `tool_calls` `task_id`; the five prose-graded entries (s12-c9..s12-c11, s12-sn2, s12-sn3) honestly marked `false`. Cross-sprint edge-case aggregator emits `aggregate edge-case pass rate: 1/2 = 50.0%` over the two-sprint fixture corpus. SN1 git-diff gate confirms zero modifications to Sprint 11 deliverables. Phase 2 runtime-hookup gap-closure plan is now complete; the four external-service hookups (Batch API HTTP, Playwright MCP, edge-case multi-sprint aggregation, `thinking.profile` runtime dispatch) are documented and protocol-verified offline. Live-network end-to-end runs remain a follow-up sprint or applied-harness use case.
+- Rubric scores: Methodology 5/5, Grading 5/5, Separation 5/5, Context 4/5, Extensibility 5/5
+## Session 2026-05-01T02:49:34-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-05-01T03:00:37-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-05-01T03:05:45-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-05-01T03:11:35-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-05-06T21:33:32-04:00
+Stopped. Current sprint state should be committed.

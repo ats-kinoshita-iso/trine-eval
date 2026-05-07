@@ -25,5 +25,19 @@
   "regression": {
     "enabled": null,
     "fail_fast": true
+  },
+  "thinking": {
+    "profile": "default"
+  },
+  "batch": {
+    "enabled": false,
+    "min_criteria": 20
+  },
+  "transcripts": {
+    "capture": true,
+    "retain_days": 30
+  },
+  "evaluator_tools": {
+    "playwright": "auto"
   }
 }

@@ -1,0 +1,23 @@
+{
+  "project_type": "eval-harness",
+  "rubric": "eval-harness",
+  "max_retries": 3,
+  "trials": 3,
+  "sandbox": {
+    "mode": "tmpdir"
+  },
+  "regression": {
+    "enabled": null,
+    "fail_fast": true
+  },
+  "taxonomy": {
+    "emit_tasks_json": true
+  },
+  "transcripts": {
+    "capture": true,
+    "retain_days": 30
+  },
+  "evaluator_tools": {
+    "playwright": "auto"
+  }
+}

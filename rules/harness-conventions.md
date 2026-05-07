@@ -62,3 +62,77 @@ No fields from `tasks.json` are renamed or dropped. The added field is the only 
 **Gate semantics.** `skills/harness-sprint/SKILL.md` Step 0.5 runs every entry's `verification_command` — verbatim, with no paraphrase — before contract negotiation for a new sprint. Each task's PASS (exit 0) or FAIL (non-zero) verdict is recorded to `.harness/regression/runs/run-<UTC-ISO8601>.json`. If any task fails and `config.regression.fail_fast` is true (default), the sprint aborts with the failing `task_id` and `graduated_from_sprint` so the operator knows which capability regressed. The gate is `fail_fast` by default because a new sprint's criteria are independent of prior capabilities — the new eval can grade PASS on fresh work while a graduated capability has silently broken, and shipping that green score would overstate system health.
 
 **Backward compatibility.** If `regression.json` does not exist, or its `tasks` array is empty, or `config.regression.enabled` is explicitly `false`, Step 0.5 is a no-op. Projects that predate Phase 2 and never graduate a criterion experience no behavior change.
+
+## Transcript Schema
+
+Each evaluator run produces an optional structured JSON transcript at `.harness/transcripts/sprint-NN-rR-tT.json` (multi-trial mode) or `.harness/transcripts/sprint-NN-rR.json` (single-trial mode, the default). The transcript is the machine-readable sibling of the markdown eval at `.harness/evals/sprint-NN-rR-tT.md` — same naming, different format, paired 1:1.
+
+**Role.** Transcripts are the audit-grade record of the Evaluator's behavior across runs: which tools it called, what messages were exchanged, how much it spent on tokens and time, and a one-paragraph summary of how it reasoned. The harness-summary skill links the transcript path next to FAIL criteria and grader-disagreement entries so a human auditor can trace the verdict back to ground truth — see `skills/harness-summary/SKILL.md`. Transcripts are an audit artifact, not a grading input.
+
+**Pipeline.** Evaluator emits markdown eval ending with a fenced JSON code block under a `## Transcript Trailer` section → `skills/harness-sprint/SKILL.md` Step 3e reads the markdown, extracts the trailer block, parses it as JSON → writes the parsed JSON verbatim to `.harness/transcripts/sprint-NN-rR-tT.json`. The trailer instruction itself lives in `agents/evaluator.md` under **Transcript Trailer (Structured Output)**. If the section is missing or the JSON malformed, the workflow skips the write rather than failing the eval — transcripts are append-only-when-available, never forced.
+
+**Schema.** Top-level keys (all required, except runtime-instrumented fields documented as nullable):
+
+- `"sprint"` — Integer. The sprint number this run graded.
+- `"round"` — Integer. Round 1 for the initial eval, R+1 for retry round R.
+- `"trial"` — Integer. 1 for single-trial mode, otherwise the 1..config.trials index within the round.
+- `"messages"` — Array of `{role, content}` objects summarizing the message exchange. May be a high-level summary when the full message array is not directly available to the agent. Empty array `[]` is permitted when no summary is feasible.
+- `"tool_calls"` — Array of `{name, arguments_summary, result_summary}` objects, one per tool call the Evaluator made. Each summary is one-line; the field is the ground truth Sprint 10's adversarial-hygiene checks key off.
+- `"token_usage"` — Object `{input, output, cache_hit}` with integer or `null` values. **Runtime-supplied. The Evaluator must write `null` rather than fabricating values when the runtime does not expose token counts.** Fabricated counts contradict the calibration purpose of transcripts.
+- `"timing"` — Object `{ttft_ms, total_ms}` with integer or `null` values. **Runtime-supplied per the same rule as `token_usage`. `null` allowed; fabrication forbidden.**
+- `"thinking_summary"` — String. The Evaluator's one-paragraph summary of its reasoning approach. Captures Sprint 8's adaptive-thinking output that would otherwise be lost when only the markdown eval is preserved.
+
+The schema is intentionally extensible. Sprint 10 will add `verified_via_command` per-tool-call adversarial-hygiene flags inside `tool_calls` entries (or as a top-level array) without renegotiating these top-level fields.
+
+**Why each field exists.** `messages` because reading the actual model output is the only way to verify a grader's reasoning chain across runs; `tool_calls` because adversarial-hygiene checks need to confirm a verification command actually ran; `token_usage` because cost regressions are otherwise invisible; `timing` because slow evals correlate with grader confusion; `thinking_summary` because the adaptive-thinking declaration from Sprint 8 produces internal reasoning that is otherwise lost when only the markdown eval is preserved. The runtime-nullable design for `token_usage` and `timing` reflects that the evaluator agent typically cannot observe its own runtime instrumentation directly — better an honest `null` than a fabricated number.
+
+**Configuration.** Two knobs gate transcript behavior, both with backward-compatible defaults:
+
+- `config.transcripts.capture` — Boolean. Default `true` when the `transcripts` object is present in `.harness/config.json`. When `true`, Step 3e attempts trailer extraction. When `false`, Step 3e is skipped entirely and no transcript files are written. When the `transcripts` object is absent (legacy/Phase-1 config), the Phase-1 default applies — see Backward Compatibility below.
+- `config.transcripts.retain_days` — Integer. Default `30`. Declared retention window. Cleanup is policy-only in Sprint 9; actual deletion of files older than this threshold runs out-of-band or in a future sprint. Note that summary graduation needs at least 3 sprints of evidence, so the retention window must be long enough to cover the saturation-detection lookback (see `skills/harness-summary/SKILL.md`).
+
+**Backward compatibility.** A project whose `.harness/config.json` lacks the `transcripts` object and whose `agents/evaluator.md` predates Sprint 9 experiences no functional behavior change. The legacy evaluator does not emit a `## Transcript Trailer` section, so Step 3e's failure-tolerant extraction falls into the no-op branch and no transcript file is written. The `capture: true` default applies to fresh installs that pick up the updated agent file (which then start emitting trailers); for legacy installs, Phase-1 disk state is preserved. End-to-end transcript writing against a live evaluator subagent is deferred to a synthetic verification sprint per the gap-closure plan, matching Sprint 8's posture for `thinking.profile` — Sprint 9 ships the protocol and the schema, not a forced runtime hookup.
+
+**Failure-tolerant extraction.** If the markdown eval lacks a `## Transcript Trailer` section, the fenced code block is malformed, or the parsed JSON is missing required top-level fields, Step 3e skips the write rather than failing the eval. Transcripts are an audit artifact, not a grading input — losing one for a single run does not invalidate that run's verdict. This matches Sprint 7's append-only stance for regression entries: the harness never destroys evaluator output to "fix" a missing transcript.
+
+## Edge Case Criteria
+
+Sprint contracts may declare an optional `## Edge Case Criteria` section, distinct from the 100%-weighted Success Criteria and from Should-NOT gates. Edge cases test ambiguous, boundary, or adversarial inputs (empty inputs, oversized payloads, concurrent requests, queries with no matches). They are tracked separately as **Edge Case Pass Rate** in `harness-summary` and **do not contribute weight** to the Success Criteria total — so omitting the section does not break the weight-sum-to-100% invariant.
+
+**Why a third class.** Folding edge cases into the weighted total is the one-sided-eval failure mode the playbook calls out: an agent that passes only obvious positive cases would earn the same weighted score as one that also handles ambiguous cases. Reporting Edge Case Pass Rate as its own metric makes the asymmetry visible — a sprint at 100% weighted with 30% edge-case pass rate has a materially different story than 100%/95%.
+
+**When to include.** Most valuable for `web-app`, `api-service`, and `rag-system` rubrics — those domains have well-known edge-case boundaries that the rubric's dimension scoring tables alone do not cover at sufficient granularity. For `cli-tool` and `eval-harness` deliverables, the rubric's existing dimensions usually cover the relevant edge-case concerns and the Evaluator may skip the recommendation.
+
+**Schema.** Edge case criteria appear in `tasks.json` with `is_gate: false`, `weight: 0` (they do not contribute weight), and an optional `is_edge_case: true` flag, so the harness-summary computer can split edge-case results from weighted Success Criteria results without parsing the markdown contract. The flag is additive — Sprint 1–9 entries do not carry it and continue to grade as Success Criteria. See `skills/sprint-contract/SKILL.md` for the contract-author-facing rationale and per-rubric guidance.
+
+**Backward compatibility.** Sprint contracts that predate Sprint 10 do not declare `## Edge Case Criteria`. Their `tasks.json` files contain only Success Criteria and Should-NOT entries, exactly as before. The Edge Case Pass Rate metric in summary output is rendered as `N/A` when no sprint declared edge-case criteria — absence is meaningful information, not a zero.
+
+## Conditional Evaluator Tools
+
+Some evaluator tools are useful only on specific project types. Sprint 10 introduces `config.evaluator_tools` for declaring per-tool availability with backward-compatible defaults.
+
+**`config.evaluator_tools.playwright`** — string. Default `"auto"`. Reserved values:
+
+- `"auto"` — Playwright MCP is enabled when `config.project_type == "web-app"`, disabled otherwise. This is the recommended default.
+- `"never"` — Playwright is unconditionally disabled. Use this when running a `web-app` project without Playwright installed; the Evaluator falls back to `curl` and routes Visual Design dimension findings to human review.
+- `"always"` — Playwright is unconditionally enabled. Use only for explicit testing of the Playwright path in non-`web-app` projects.
+
+**Why guard Playwright behind project type.** Playwright is the right tool for the Visual Design dimension of `web-app` evals (rendered DOM, computed styles, viewport extremes, JavaScript-driven UI). For other project types it adds tool surface without adding signal — `cli-tool`, `api-service`, `rag-system`, and `eval-harness` rubrics do not include a Visual Design dimension and do not need a browser harness.
+
+**Visual Design fallback.** When `evaluator_tools.playwright` resolves to disabled on a `web-app` project, the Evaluator falls back to `curl` for HTTP-level verification and flags every Visual Design dimension finding as **low-confidence** in `## Human Review Flags`. Routing low-confidence Visual Design findings to human review is the documented escape hatch — silently grading without the right tool would produce confidently-wrong scores on a 25%-weight rubric dimension. See `agents/evaluator.md` under "Conditional Tools: Playwright MCP for Web Apps" for the full agent-facing instruction.
+
+**Backward compatibility.** A project whose `.harness/config.json` lacks the `evaluator_tools` object hits the `"auto"` default. Combined with any non-`web-app` project type — including the current `eval-harness` project — `"auto"` resolves to "Playwright disabled," which is exactly Phase-1 behavior. No project that predates Sprint 10 sees a Playwright invocation. End-to-end Playwright invocation against a live `web-app` project is deferred to a synthetic verification sprint per the gap-closure plan, matching Sprint 8's posture for `thinking.profile` and Sprint 9's posture for transcript file writing.
+
+## Adversarial Hygiene: `verified_via_command` Per Criterion
+
+Sprint 9's transcript trailer captures messages, tool calls, token usage, timing, and thinking summary per evaluator run. Sprint 10 adds the per-criterion `verified_via_command` boolean to the same channel as the audit ground truth for "did the evaluator actually run the verification command, or did it grade by inference?"
+
+**Per-criterion, not per-eval-file.** The flag is keyed by `task_id` so each criterion carries its own audit verdict — one verified criterion does not vouch for the others. A per-eval-file flag would be too coarse: it would let an evaluator run one `grep`, set the file-level flag to `true`, and grade the remaining nine criteria by inference without changing the flag. The per-criterion shape forces the evaluator to record, for each of N criteria, whether it actually executed the verification command versus inferring from non-executable evidence (filenames, comments, surrounding prose).
+
+**Schema location.** The flag lives inside the Sprint 9 transcript trailer — see **Transcript Schema** above. Sprint 9 framed the trailer as "intentionally extensible"; Sprint 10 adds either a top-level `criteria_audit` array (`[{task_id, verified_via_command}, ...]`) or an inline `verified_via_command` field inside each `tool_calls` entry tagged with `task_id`. Both shapes preserve the per-criterion guarantee. The harness-summary skill consumes whichever shape is present and flags any criterion with `verified_via_command: false` as a candidate for human spot-check.
+
+**No fabrication.** The Evaluator must not write `verified_via_command: true` for a criterion that was graded by reading prose, by inference from filenames, or by reasoning about code without running the verification command. Fabricated flags would hide exactly the criteria that need human review — defeating the calibration purpose of the audit channel. The no-fabrication rule matches Sprint 9's posture for `token_usage` and `timing`: better an honest `false` than a misleading `true`.
+
+**No inference of PASS/FAIL from filenames or comments.** Beyond the per-criterion flag, the Evaluator's Adversarial Hygiene section in `agents/evaluator.md` forbids inferring verdicts from artifact metadata. A file named `success_FINAL.py` is not evidence of PASS; a `// TODO: broken` comment is not evidence of FAIL. The verdict for a deterministic criterion comes from the exit code of the verification command — nothing else. The verdict for an llm-judge criterion comes from structured rubric assessment of the artifact, not from signals embedded in its filename or comments.
+
+**Backward compatibility.** A legacy evaluator that predates Sprint 10 does not emit `verified_via_command` flags; its trailer (if present) is missing the per-criterion audit channel. Sprint 9's failure-tolerant extraction stance applies — the harness-summary skill renders an "audit unavailable" note for those criteria rather than treating absence as failure. Projects that predate Sprint 9 entirely produce no trailer and no transcript file, so the question of `verified_via_command` does not arise.

@@ -1,0 +1,131 @@
+{
+  "sprint": 9,
+  "tasks": [
+    {
+      "task_id": "s09-c1",
+      "criterion": ".harness/transcripts/ directory and README exist: directory exists, contains a README.md explaining what the directory is for, the file naming convention sprint-{NN}-r{R}-t{T}.json (or sprint-{NN}-r{R}.json for single-trial), and a pointer to rules/harness-conventions.md for the full schema.",
+      "grader_type": "deterministic",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": "test -d .harness/transcripts && test -f .harness/transcripts/README.md",
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s09-c2",
+      "criterion": "config.json declares transcripts.capture and transcripts.retain_days: .harness/config.json contains a top-level transcripts object with keys capture (boolean, default true) and retain_days (integer, default 30).",
+      "grader_type": "deterministic",
+      "weight": 7,
+      "is_gate": false,
+      "verification_command": "jq -e '.transcripts.capture == true and (.transcripts.retain_days | type == \"number\") and .transcripts.retain_days == 30' .harness/config.json",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s09-c3",
+      "criterion": "harness-sprint SKILL adds a Transcript Capture section in Step 3: skills/harness-sprint/SKILL.md contains a section (heading or labeled subsection inside Step 3 Evaluation) that uses the word Transcript or Transcripts (case-insensitive) and explicitly references config.transcripts.capture, the file path under .harness/transcripts/, and the trailer extraction step (workflow reads the evaluator's markdown eval, extracts the JSON trailer, writes it to the transcript file).",
+      "grader_type": "deterministic",
+      "weight": 11,
+      "is_gate": false,
+      "verification_command": "grep -qi 'transcript' skills/harness-sprint/SKILL.md && grep -q 'transcripts.capture' skills/harness-sprint/SKILL.md && grep -qE '\\.harness/transcripts/' skills/harness-sprint/SKILL.md && grep -qi 'trailer' skills/harness-sprint/SKILL.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s09-c4",
+      "criterion": "evaluator.md adds a Transcript Trailer instruction: agents/evaluator.md contains a section (or subsection) instructing the evaluator to emit a structured JSON trailer at the end of its markdown eval file, distinct from the existing Transcript Review section. The new section must use the word trailer (case-insensitive) and reference at least three required schema field names by literal name: messages, tool_calls, token_usage, timing, thinking_summary.",
+      "grader_type": "deterministic",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "grep -qi 'trailer' agents/evaluator.md && grep -q 'thinking_summary' agents/evaluator.md && grep -q 'tool_calls' agents/evaluator.md && grep -q 'token_usage' agents/evaluator.md",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s09-c5",
+      "criterion": "harness-conventions.md documents the Transcript schema with all required fields: rules/harness-conventions.md contains a section about the structured JSON transcript that includes (a) the file-path convention beginning with .harness/transcripts/, (b) the transcripts.capture and transcripts.retain_days config knobs, and (c) every required schema field name in JSON-quoted form: \"sprint\", \"round\", \"trial\", \"messages\", \"tool_calls\", \"token_usage\", \"timing\", \"thinking_summary\".",
+      "grader_type": "deterministic",
+      "weight": 12,
+      "is_gate": false,
+      "verification_command": "grep -qi 'transcript' rules/harness-conventions.md && grep -q 'transcripts.capture' rules/harness-conventions.md && grep -q 'transcripts.retain_days' rules/harness-conventions.md && grep -qE '\\.harness/transcripts/' rules/harness-conventions.md && grep -q '\"sprint\"' rules/harness-conventions.md && grep -q '\"round\"' rules/harness-conventions.md && grep -q '\"trial\"' rules/harness-conventions.md && grep -q '\"messages\"' rules/harness-conventions.md && grep -q '\"tool_calls\"' rules/harness-conventions.md && grep -q '\"token_usage\"' rules/harness-conventions.md && grep -q '\"timing\"' rules/harness-conventions.md && grep -q '\"thinking_summary\"' rules/harness-conventions.md",
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s09-c6",
+      "criterion": "harness-summary SKILL references transcript paths in its summary output: skills/harness-summary/SKILL.md documents that the cross-sprint summary output links the corresponding transcript path for FAIL criterion entries and grader-disagreement entries. The skill must reference the literal path prefix .harness/transcripts/ and use the word transcript (case-insensitive) in the linking context.",
+      "grader_type": "deterministic",
+      "weight": 9,
+      "is_gate": false,
+      "verification_command": "grep -qE '\\.harness/transcripts/' skills/harness-summary/SKILL.md && grep -qi 'transcript' skills/harness-summary/SKILL.md",
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s09-c7",
+      "criterion": "sprint-09.tasks.json is emitted: file exists, valid JSON, top-level sprint:9 and tasks array with 11 success criteria + 3 Should-NOT gates = 14 entries minimum, each with the Sprint-6 schema fields task_id, criterion, grader_type, weight, is_gate, verification_command, rubric_dimension.",
+      "grader_type": "deterministic",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": "jq -e '.sprint == 9 and (.tasks | length) >= 14 and (.tasks | all(has(\"task_id\") and has(\"grader_type\") and has(\"weight\") and has(\"is_gate\")))' .harness/contracts/sprint-09.tasks.json",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s09-c8",
+      "criterion": "Backward compatibility is explicit and correct: harness-sprint SKILL, evaluator.md, and harness-conventions.md together must make it unambiguous that a project whose .harness/config.json predates Phase 2 (no transcripts object) and whose evaluator agent file predates Sprint 9 experiences no functional behavior change. The transcripts.capture: true default describes Phase-2 declared intent for fresh installs; for legacy projects, no transcript file is forced to exist on disk because the legacy evaluator does not emit a trailer for the workflow to extract. End-to-end transcript writing against a live evaluator subagent is deferred to a synthetic verification sprint per the gap-closure plan.",
+      "grader_type": "llm-judge",
+      "weight": 13,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s09-c9",
+      "criterion": "Schema field rationale is justified, not just asserted: documentation across rules/harness-conventions.md and agents/evaluator.md should explain why each schema field is captured. messages exists because reading actual model output is the only way to verify a grader's reasoning chain; tool_calls exists because adversarial-hygiene checks need to confirm a verification command actually ran; token_usage exists because cost regressions are otherwise invisible; timing exists because slow evals are themselves a quality signal; thinking_summary exists because adaptive-thinking declaration produces internal reasoning otherwise lost.",
+      "grader_type": "llm-judge",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s09-c10",
+      "criterion": "FAIL/disagreement linkage rationale is justified: skills/harness-summary/SKILL.md transcript-linking section should explain why transcripts are linked specifically for FAIL criteria and grader disagreements and not for every PASS entry. PASS verdicts on deterministic criteria are usually self-explanatory; FAILs and disagreements are the points where a human auditor most needs to read what the evaluator actually did. The link is a calibration audit trail, not summary boilerplate.",
+      "grader_type": "llm-judge",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s09-c11",
+      "criterion": "Trailer extraction protocol is well-defined: skills/harness-sprint/SKILL.md Transcript Capture section should describe the trailer extraction protocol precisely enough that two independent implementers would produce equivalent file contents. The Evaluator emits a delimited JSON block (e.g., a fenced ```json code block under a section heading) at the end of its markdown eval file; the workflow reads, parses, and writes it verbatim to the transcript file; if the trailer is missing or malformed JSON, the workflow proceeds without writing a transcript file rather than failing the eval.",
+      "grader_type": "llm-judge",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s09-sn1",
+      "criterion": "No silent behavior change for pre-Phase-2 configs: A project whose .harness/config.json lacks the transcripts object and whose agent files predate Sprint 9 must run the harness identically to Phase 1: no transcript files are forced to exist, no errors are raised when an evaluator subagent does not emit a trailer, and no preexisting workflow steps change semantics. Every transcript-write action must be guarded on a successfully extracted trailer, never unconditionally executed.",
+      "grader_type": "llm-judge",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": null,
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s09-sn2",
+      "criterion": "No modification of prior sprint artifacts: .harness/evals/sprint-0[1-8]* and .harness/contracts/sprint-0[1-8]* must be unchanged from HEAD at the start of this sprint.",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "test -z \"$(git diff HEAD -- .harness/evals/sprint-0[1-8]* .harness/contracts/sprint-0[1-8]*)\"",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s09-sn3",
+      "criterion": "No fabrication of fields the evaluator cannot actually compute: schema documentation must not require the Evaluator to populate every field with high-fidelity values. Specifically, runtime-instrumentation-dependent fields (token_usage.input, token_usage.output, token_usage.cache_hit, timing.ttft_ms, timing.total_ms) must be documented as runtime-supplied or best-effort with null allowed when the agent runtime does not expose them. The Evaluator must be explicitly told not to invent or estimate values it cannot observe.",
+      "grader_type": "llm-judge",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": null,
+      "rubric_dimension": "grading_architecture"
+    }
+  ]
+}

@@ -2,11 +2,16 @@
 name: harness-summary
 description: Cross-sprint analysis showing pass rates, consistency metrics, trends, and failure patterns
 allowed-tools: Read, Glob, Grep
+thinking: { type: adaptive, effort: max }
 ---
 
 # Eval Summary
 
 Generate a cross-sprint evaluation summary by analyzing all completed sprint evaluations.
+
+## Thinking Effort
+
+The frontmatter declares `thinking: { type: adaptive, effort: max }`. Cross-sprint analysis is the highest-leverage reasoning task in the harness: a missed pattern here propagates into every subsequent recommendation, every saturation graduation, and every consistency-metric interpretation. Because saturation detection feeds the regression suite (append-only — once a wrong criterion graduates, it gates every future sprint), and because the recommendations from this skill shape what the operator does next, an analytical mistake at summary time has the largest blast radius in the system. `max` matches that — it is the right place to spend deeply on reasoning even though the skill runs less frequently than per-sprint evaluation.
 
 ## How to Generate
 
@@ -94,12 +99,59 @@ A criterion is **saturated** when it passes on the first evaluation round across
 
 **Graduation is append-only.** Never remove or rewrite an existing entry in `regression.json`. If a buggy summary run could mutate prior entries, a regression-coverage loss would be one bad run away — exactly the failure mode the gate exists to prevent. The summary only ever *appends* newly saturated criteria. If an operator needs to retire a regression criterion, they edit `regression.json` by hand, outside the harness.
 
+### Edge Case Pass Rate
+
+Sprint contracts may declare an optional **Edge Case Criteria** section (see `skills/sprint-contract/SKILL.md` for the rationale and template). Edge case criteria test ambiguous, boundary, and adversarial inputs — empty inputs, very large inputs, concurrent requests, malformed payloads, queries with no matches. They are **not** weighted and **not** counted toward the 100% weighted score.
+
+The summary reports their results separately as **Edge Case Pass Rate** — a distinct row in the per-sprint table and an aggregate value across sprints.
+
+**Why separate from the weighted score.** Folding edge cases into the weighted total creates the one-sided-eval failure mode Anthropic's playbook calls out: an agent that only passes obvious positive cases earns the same headline score as one that also handles ambiguous inputs. Reporting Edge Case Pass Rate as its own metric makes that asymmetry visible — a sprint that scores 100% weighted but 30% on edge cases looks materially different from one with 100% weighted and 95% on edge cases.
+
+**How to compute.** For each sprint, count `edge_case_passed / edge_case_total` over the criteria in the contract's `## Edge Case Criteria` section (or 0/0 = N/A when the section is omitted). Aggregate across sprints by summing passes and totals separately, not by averaging per-sprint rates. Report N/A explicitly when no sprint declared edge-case criteria — the absence of edge cases is meaningful information, not a zero.
+
+**Per-rubric expectations.** The metric is most meaningful for `web-app`, `api-service`, and `rag-system` projects whose rubrics carry well-known edge-case domains (browser viewport extremes, empty/oversized API payloads, queries with no matching documents). For `cli-tool` and `eval-harness` projects, Edge Case Pass Rate often shows N/A — those rubrics encode edge-case concerns inside the dimension scoring tables rather than as separate criteria.
+
+**Render in the per-sprint table.** Add an `Edge Case Pass Rate` column to the per-sprint table; show `N/A` when the sprint declared no edge cases.
+
+#### Cross-sprint edge case aggregation
+
+The cross-sprint edge case aggregate is a single number computed across every sprint that declared an `## Edge Case Criteria` section. The formula is:
+
+```
+cross-sprint edge-case pass rate = total edge-case PASS / total edge-case criteria
+```
+
+where `total edge-case PASS` sums the PASS counts across every contributing sprint and `total edge-case criteria` sums the totals. Sprints that omit the edge-case section contribute neither to the numerator nor the denominator. When no sprint has declared edge cases, render the aggregate as `N/A`, matching the per-sprint convention.
+
+**Why summing rather than averaging.** A sprint with 1 edge-case criterion (1/1 PASS) and a sprint with 20 edge-case criteria (10/20 PASS) average to 75% if you average per-sprint rates, but the true aggregate is 11/21 = 52%. Averaging per-sprint rates over-weights sprints that declared few edge cases. Summing passes and totals separately preserves the rate's meaning across sprint sizes — the aggregate answers "of every edge case ever evaluated, what fraction passed" rather than "what is the mean per-sprint edge-case rate."
+
+**Where to render.** Add the aggregate as a new line beneath the per-sprint Edge Case Pass Rate column, in the Overview section: `Cross-sprint edge-case pass rate: P/T = X%` (or `N/A`). The aggregator script `tests/edge-case-aggregate.py` computes this value from the fixture project; the production summary computes it identically from the parent `.harness/contracts/` and `.harness/evals/` trees.
+
 ### Recommendations
 - Based on patterns, what should the next sprint focus on?
 - Are there systemic issues that rubric changes could address?
 - Should any harness components be disabled based on performance? (per the `components_enabled` config)
 - Which criteria should be graduated from capability eval to regression suite?
 - Where is the largest gap between pass@k and pass^k? (indicates where to invest in consistency)
+- Is Edge Case Pass Rate consistently below the weighted score? (indicates one-sided optimization — the agent passes obvious cases but skids on ambiguous ones)
+
+### Transcript Links for FAIL Criteria and Grader Disagreements
+
+When rendering a FAIL criterion entry or a grader-disagreement entry in the summary output, link the corresponding structured transcript at `.harness/transcripts/sprint-NN-rR-tT.json` (multi-trial) or `.harness/transcripts/sprint-NN-rR.json` (single-trial). The transcript pairs 1:1 with the eval markdown and contains the structured record described in `rules/harness-conventions.md` under **Transcript Schema** — `messages`, `tool_calls`, `token_usage`, `timing`, and `thinking_summary` for that run.
+
+**Why FAIL and disagreement entries specifically — and not every PASS row.** PASS verdicts on deterministic criteria are usually self-explanatory: the verification command exited 0, and that exit code is the answer. A human auditor scanning the summary does not typically need the transcript for those rows. FAIL entries and grader disagreements are the points where the verdict alone is insufficient — the auditor needs to see what tools the Evaluator called, what evidence it weighed, and how it got from observation to conclusion. Linking transcripts only at those entries keeps the summary readable while preserving audit access exactly where it matters; linking every row would dilute the signal and turn the summary into a wall of paths.
+
+**How to render the link.** Add a `Transcript:` line under the FAIL criterion's evidence (or the grader-disagreement entry), pointing to the transcript file with a relative path. Example for a multi-trial FAIL:
+
+```markdown
+### Sprint 4, Criterion 8 — FAIL
+**Evidence:** PostToolUse hook only echoed; did not update `sprint-state.json`.
+**Transcript:** `.harness/transcripts/sprint-04-r1-t1.json`
+```
+
+For single-trial mode, the transcript path is `.harness/transcripts/sprint-NN-rR.json`. If the transcript file does not exist (the evaluator did not emit a parseable trailer for that run), omit the line — do NOT print a broken link. Transcripts are append-only-when-available, so missing transcripts are a known and acceptable state.
+
+**Grader-disagreement entries** include any criterion where a code-based grader and the LLM-judge would have produced different verdicts (per the Evaluator's `## Human Review Flags` section in the eval report). These are the calibration touch-points where the structured transcript matters most — the FAIL/PASS gap reflects rubric ambiguity, and the transcript captures the reasoning that produced each verdict.
 
 ## Output Format
 

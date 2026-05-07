@@ -1,0 +1,11 @@
+{
+  "tasks": [
+    {
+      "task_id": "sfx-c1",
+      "graduated_from_sprint": "fx",
+      "verification_command": "test -s tests/fixture-project/.harness/dependent.txt",
+      "grader_type": "deterministic",
+      "rubric_dimension": "methodology_completeness"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "sprint": "fx",
+  "round": 1,
+  "trial": 1,
+  "messages": [
+    {"role": "user", "content": "Read the fixture sprint contract and grade the single criterion."},
+    {"role": "assistant", "content": "Verified the dependent file exists and is non-empty. Verdict: PASS."}
+  ],
+  "tool_calls": [
+    {"name": "Bash", "arguments_summary": "test -s tests/fixture-project/.harness/dependent.txt", "result_summary": "exit 0", "task_id": "sfx-c1"}
+  ],
+  "criteria_audit": [
+    {"task_id": "sfx-c1", "verified_via_command": true}
+  ],
+  "token_usage": {"input": null, "output": null, "cache_hit": null},
+  "timing": {"ttft_ms": null, "total_ms": null},
+  "thinking_summary": "Hand-crafted fixture transcript for Sprint 11 runtime-hookup verification. The single deterministic criterion was verified by an actual shell command (test -s ...), which is logged in tool_calls. The criteria_audit array carries verified_via_command: true for the corresponding task_id. The runtime-supplied fields (token_usage, timing) are null per the no-fabrication rule from agents/evaluator.md. This file is the ground truth for parent C6 (transcript schema) and parent C7 (audit script consistency)."
+}
