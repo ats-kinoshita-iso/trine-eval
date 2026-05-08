@@ -22,10 +22,11 @@
     ],
     "PostToolUse": [
       {
+        "matcher": "Task|Edit|Write",
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -d .harness ] && [ -f .harness/sprint-state.json ]; then bash -c 'LATEST=$(ls -t .harness/evals/sprint-*-r*.md 2>/dev/null | head -1); if [ -n \"$LATEST\" ]; then STAMP=$(date -Iseconds); python3 -c \"import json,sys; d=json.load(open(sys.argv[1])); d[\\\"last_updated\\\"]=sys.argv[2]; json.dump(d,open(sys.argv[1],\\\"w\\\"),indent=2)\" .harness/sprint-state.json \"$STAMP\" 2>/dev/null || true; fi'; fi"
+            "command": "if [ -d .harness ] && [ -f .harness/sprint-state.json ]; then bash -c 'LATEST=$(ls -t .harness/evals/sprint-*-r*.md 2>/dev/null | head -1); if [ -n \"$LATEST\" ]; then python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/touch-sprint-state.py\" .harness/sprint-state.json \"$(date -Iseconds)\" 2>/dev/null || true; fi'; fi"
           }
         ]
       }
