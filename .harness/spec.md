@@ -1,92 +1,63 @@
-# Product Specification: trine-eval Self-Upgrade
+# Product Specification: trine-eval v0.1 — Python Library Pivot
+
+## Context
+
+Phase 1 (Sprints 01–05, completed 2026-04-12) upgraded the trine-eval Claude Code plugin into a mature three-agent meta-harness. The `.harness/playbook-alignment-2026-04.md` gap analysis identified 10 remaining gaps against Anthropic's 2025–2026 eval-driven development playbook, and a separate compass requirements document (`Downloads/compass_artifact_wf-6f4b7fb2-ef1b-4fcb-8a01-037702141f31_text_markdown.md`) specified what trine-eval should be **as a product**: a runnable Python eval library modelled on Inspect AI.
+
+Phase 2 pivots: the meta-harness (existing Claude Code plugin) becomes the **build vehicle** for a new Python library (`src/trine_eval/`). The meta-harness itself receives exactly the minimum upgrades needed to produce trustworthy verdicts on the Python build — nothing more.
+
+Full design in `C:\Users\akino\.claude\plans\c-users-akino-downloads-compass-artifac-dapper-muffin.md`.
 
 ## Product Vision
 
-Upgrade trine-eval to fully implement Anthropic's published eval-driven development methodology (January–March 2026 guidance). The harness should move from a functional three-agent loop to a comprehensive eval framework that enforces the grading hierarchy, supports balanced test sets, tracks saturation, and manages context deliberately — closing 15 identified gaps against the playbook.
+Ship trine-eval v0.1 as a Python library that proves functional correctness on one end-to-end benchmark (**SWE-bench Verified**) before any cost-optimisation pass. Surface the same primitives every serious eval framework has rediscovered — sample → solver → scorer → metric → log — specialised to the Anthropic stack with Opus 4.7 as default target, Batch API + prompt caching in v0.1, and self-hosted Langfuse for observability.
 
 ## Feature List
 
-### Must-have
+### Must-have (v0.1 scope)
 
-1. **Grading hierarchy enforcement** — Evaluator distinguishes code-based graders (run first) from LLM-as-judge graders (for subjective dimensions). Contract criteria tagged by grader type.
-2. **Negative test cases in contracts** — Contract template includes "Should NOT" criteria alongside "Should" criteria. Evaluator tests both.
-3. **Reference solutions in contracts** — Contract template supports optional known-working outputs for calibration.
-4. **Weighted criteria** — Each criterion in a sprint contract carries a weight. The evaluator computes a weighted score, not just pass/fail count.
-5. **Environment isolation guidance** — Evaluator instructions specify clean-state requirements between trial runs.
-6. **Pass@k and pass^k metrics** — harness-summary computes consistency metrics across retry rounds.
-7. **Saturation graduation** — harness-summary identifies criteria that always pass and flags them for regression suite graduation.
-8. **Plugin manifest accuracy** — plugin.json reflects the current project name and structure.
+1. **Core primitives** (A1–A5, A9) — Pydantic `Sample`/`Score`/`Task`/`EvalLog`; `@task`/`@solver`/`@scorer`/`@metric`/`@tool` decorator registry; `model_roles={target, judge}`; pytest plugin with exit-code gating.
+2. **Async runner** (A6, G3) — `max_concurrency`, `token_limit`, `time_limit`, `cost_limit` hard caps; deterministic seeds; pinned model + harness versions.
+3. **Replayable log format** (A5, H3–H5) — binary + JSON logs; `trine-eval score --log <path> --scorer <name>` rescores without re-running target.
+4. **Docker sandbox** (A7) — per-sample container with `network=none` default, CPU/memory caps, guaranteed teardown.
+5. **Anthropic integration** (F1, F2, F3, F6) — `claude-opus-4-7` default; effort tier (`low | medium | high | xhigh | max`); `interleaved-thinking-2025-05-14` beta with unmodified thinking blocks through tool round-trips; tokenizer budgets re-baselined (1.0–1.35× vs. 4.6).
+6. **Prompt caching** (G1) — `cache_control` breakpoints on system prompt + tools + golden examples.
+7. **Batch API** (G2) — default offline execution path; stacks with caching.
+8. **LLM-as-judge** (E1, E2, E5, E6) — CoT rubric + golden answer; binary or small-discrete-label judgments with TPR/TNR (never agreement rate); bootstrap CI on aggregates; three-tier grading (code/model/human).
+9. **Observability** (H1, H2, H6) — self-hosted Langfuse via docker-compose; OTel spans on every solver step, tool call, judge invocation; human annotation queue present and empty.
+10. **SWE-bench Verified adapter** (D1, D2, D3, D4, D5, D6, F5) — test-execution scoring; unbiased pass@k (`1 − C(n−c,k)/C(n,k)`); `FAIL_TO_PASS` + `PASS_TO_PASS` regression gate; lint → type-check → AST-diff pre-filter; contamination screens disclosed; ±3pp of published Opus 4.7 baseline (87.6%).
+11. **Token-efficiency reporting** (G4) — accuracy-per-dollar and success-per-1k-tokens alongside raw accuracy.
+12. **Meta-harness prereqs** — Sprint 0 closes GAP 1 (statistical trials), GAP 3 (tasks.json schema), GAP 5 (adaptive thinking), GAP 6 (transcript capture) from playbook-alignment-2026-04.md.
 
-### Should-have
+### Deferred to v0.2+
 
-9. **Structured JSON state** — `feature_list.json` alongside `progress.md` for machine-readable sprint state tracking.
-10. **Per-dimension isolated judging** — Evaluator scores each rubric dimension in a separate reasoning pass, not all at once.
-11. **Compaction guidance** — Generator and evaluator instructions include guidance for surviving context compaction in long sessions.
-12. **Expanded hooks** — Hooks for pre-eval (ensure clean state), post-eval (update progress), and session-start (read progress).
-
-### Nice-to-have
-
-13. **Human calibration pathway** — A mechanism for spot-checking evaluator grades against human judgment.
-14. **ACI self-optimization** — Evaluator can review tool/skill descriptions and suggest improvements based on eval transcripts.
-15. **Bootstrap from failures** — A workflow for importing real failure cases (bug reports, support tickets) as initial eval tasks.
+τ²-bench / Terminal-Bench / MCP-Atlas adapters (B6). Entire RAG domain (C1–C7). Trajectory-level judge (B8), cost-per-task (B9). Judge cascade (G5), self-consistency reduction (G6), tool-description compaction (G7). Online production scoring (H7). Task budgets (F7). LangGraph, RAGAS, pgvector, FastAPI. Meta-harness GAPs 2, 4, 7, 8, 9, 10.
 
 ## User Interaction Patterns
 
-- Users invoke `/harness-kickoff` and `/harness-sprint` as before — no workflow changes
-- New contract fields (weights, negative criteria, grader type) are additive — old contracts still work
-- `harness-summary` gains new metric sections (pass@k, saturation) automatically
-- Config gains optional fields with backward-compatible defaults
+- Meta-harness workflow unchanged: `/harness-sprint` drives each Phase 2 sprint through contract → build → eval → retry.
+- New Python library surface: `uv run trine-eval run <task>`, `uv run trine-eval score --log ...`, `uv run trine-eval report <run>`, `uv run pytest` (via plugin).
+- Langfuse UI at `localhost:3000` for trace inspection.
 
 ## Technical Constraints
 
-- All changes are to markdown, JSON, and YAML files — this is a Claude Code plugin, not runnable application code
-- Agents communicate only via `.harness/` files
-- Must remain compatible with Claude Code's plugin system (`plugin.json`, skills, agents, hooks)
-- Skills must stay under 500 lines per SKILL.md
-- No external dependencies — the harness runs purely through Claude Code's built-in tools
+- **Meta-harness** (Phase 2 Sprint 0): still pure markdown/JSON on the Claude Code plugin surface. Agents and skills under `plugins/trine-eval/`.
+- **Python library** (Sprints 1–6): Python 3.12+, uv-managed, `src/trine_eval/` layout, strict mypy + ruff.
+- Tech stack v0.1: `anthropic`, `pydantic`, `pytest`, `typer`, `opentelemetry`, `langfuse`, `msgpack`, Docker. **No** LangGraph, RAGAS, pgvector, FastAPI in v0.1.
+- Platform: Docker Desktop + WSL2 on Windows 11 assumed. Langfuse Cloud free tier is documented SaaS fallback.
+- All prior Phase 1 sprint evals remain append-only under `.harness/evals/sprint-0{1..5}*.md`. New sprints write to `.harness/evals/sprint-0{6..12}*.md`-style filenames (sprint number = Phase 2 sprint number + 5, offset to preserve audit continuity) **OR** under a `.harness/evals/phase-02/` subdirectory. Convention decided in Sprint 0.
 
-## Success Criteria
+## Success Criteria (v0.1 ship gate)
 
-1. The eval-harness rubric scores the upgraded system at 4+ on all five dimensions
-2. All 8 playbook methodology steps have a corresponding mechanism in the harness
-3. Contract template supports weighted criteria, negative tests, and reference solutions
-4. Evaluator agent instructions enforce code→LLM→human grading hierarchy
-5. harness-summary computes pass@k, pass^k, and saturation metrics
-6. Plugin manifest and all cross-references are accurate
+Ten verification items from the plan, all green:
 
-## Phase 2: Playbook Alignment (Sprints 6–10)
-
-Phase 1 (sprints 1–5) closed the methodology gaps in trine-eval against Anthropic's Jan–Mar 2026 eval playbook. The gap analysis at `.harness/playbook-alignment-2026-04.md` identified 10 remaining gaps in execution infrastructure — primarily statistical validity of pass@k/pass^k, Claude 4.6 API features, and formal evaluation suite primitives. The gap-closure plan at `.harness/gap-closure-plan-2026-04.md` maps these gaps to five new sprints.
-
-### Must-have (Gaps 1–6)
-
-16. **Multi-trial execution (Gap 1)** — Separate the retry loop (bug-fix) from the trial loop (measurement). When `config.trials > 1`, each trial runs from clean git state and writes its own eval file (`sprint-NN-rR-tT.md`). pass@k and pass^k are computed from trials, not rounds.
-17. **Environment sandboxing (Gap 2)** — Add `config.sandbox.mode` with values `"none"`, `"tmpdir"`, and `"docker"`. Evaluator runs each trial in a fresh sandbox to eliminate cross-trial state contamination.
-18. **Formal task taxonomy (Gap 3)** — Contract negotiation emits a sibling `sprint-NN.tasks.json` with one entry per criterion (`task_id`, `criterion`, `grader_type`, `weight`, `is_gate`, `verification_command`, `rubric_dimension`) to serve as the machine-readable source of record for regression and batch scheduling.
-19. **Regression gate (Gap 4)** — Saturated criteria graduate into `.harness/regression/regression.json`. Sprint workflow runs the regression suite before contract negotiation; any failure aborts the sprint.
-20. **Adaptive thinking configuration (Gap 5)** — Agents declare `thinking: { type: adaptive, effort: ... }` frontmatter tuned to role: `medium` for planning and implementation, `high` for capability evals, `max` for contract review and summary analysis. Exposes a `thinking.profile` config knob.
-21. **Full transcript capture (Gap 6)** — Evaluator emits a structured JSON trailer captured to `.harness/transcripts/sprint-NN-rR-tT.json` with messages, tool calls, token usage, timing, and thinking summary. Summary output links transcripts for any FAIL criterion or grader disagreement.
-
-### Should-have (Gaps 7–10)
-
-22. **Batch API mode (Gap 7)** — `config.batch.enabled` routes eval criterion verifications through Anthropic's Batch API when the criterion count meets `batch.min_criteria`. Documents the 50% discount and 24-hour SLA.
-23. **Edge case criteria (Gap 8)** — Contract template supports an optional `## Edge Case Criteria` section. Edge-case pass rate is reported separately from weighted score.
-24. **Playwright MCP evaluator (Gap 9)** — Evaluator conditionally enables Playwright when `config.project_type == "web-app"`; falls back to curl otherwise. Visual Design dimension findings are flagged low-confidence if Playwright is unavailable.
-25. **Adversarial hygiene (Gap 10)** — Evaluator is instructed never to infer PASS/FAIL from filenames or comments, to log verification commands before scoring, and to emit a `verified_via_command` flag per criterion. Summary flags any criterion lacking verification evidence.
-
-### Technical Constraints (Phase 2 additions)
-
-- New `.harness/config.json` fields are optional with backward-compatible defaults: `trials: 1`, `sandbox.mode: "none"`, `thinking.profile: "default"`, `batch.enabled: false`, `batch.min_criteria: 20`, `transcripts.capture: true`, `transcripts.retain_days: 30`, `regression.enabled: true` (when `regression.json` exists), `regression.fail_fast: true`, `evaluator_tools.playwright: "auto"`, `taxonomy.emit_tasks_json: true`. An existing config file that predates Phase 2 must continue to execute exactly as it did before: one trial, no sandbox, synchronous calls, no transcript files, no regression gate.
-- New directories introduced by Phase 2 (`.harness/regression/`, `.harness/transcripts/`, optional `scripts/`) are created on demand by the sprints that need them.
-- Trial file naming extends round-file naming: `sprint-NN-rR-tT.md` (trials share a round, retries create a new round).
-
-### Phase 2 Success Criteria
-
-1. With `trials: 1` (default), Phase 2 harness behaves identically to Phase 1 — no behavior change for pre-existing projects
-2. With `trials: k > 1`, harness-summary computes pass@k and pass^k from independent trial files, not retry rounds
-3. Every graduated criterion lives in `regression.json` and blocks new sprints on regression failure
-4. Agent frontmatter declares explicit adaptive-thinking effort levels tuned to agent role
-5. Batch API mode cuts eval-time API calls from N to 1 on sprints with ≥ `batch.min_criteria` criteria
-6. Evaluator transcripts are captured to `.harness/transcripts/` and linked from summary FAIL entries
-7. Web-app projects invoke Playwright via MCP for Visual Design dimension criteria
-8. No sprint eval grades a criterion PASS/FAIL without a recorded verification command
+1. `uv run pytest` green for core/models/runner/judge/sandbox/benchmarks.
+2. `uv run ruff check` and `uv run mypy --strict src` clean.
+3. Replayable log: rescore a prior log with a swapped scorer without re-hitting the Anthropic API.
+4. Langfuse UI shows traces for every solver step, tool call, judge invocation.
+5. Judge calibration passes on 50-item set (TPR + TNR ≥ 1.5).
+6. Batch run cost ≤ 55% of streaming; cache-read rate ≥ 85% on system prompt.
+7. Docker sandbox leaves zero containers after `pytest` finishes; regression gate rejects a deliberately-regressing fixture patch.
+8. SWE-bench Verified 50-instance calibration: pass@1 within 84.6–90.6% (±3pp of 87.6%); harness SHA + model version recorded.
+9. `trine-eval report <run>` prints accuracy-per-dollar and success-per-1k-tokens.
+10. `/harness-summary` across Phase 2 sprints: pass@k/pass^k computed from **trial** data (not retry data); every failing criterion has a linked transcript.

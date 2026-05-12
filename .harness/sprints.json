@@ -1,145 +1,114 @@
 {
+  "phase": 2,
+  "description": "Pivot to Python eval library (v0.1). Meta-harness prereqs (Sprint 0) then Python build (Sprints 1-6). See .harness/spec.md and C:/Users/akino/.claude/plans/c-users-akino-downloads-compass-artifac-dapper-muffin.md for full design.",
+  "phase_01_archive": {
+    "sprints_file": ".harness/sprints-phase-01.json",
+    "spec_file": ".harness/spec-phase-01.md",
+    "summary_file": ".harness/summary-phase-01.md",
+    "result": "5/5 sprints PASS, 53/53 criteria, 92% first-round pass rate"
+  },
   "sprints": [
     {
-      "number": 1,
-      "title": "Grading hierarchy and contract structure",
+      "number": 0,
+      "title": "Meta-harness prereqs: statistical trials, tasks.json, adaptive thinking, transcript capture",
       "features": [
-        "grading-hierarchy-enforcement",
-        "weighted-criteria",
-        "negative-test-cases",
-        "reference-solutions",
-        "plugin-manifest-fix"
+        "statistical-trial-infrastructure",
+        "tasks-json-schema",
+        "adaptive-thinking-opus-4-7",
+        "transcript-capture"
       ],
+      "gaps_addressed": ["GAP 1", "GAP 3", "GAP 5", "GAP 6"],
       "estimated_complexity": "medium",
-      "dependencies": []
+      "dependencies": [],
+      "scope_notes": "Upgrades the meta-harness itself so its verdicts on the Python build are statistically valid. All changes to plugins/trine-eval/ (skills, agents, hooks) and .harness/config.json. Adds trials-vs-retries separation, tasks.json schema per sprint criterion, Opus 4.7 with adaptive thinking on all agents, full transcript serialisation to .harness/transcripts/."
+    },
+    {
+      "number": 1,
+      "title": "Python library bootstrap + core primitives",
+      "features": [
+        "pyproject-uv-setup",
+        "pydantic-sample-score-task-evallog",
+        "decorator-registry-task-solver-scorer-metric-tool",
+        "anthropic-sdk-wrapper-opus-4-7-effort-thinking",
+        "cli-stubs"
+      ],
+      "compass_ids": ["A1", "A2", "A3", "A4", "A5", "F1", "F3", "F6"],
+      "estimated_complexity": "high",
+      "dependencies": [0],
+      "scope_notes": "First sprint creating src/trine_eval/. pyproject.toml uv-managed. Pydantic primitives, decorator registry, Anthropic wrapper with Opus 4.7 default + effort tier + interleaved thinking. Thinking-block round-trip enforced by unit test."
     },
     {
       "number": 2,
-      "title": "Evaluator separation and isolation",
+      "title": "Runner, replayable logs, pytest plugin, observability",
       "features": [
-        "per-dimension-isolated-judging",
-        "environment-isolation-guidance",
-        "evaluator-calibration-enhancement"
+        "async-runner-hard-caps",
+        "binary-json-replayable-logs",
+        "deterministic-seeds-pinned-versions",
+        "otel-langfuse-tracing",
+        "pytest-plugin-exit-code-gating",
+        "accuracy-per-dollar-success-per-1k-tokens"
       ],
-      "estimated_complexity": "medium",
-      "dependencies": [1]
+      "compass_ids": ["A6", "A9", "G3", "G4", "H1", "H2", "H3", "H4", "H5"],
+      "estimated_complexity": "high",
+      "dependencies": [1],
+      "scope_notes": "Runner with hard caps; msgpack binary + JSON replayable log; deterministic seed plumbing; OpenTelemetry spans exported to self-hosted Langfuse (ops/langfuse-compose.yaml); pytest plugin with exit code 100 on failure; G4 cost reporting."
     },
     {
       "number": 3,
-      "title": "Metrics, saturation, and summary upgrades",
+      "title": "Prompt caching and Batch API",
       "features": [
-        "pass-at-k-metrics",
-        "pass-to-the-k-metrics",
-        "saturation-graduation",
-        "eval-summary-upgrade"
+        "cache-control-breakpoints",
+        "batch-api-default-offline-path",
+        "thinking-block-round-trip-preservation"
       ],
+      "compass_ids": ["G1", "G2", "F6"],
       "estimated_complexity": "medium",
-      "dependencies": [1, 2]
+      "dependencies": [2],
+      "scope_notes": "Compass P1s promoted to v0.1 per user decision. cache_control breakpoints on system prompt + tools + golden examples. Batch API default for offline runs, stacks with caching. F6 enforcement: interleaved thinking survives batch round-trip byte-identical."
     },
     {
       "number": 4,
-      "title": "Context engineering and structured state",
+      "title": "LLM-as-judge: CoT rubric, binary scores, bootstrap CI, three-tier grading, calibration",
       "features": [
-        "structured-json-state",
-        "compaction-guidance",
-        "expanded-hooks",
-        "session-resumption-improvements"
+        "cot-rubric-scorer-golden-answer",
+        "binary-judge-tpr-tnr",
+        "bootstrap-ci-aggregates",
+        "three-tier-grading-code-model-human",
+        "human-annotation-queue-skeleton",
+        "50-item-calibration-set"
       ],
-      "estimated_complexity": "medium",
-      "dependencies": [1]
+      "compass_ids": ["E1", "E2", "E5", "E6", "H6"],
+      "estimated_complexity": "high",
+      "dependencies": [1, 2],
+      "scope_notes": "Single-judge-with-rubric mode at v0.1. E3/E4/E7 (pairwise position-swap, verbosity mitigation, self-consistency) explicitly deferred. Calibration gate: 50-item set under tests/fixtures/calibration/ must hit TPR+TNR >= 1.5."
     },
     {
       "number": 5,
-      "title": "Bootstrap, calibration, and ACI self-optimization",
+      "title": "Docker sandbox + cheap pre-filter + regression-safety gate",
       "features": [
-        "bootstrap-from-failures",
-        "human-calibration-pathway",
-        "aci-self-optimization"
+        "docker-sandbox-per-sample",
+        "lint-typecheck-ast-test-pipeline",
+        "fail-to-pass-pass-to-pass-regression-gate"
       ],
+      "compass_ids": ["A7", "D3", "D4"],
       "estimated_complexity": "high",
-      "dependencies": [1, 2, 3, 4]
+      "dependencies": [2],
+      "scope_notes": "Per-sample container with network=none; four-stage pipeline (ruff -> mypy -> AST diff -> tests); short-circuits on failure with structured reason; pre-patch FAIL_TO_PASS/PASS_TO_PASS capture; any PASS_TO_PASS -> FAIL is automatic fail."
     },
     {
       "number": 6,
-      "title": "Statistical foundation (trials, sandbox, tasks.json)",
+      "title": "SWE-bench Verified adapter + pass@k unbiased estimator + calibration run",
       "features": [
-        "multi-trial-execution",
-        "environment-sandboxing",
-        "formal-task-taxonomy"
+        "swebench-verified-dataset-adapter",
+        "pass-at-k-unbiased-estimator",
+        "contamination-memorization-screens",
+        "opus-4-7-baseline-calibration",
+        "token-efficiency-dashboard"
       ],
+      "compass_ids": ["D1", "D2", "D5", "D6", "F5", "G4"],
       "estimated_complexity": "high",
-      "dependencies": [1, 2, 3, 4, 5]
-    },
-    {
-      "number": 7,
-      "title": "Capability/regression dual-track",
-      "features": [
-        "regression-suite",
-        "regression-gate"
-      ],
-      "estimated_complexity": "medium",
-      "dependencies": [6]
-    },
-    {
-      "number": 8,
-      "title": "Claude 4.6 adaptive thinking and Batch API",
-      "features": [
-        "adaptive-thinking-config",
-        "batch-api-mode"
-      ],
-      "estimated_complexity": "medium",
-      "dependencies": [6]
-    },
-    {
-      "number": 9,
-      "title": "Full transcript capture",
-      "features": [
-        "structured-transcripts",
-        "grader-disagreement-links"
-      ],
-      "estimated_complexity": "medium",
-      "dependencies": [6]
-    },
-    {
-      "number": 10,
-      "title": "Completeness — edge cases, Playwright, integrity",
-      "features": [
-        "edge-case-criteria",
-        "playwright-mcp-evaluator",
-        "adversarial-hygiene"
-      ],
-      "estimated_complexity": "high",
-      "dependencies": [6, 8, 9]
-    },
-    {
-      "number": 11,
-      "title": "Synthetic verification — Phase 2 runtime hookups (offline)",
-      "features": [
-        "trial-loop-runtime",
-        "sandbox-tmpdir-isolation",
-        "regression-abort-runtime",
-        "transcript-emission-runtime",
-        "verified-via-command-audit",
-        "fixture-project-scaffold"
-      ],
-      "estimated_complexity": "high",
-      "dependencies": [6, 7, 9, 10]
-    },
-    {
-      "number": 12,
-      "title": "External-service runtime hookups + Sprint 11 follow-ups",
-      "features": [
-        "evaluator-write-tool",
-        "batch-api-runtime-hookup",
-        "playwright-runtime-hookup",
-        "thinking-profile-runtime-dispatch",
-        "edge-case-multi-sprint-aggregation",
-        "generic-regression-invariants",
-        "contract-skill-authoring-rules",
-        "evaluator-fallback-documentation"
-      ],
-      "estimated_complexity": "high",
-      "dependencies": [10, 11]
+      "dependencies": [1, 2, 3, 4, 5],
+      "scope_notes": "Load SWE-bench Verified v2.0.3+. pass@k via Chen-et-al. unbiased estimator with n>=k samples (default n=5). 50-instance calibration targeting 84.6-90.6% (published Opus 4.7 = 87.6%). D6 contamination disclosure in README. trine-eval report <run> prints G4 metrics."
     }
   ]
 }
