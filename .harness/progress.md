@@ -86,3 +86,13 @@ Phase 1 delivered a mature three-agent meta-harness (5/5 sprints PASS, 53/53 cri
 Stopped. Current sprint state should be committed.
 ## Session 2026-05-18T16:04:21-04:00
 Stopped. Current sprint state should be committed.
+
+## Sprint 00: Meta-harness prereqs for Phase 2 Python build
+- Status: PASS
+- Rounds: 2
+- Passed criteria: 5/5
+- Weighted score: 100%
+- Gates: 2/2
+- Date: 2026-05-18
+- Note: Round 1 FAIL on C4 (verification_command Python wrapper failed on Windows via cmd.exe). Round 2 PASS after fix bf30c09/b54a478 using explicit Git Bash path. Three real deltas delivered: `.harness/sprint-state.json` (new), `config.json` `python_build` section (6 fields), and Phase 2 eval-naming convention in `rules/harness-conventions.md`. Trials/tasks.json/adaptive-thinking/transcripts already shipped in meta-sprints 6–12, not re-implemented.
+- Rubric scores: Methodology 4/5, Grading 4/5, Separation 5/5, Context 4/5, Extensibility 4/5

@@ -1,13 +1,15 @@
 {
   "current_sprint": 1,
-  "last_updated": "2026-05-18T16:33:44-04:00",
+  "last_updated": "2026-05-18T16:51:16-04:00",
   "sprints": {
     "0": {
       "status": "PASS",
-      "rounds": 1,
+      "rounds": 2,
       "criteria_passed": "5/5",
       "weighted_score": 100,
-      "date": "2026-05-18"
+      "gates_passed": "2/2",
+      "date": "2026-05-18",
+      "note": "Round 1 FAIL on C4 (Python subprocess shell=True routed through cmd.exe on Windows). Round 2 PASS after fix bf30c09/b54a478: explicit Git Bash path with subprocess.run([bash,'-c',...])."
     },
     "1": {
       "status": "PASS",
