@@ -1,0 +1,97 @@
+{
+  "current_sprint": 1,
+  "last_updated": "2026-05-18T16:33:44-04:00",
+  "sprints": {
+    "0": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "5/5",
+      "weighted_score": 100,
+      "date": "2026-05-18"
+    },
+    "1": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "13/13",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "2": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "9/9",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "3": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "9/9",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "4": {
+      "status": "PASS",
+      "rounds": 2,
+      "criteria_passed": "10/10",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "5": {
+      "status": "PASS",
+      "rounds": 2,
+      "criteria_passed": "12/12",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "6": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "12/12",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "7": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "13/13",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "8": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "13/13",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "9": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "11/11",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "10": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "12/12",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "11": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "12/12",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "12": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "11/11",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    }
+  }
+}
