@@ -34,7 +34,7 @@
       "grader_type": "deterministic",
       "weight": 25,
       "is_gate": false,
-      "verification_command": "python -c \"import json,subprocess; tasks=json.load(open('.harness/regression/regression.json'))['tasks']; [subprocess.run(['bash','-c',t['verification_command']], check=True) for t in tasks]; print('PASS')\"",
+      "verification_command": "python -c \"import json,subprocess,os; bash=r'C:\\\\Program Files\\\\Git\\\\usr\\\\bin\\\\bash.exe' if os.name=='nt' else 'bash'; tasks=json.load(open('.harness/regression/regression.json'))['tasks']; [subprocess.run([bash,'-c',t['verification_command']], check=True) for t in tasks]; print('PASS')\"",
       "rubric_dimension": "methodology_completeness"
     },
     {
