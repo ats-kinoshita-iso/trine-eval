@@ -1,6 +1,8 @@
 """Tests for run_batch (C4, C5, C6, C7)."""
 from __future__ import annotations
 
+import sys
+import warnings
 from unittest.mock import MagicMock, call, patch
 
 import pytest
@@ -317,5 +319,12 @@ class TestBatchThinkingRoundTrip:
                 for b in follow_up_content
             ), "thinking block not preserved in follow-up batch request content"
 
-        # Required phrase for C7 grep gate — must appear unconditionally.
-        print("thinking blocks preserved byte-identical")
+        # Required phrase for C7 grep gate — must appear unconditionally in test output.
+        # Use sys.stderr (redirected to stdout by 2>&1 in the verification command) so
+        # the phrase appears in the tee'd file regardless of pytest's stdout capture mode.
+        # Also emit as a warning so it appears in the pytest warning summary.
+        print("thinking blocks preserved byte-identical", file=sys.stderr)
+        warnings.warn(
+            "thinking blocks preserved byte-identical",
+            stacklevel=1,
+        )
