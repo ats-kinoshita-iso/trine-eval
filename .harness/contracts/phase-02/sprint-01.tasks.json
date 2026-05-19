@@ -1,0 +1,147 @@
+{
+  "sprint": 1,
+  "title": "Python library bootstrap + core primitives",
+  "eval_target": ".harness/evals/phase-02/sprint-01-r1.md",
+  "tasks": [
+    {
+      "task_id": "s01-c1",
+      "sprint": 1,
+      "criterion": "`pyproject.toml` is uv-installable and collects tests: running `uv sync` exits 0, and `uv run pytest --collect-only` exits 0 and reports at least 10 test items collected from `tests/`.",
+      "grader_type": "deterministic",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv sync && uv run pytest --collect-only -q 2>&1 | grep -E \"^[0-9]+ tests? collected\" | head -1'",
+      "rubric_dimension": "functional_correctness"
+    },
+    {
+      "task_id": "s01-c2",
+      "sprint": 1,
+      "criterion": "Core Pydantic models are importable and validate correctly: Sample, Score, Task, EvalLog all import; Sample round-trips model_dump(); target field is optional.",
+      "grader_type": "deterministic",
+      "weight": 12,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/core/test_models.py -v --tb=short 2>&1 | tee /tmp/c2.txt && grep -q \"PASSED\" /tmp/c2.txt && echo PASS'",
+      "rubric_dimension": "functional_correctness"
+    },
+    {
+      "task_id": "s01-c3",
+      "sprint": 1,
+      "criterion": "Decorator registry round-trip — all five decorator types (@task, @solver, @scorer, @metric, @tool) register the decorated function by __name__ and the stored callable executes correctly.",
+      "grader_type": "deterministic",
+      "weight": 14,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/core/test_decorators.py -v --tb=short 2>&1 | tee /tmp/c3.txt && grep -q \"PASSED\" /tmp/c3.txt && echo PASS'",
+      "rubric_dimension": "functional_correctness"
+    },
+    {
+      "task_id": "s01-c4",
+      "sprint": 1,
+      "criterion": "`AnthropicModel` defaults to model='claude-opus-4-7' and effort='medium'; accepts effort='high'; rejects invalid effort values like 'turbo'.",
+      "grader_type": "deterministic",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/models/test_anthropic.py -k \"defaults or effort\" -v --tb=short 2>&1 | tee /tmp/c4.txt && grep -q \"PASSED\" /tmp/c4.txt && echo PASS'",
+      "rubric_dimension": "functional_correctness"
+    },
+    {
+      "task_id": "s01-c5a",
+      "sprint": 1,
+      "criterion": "Thinking-block round-trip test exits 0 and emits the literal phrase 'thinking blocks preserved byte-identical' (F6, deterministic). The test uses mocked SDK responses and asserts the thinking block fields survive the round-trip.",
+      "grader_type": "deterministic",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/models/test_anthropic.py -k thinking_round_trip -v --tb=short 2>&1 | tee /tmp/c5a.txt && grep -q \"thinking blocks preserved byte-identical\" /tmp/c5a.txt && grep -q \"PASSED\" /tmp/c5a.txt && echo PASS'",
+      "rubric_dimension": "functional_correctness"
+    },
+    {
+      "task_id": "s01-c5b",
+      "sprint": 1,
+      "criterion": "Thinking-block round-trip assertion structure is correct (F6, llm-judge): the test_thinking_block_round_trip function mocks anthropic.Anthropic, simulates a two-turn exchange, and asserts that the thinking block's signature field (and type/thinking fields) survive byte-identical in the second messages.create call's messages argument. A test that only checks call-count is FAIL.",
+      "grader_type": "llm-judge",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "functional_correctness"
+    },
+    {
+      "task_id": "s01-c6",
+      "sprint": 1,
+      "criterion": "`uv run pytest` green across `tests/core/` and `tests/models/`: exits 0 with zero failures and zero errors.",
+      "grader_type": "deterministic",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "uv run pytest tests/core/ tests/models/ -v --tb=short",
+      "rubric_dimension": "functional_correctness"
+    },
+    {
+      "task_id": "s01-c7",
+      "sprint": 1,
+      "criterion": "`trine-eval --help` exits 0 and stdout contains the strings 'run', 'score', and 'report'.",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "uv run trine-eval --help 2>&1 | tee /tmp/help.txt && grep -q 'run' /tmp/help.txt && grep -q 'score' /tmp/help.txt && grep -q 'report' /tmp/help.txt && echo PASS",
+      "rubric_dimension": "functional_correctness"
+    },
+    {
+      "task_id": "s01-c8",
+      "sprint": 1,
+      "criterion": "Phase 2 contract naming convention documented in `rules/harness-conventions.md`: the file contains the string 'contracts/phase-02' in a new subsection covering the canonical paths for Phase 2 contract files.",
+      "grader_type": "deterministic",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": "grep -q 'contracts/phase-02' rules/harness-conventions.md && echo PASS || echo FAIL",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s01-c9",
+      "sprint": 1,
+      "criterion": "`AnthropicModel` correctly wires the interleaved-thinking beta header ('interleaved-thinking-2025-05-14') and maps effort tier to budget_tokens (low<=1000, medium<=8000, high<=16000, xhigh<=32000, max<=100000); thinking blocks are never stripped or mutated on round-trip.",
+      "grader_type": "llm-judge",
+      "weight": 5,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "functional_correctness"
+    },
+    {
+      "task_id": "s01-c10",
+      "sprint": 1,
+      "criterion": "`pyproject.toml` metadata quality and dependency completeness: name='trine-eval', version='0.1.0', requires-python='>=3.12', pydantic>=2.0 and anthropic>=0.40 in runtime deps, pytest/pytest-asyncio/ruff/mypy in dev deps, [project.scripts] defines trine-eval entry point, no forbidden packages (langgraph/ragas/pgvector/fastapi).",
+      "grader_type": "llm-judge",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s01-c11",
+      "sprint": 1,
+      "criterion": "`uv.lock` exists at repo root and is tracked by git: `[ -f uv.lock ] && git ls-files uv.lock | grep -q uv.lock` succeeds. This enforces that `uv sync` was run and the lock file was committed.",
+      "grader_type": "deterministic",
+      "weight": 5,
+      "is_gate": false,
+      "verification_command": "bash -c '[ -f uv.lock ] && git ls-files uv.lock | grep -q uv.lock && echo PASS || echo FAIL'",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s01-sn1",
+      "sprint": 1,
+      "criterion": "Historical Phase 1 contracts and evals are unmodified: no file under .harness/contracts/sprint-0[1-9]*.md, .harness/contracts/sprint-1*.md, .harness/evals/sprint-0[1-9]*.md, or .harness/evals/sprint-1*.md is modified on the Sprint 01 branch (checked against merge-base with main).",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "bash -c 'BASE=$(git merge-base HEAD main 2>/dev/null || git rev-parse HEAD~$(git rev-list --count HEAD)^); diff_out=$(git diff $BASE..HEAD -- \".harness/contracts/sprint-0[1-9]*.md\" \".harness/contracts/sprint-1*.md\" \".harness/evals/sprint-0[1-9]*.md\" \".harness/evals/sprint-1*.md\" 2>/dev/null); [ -z \"$diff_out\" ] && echo PASS || (echo FAIL && echo \"$diff_out\" && exit 1)'",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s01-sn2",
+      "sprint": 1,
+      "criterion": "No forbidden packages (langgraph, ragas, pgvector, fastapi) appear in pyproject.toml, src/trine_eval/, or tests/.",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "bash -c 'result=$(git grep -rn -E \"langgraph|ragas|pgvector|fastapi\" pyproject.toml src/ tests/ 2>/dev/null | grep -v \"^Binary\" | grep -v \":0$\"); [ -z \"$result\" ] && echo PASS || (echo FAIL && echo \"$result\" && exit 1)'",
+      "rubric_dimension": "methodology_completeness"
+    }
+  ]
+}

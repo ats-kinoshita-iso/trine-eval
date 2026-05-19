@@ -1,0 +1,124 @@
+{
+  "current_sprint": 3,
+  "current_phase": 2,
+  "last_updated": "2026-05-18T23:40:00-04:00",
+  "sprints": {
+    "phase-02-2": {
+      "phase": 2,
+      "number": 2,
+      "title": "Runner, replayable logs, pytest plugin, observability",
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "12/12",
+      "weighted_score": 100,
+      "gates_passed": "3/3",
+      "date": "2026-05-18",
+      "note": "First clean first-round PASS since early Phase 1. Contract negotiation hit max rounds (2) with Round 2 NEEDS REVISION (C9 exit-mask + C2 advisory). Generator fixed both as fix(sprint-02): 682c7f1 before any source landed. 11 implementation commits (682c7f1..8a17ea3): async runner with hard caps (token/time/cost/concurrency), binary+JSON replayable log format, deterministic seeds, OTel+Langfuse, pytest plugin (exit 100), token-efficiency metrics, CLI score/report subcommands, ops/langfuse-compose.yaml, sprint-state phase-qualifier docs. 78 tests passing (29 new for Sprint 2). Eval at .harness/evals/phase-02/sprint-02-r1.md."
+    },
+    "phase-02-1": {
+      "phase": 2,
+      "number": 1,
+      "title": "Python library bootstrap + core primitives",
+      "status": "PASS",
+      "rounds": 2,
+      "criteria_passed": "11/11",
+      "weighted_score": 100,
+      "gates_passed": "2/2",
+      "date": "2026-05-18",
+      "note": "Round 1 FAIL on SN1 only (all 11 success criteria PASS, 100%): SN1's broad .harness/evals/sprint-*.md glob matched sprint-00-*.md Phase 2 files from prior sprint. Round 2 PASS after fix 39a5ae7: narrowed eval glob to sprint-0[1-9]*.md and sprint-1*.md (matches contracts glob)."
+    },
+    "0": {
+      "status": "PASS",
+      "rounds": 2,
+      "criteria_passed": "5/5",
+      "weighted_score": 100,
+      "gates_passed": "2/2",
+      "date": "2026-05-18",
+      "note": "Round 1 FAIL on C4 (Python subprocess shell=True routed through cmd.exe on Windows). Round 2 PASS after fix bf30c09/b54a478: explicit Git Bash path with subprocess.run([bash,'-c',...])."
+    },
+    "1": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "13/13",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "2": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "9/9",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "3": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "9/9",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "4": {
+      "status": "PASS",
+      "rounds": 2,
+      "criteria_passed": "10/10",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "5": {
+      "status": "PASS",
+      "rounds": 2,
+      "criteria_passed": "12/12",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "6": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "12/12",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "7": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "13/13",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "8": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "13/13",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "9": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "11/11",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "10": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "12/12",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "11": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "12/12",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    },
+    "12": {
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "11/11",
+      "weighted_score": 100,
+      "date": "2026-04-12"
+    }
+  }
+}

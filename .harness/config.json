@@ -39,5 +39,13 @@
   },
   "evaluator_tools": {
     "playwright": "auto"
+  },
+  "python_build": {
+    "project_root": ".",
+    "src_root": "src/trine_eval",
+    "test_command": "uv run pytest",
+    "lint_command": "uv run ruff check && uv run mypy --strict src",
+    "python_version": "3.12",
+    "lock_file_path": "uv.lock"
   }
 }

@@ -1,0 +1,68 @@
+{
+  "sprint": 0,
+  "tasks": [
+    {
+      "task_id": "s00-c1",
+      "criterion": "sprint-state.json exists and is structurally valid",
+      "grader_type": "deterministic",
+      "weight": 25,
+      "is_gate": false,
+      "verification_command": "python -c \"import json; d=json.load(open('.harness/sprint-state.json')); assert isinstance(d.get('current_sprint'), int) and d['current_sprint']==1 and isinstance(d.get('last_updated'), str) and ('sprints' in d); print('PASS')\"",
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s00-c2",
+      "criterion": "config.json carries a python_build section with required fields",
+      "grader_type": "deterministic",
+      "weight": 20,
+      "is_gate": false,
+      "verification_command": "python -c \"import json; d=json.load(open('.harness/config.json')); pb=d['python_build']; assert all(k in pb for k in ['project_root','src_root','test_command','lint_command','python_version','lock_file_path']); print('PASS')\"",
+      "rubric_dimension": "extensibility"
+    },
+    {
+      "task_id": "s00-c3",
+      "criterion": "Phase 2 eval file-naming convention is committed in harness-conventions.md",
+      "grader_type": "deterministic",
+      "weight": 15,
+      "is_gate": false,
+      "verification_command": "grep -qE '^#{2,3}.*Phase 2' rules/harness-conventions.md && grep -q 'phase-02' rules/harness-conventions.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s00-c4",
+      "criterion": "Regression gate passes with the three graduated invariants (sprint-00.md and sprint-00.tasks.json must be committed together)",
+      "grader_type": "deterministic",
+      "weight": 25,
+      "is_gate": false,
+      "verification_command": "python -c \"import json,subprocess,os; bash=r'C:\\\\Program Files\\\\Git\\\\usr\\\\bin\\\\bash.exe' if os.name=='nt' else 'bash'; tasks=json.load(open('.harness/regression/regression.json'))['tasks']; [subprocess.run([bash,'-c',t['verification_command']], check=True) for t in tasks]; print('PASS')\"",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s00-c5",
+      "criterion": "python_build config values are consistent with spec.md's technical constraints",
+      "grader_type": "llm-judge",
+      "weight": 15,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s00-sn1",
+      "criterion": "Historical contracts and evals are unmodified by any commit on the Sprint 00 branch",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "bash -c 'BASE=$(git merge-base HEAD main 2>/dev/null || git rev-parse HEAD~$(git rev-list --count HEAD)^); diff_out=$(git diff $BASE..HEAD -- .harness/contracts/sprint-0[1-9]*.md .harness/contracts/sprint-1*.md .harness/evals/sprint-*.md 2>/dev/null); [ -z \"$diff_out\" ] && echo PASS || (echo FAIL && echo \"$diff_out\" && exit 1)'",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s00-sn2",
+      "criterion": "sprint-state.json does not fabricate status, rounds, or weighted_score data not supported by progress.md or evals",
+      "grader_type": "llm-judge",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    }
+  ]
+}

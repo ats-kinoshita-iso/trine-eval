@@ -1,0 +1,142 @@
+{
+  "sprint": 2,
+  "phase": 2,
+  "title": "Runner, replayable logs, pytest plugin, observability",
+  "tasks": [
+    {
+      "task_id": "s02-c1",
+      "criterion": "Async runner returns an EvalLog for a no-op task: test_run_noop imports asyncio and trine_eval.runner.engine.run, creates a minimal Task with one Sample, calls asyncio.run(run(task, model)) with a stub model, and asserts the return value is an EvalLog with len(scores) == 1.",
+      "grader_type": "deterministic",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/runner/test_engine.py -k test_run_noop -v --tb=short 2>&1 | tee /tmp/s02c1.txt && grep -q \"PASSED\" /tmp/s02c1.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s02-c2",
+      "criterion": "Hard-cap enforcement — all four caps fire correctly: tests/runner/test_caps.py contains at least four independent tests (one per cap). Three tests (token_limit, time_limit, cost_limit) assert EvalLog.metadata['cap_hit'] names the triggered cap and the log is partial. One test (max_concurrency) verifies bounded concurrency via an in-flight counter without asserting cap_hit, because max_concurrency only throttles parallelism and does not cause early abort.",
+      "grader_type": "deterministic",
+      "weight": 16,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/runner/test_caps.py -v --tb=short 2>&1 | tee /tmp/s02c2.txt && grep -q \"PASSED\" /tmp/s02c2.txt && grep -E \"4 passed|[5-9] passed|[1-9][0-9]+ passed\" /tmp/s02c2.txt && ! grep -qE \"cap_hit.*max_concurrency|max_concurrency.*cap_hit\" tests/runner/test_caps.py && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s02-c3",
+      "criterion": "Log round-trip — JSON and msgpack: tests/runner/test_logformat.py contains test_json_round_trip and test_msgpack_round_trip; each saves a non-trivial EvalLog (>=2 samples, non-empty aggregate) and asserts load(save(log)) == log via Pydantic equality.",
+      "grader_type": "deterministic",
+      "weight": 12,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/runner/test_logformat.py -v --tb=short 2>&1 | tee /tmp/s02c3.txt && grep -q \"PASSED\" /tmp/s02c3.txt && grep -E \"2 passed|[3-9] passed|[1-9][0-9]+ passed\" /tmp/s02c3.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s02-c4",
+      "criterion": "pytest plugin exits 100 on failing trine-eval test: uv run pytest tests/runner/test_plugin_exit.py exits with code 100 (not 1) when a trine-eval score falls below the configured threshold.",
+      "grader_type": "deterministic",
+      "weight": 12,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/runner/test_plugin_exit.py --tb=short 2>&1; CODE=$?; [ \"$CODE\" = \"100\" ] && echo PLUGIN_OK || (echo \"Got exit $CODE expected 100\" && exit 1)'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s02-c5",
+      "criterion": "trine-eval score --log <path> --scorer <name> rescores without re-running model: test saves a fixture EvalLog, calls the CLI subcommand via subprocess, asserts exit 0 and a score value in stdout, and confirms no real Anthropic API call was made.",
+      "grader_type": "deterministic",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/runner/test_rescore_cli.py -v --tb=short 2>&1 | tee /tmp/s02c5.txt && grep -q \"PASSED\" /tmp/s02c5.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s02-c6",
+      "criterion": "trine-eval report <log> prints token-efficiency metrics: test calls the CLI subcommand via subprocess and asserts exit 0 and stdout contains accuracy_per_dollar and success_per_1k_tokens (case-insensitive, hyphens or underscores accepted).",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/runner/test_report_cli.py -v --tb=short 2>&1 | tee /tmp/s02c6.txt && grep -q \"PASSED\" /tmp/s02c6.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s02-c7",
+      "criterion": "OTel + Langfuse wiring composes without errors: tests/observability/test_otel.py imports trine_eval.observability.otel, calls init_tracer(exporter='noop') without raising, starts/ends a span, and calls get_langfuse_client() with stub credentials without making network calls.",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/observability/test_otel.py -v --tb=short 2>&1 | tee /tmp/s02c7.txt && grep -q \"PASSED\" /tmp/s02c7.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s02-c8",
+      "criterion": "ops/langfuse-compose.yaml is valid YAML with a 'services' key: the file must exist and parse as a dict containing a 'services' key. Missing file → FileNotFoundError → non-zero exit → FAIL. Present but missing services key → sys.exit(1) → FAIL.",
+      "grader_type": "deterministic",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "bash -c 'python -c \"import sys, yaml; d=yaml.safe_load(open(\\\"ops/langfuse-compose.yaml\\\")); sys.exit(0 if isinstance(d, dict) and \\\"services\\\" in d else 1)\" && echo PASS'",
+      "rubric_dimension": "structural"
+    },
+    {
+      "task_id": "s02-c9",
+      "criterion": "phase-02-N key convention documented in rules/harness-conventions.md: the file contains the literal strings 'phase-02-N', 'current_sprint', and 'current_phase' in the new subsection, documenting how current_phase disambiguates what current_sprint refers to.",
+      "grader_type": "deterministic",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "bash -c 'grep -q \"phase-02-N\" rules/harness-conventions.md && grep -q \"current_sprint\" rules/harness-conventions.md && grep -q \"current_phase\" rules/harness-conventions.md && echo PASS || (echo FAIL && exit 1)'",
+      "rubric_dimension": "structural"
+    },
+    {
+      "task_id": "s02-c10",
+      "criterion": "All new tests collected and green — full runner + observability suite: uv run pytest tests/runner/ tests/observability/ exits 0 with no failures.",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/runner/ tests/observability/ -v --tb=short 2>&1 | tee /tmp/s02c10.txt && grep -E \"passed\" /tmp/s02c10.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s02-c11",
+      "criterion": "Async runner hard-cap design is correct: src/trine_eval/runner/engine.py uses asyncio.Semaphore for max_concurrency, accumulates tokens and aborts on token_limit, enforces time_limit via wall-clock, computes USD cost from Opus 4.7 pricing for cost_limit, and embeds 'cap_hit' in EvalLog.metadata. Stubs or single-cap enforcement is FAIL.",
+      "grader_type": "llm-judge",
+      "weight": 5,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s02-c12",
+      "criterion": "pyproject.toml dependency additions are complete: runtime deps include msgpack>=1.0, opentelemetry-api>=1.20, opentelemetry-sdk>=1.20, langfuse>=2.0; [project.entry-points.pytest11] declares trine-eval = 'trine_eval.pytest_plugin'; no forbidden packages (langgraph, ragas, pgvector, fastapi) appear anywhere.",
+      "grader_type": "llm-judge",
+      "weight": 3,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "structural"
+    },
+    {
+      "task_id": "s02-sn1",
+      "criterion": "Historical Phase 1 contracts and evals are unmodified: no file matching .harness/contracts/sprint-0[1-9]*.md, .harness/contracts/sprint-1*.md, .harness/evals/sprint-0[1-9]*.md, or .harness/evals/sprint-1*.md is modified on this branch.",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "bash -c 'BASE=$(git merge-base HEAD main 2>/dev/null || git rev-parse HEAD~$(git rev-list --count HEAD)^); diff_out=$(git diff $BASE..HEAD -- \".harness/contracts/sprint-0[1-9]*.md\" \".harness/contracts/sprint-1*.md\" \".harness/evals/sprint-0[1-9]*.md\" \".harness/evals/sprint-1*.md\" 2>/dev/null); [ -z \"$diff_out\" ] && echo PASS || (echo FAIL && echo \"$diff_out\" && exit 1)'",
+      "rubric_dimension": "structural"
+    },
+    {
+      "task_id": "s02-sn2",
+      "criterion": "No forbidden packages imported or declared: langgraph, ragas, pgvector, fastapi do not appear in pyproject.toml, src/trine_eval/**/*.py, or tests/**/*.py.",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "bash -c 'git grep -rn --count -E \"langgraph|ragas|pgvector|fastapi\" pyproject.toml src/ tests/ 2>/dev/null | grep -v \"^Binary\" | grep -v \":0$\" && echo FAIL && exit 1 || echo PASS'",
+      "rubric_dimension": "structural"
+    },
+    {
+      "task_id": "s02-sn3",
+      "criterion": "No real Anthropic API calls in tests: the Evaluator must read test source files (tests/runner/test_engine.py, tests/runner/test_caps.py, tests/runner/test_rescore_cli.py, and any other file importing anthropic) and verify every anthropic.Anthropic(...) instantiation is enclosed in a mocker.patch(...) block or unittest.mock.patch(...) context. A bare anthropic.Anthropic() call outside a patch context is FAIL.",
+      "grader_type": "llm-judge",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": null,
+      "rubric_dimension": "behavioral"
+    }
+  ]
+}

@@ -123,6 +123,56 @@ Some evaluator tools are useful only on specific project types. Sprint 10 introd
 
 **Backward compatibility.** A project whose `.harness/config.json` lacks the `evaluator_tools` object hits the `"auto"` default. Combined with any non-`web-app` project type — including the current `eval-harness` project — `"auto"` resolves to "Playwright disabled," which is exactly Phase-1 behavior. No project that predates Sprint 10 sees a Playwright invocation. End-to-end Playwright invocation against a live `web-app` project is deferred to a synthetic verification sprint per the gap-closure plan, matching Sprint 8's posture for `thinking.profile` and Sprint 9's posture for transcript file writing.
 
+## Sprint-State Phase-Qualifier Convention
+
+`sprint-state.json` uses a namespaced key scheme to avoid collisions between
+Phase 1 and Phase 2 sprint entries:
+
+- **Phase 1** sprint entries use bare integer keys: `"1"` through `"12"`.
+- **Phase 2** sprint entries use `phase-02-N` keys: `"phase-02-0"`, `"phase-02-1"`,
+  `"phase-02-2"`, etc.
+- The `current_phase` field disambiguates which phase `current_sprint` refers to:
+  when `current_phase == 2`, `current_sprint: 2` means Phase 2 Sprint 2, whose
+  state entry is keyed `"phase-02-2"`.
+- **Bridging exception:** Sprint 0 of Phase 2 used the bare key `"0"` because
+  Phase 1 had no Sprint 0 and no collision was possible. Sprint 1 introduced
+  the `phase-02-N` form; Sprint 2+ use it exclusively.
+
+Tooling that reads `sprint-state.json` must interpret `current_sprint` in the
+context of `current_phase` — do not assume bare integer keys for Phase 2.
+
+Sprint 0 introduced the `phase-02/` subdirectory for contract and eval files.
+
+## Phase 2 Contract and Eval File Naming Convention
+
+Phase 2 (Python library build, Sprints 00–06) contract files use a `phase-02/`
+subdirectory under `.harness/contracts/`. Canonical paths for Phase 2 contract
+artifacts:
+
+- `.harness/contracts/phase-02/sprint-NN.md` — sprint contract markdown
+- `.harness/contracts/phase-02/sprint-NN.tasks.json` — machine-readable tasks
+
+## Phase 2 Eval File Naming Convention
+
+Phase 2 (Python library build, Sprints 00–06) eval files use a `phase-02/`
+subdirectory rather than the sprint-number-offset scheme proposed in `spec.md`.
+The offset scheme (`NN + 5`) was written before Sprints 6–12 consumed those
+numbers for Phase 2 meta-sprints; the `phase-02/` subdirectory avoids collisions
+and makes the phase boundary unambiguous in `git log`.
+
+Canonical path patterns for Phase 2 eval artifacts:
+
+- `.harness/evals/phase-02/sprint-NN-rR.md` — single-trial eval (when `config.trials == 1`)
+- `.harness/evals/phase-02/sprint-NN-rR-tT.md` — multi-trial eval (when `config.trials > 1`, `T` is 1-indexed trial number within round `R`)
+- `.harness/transcripts/phase-02/sprint-NN-rR.json` — matching transcript (single-trial)
+- `.harness/transcripts/phase-02/sprint-NN-rR-tT.json` — matching transcript (multi-trial)
+
+Phase 1 eval files under `.harness/evals/sprint-0{1..5}-*.md` are unaffected
+and remain at the root `evals/` path as append-only audit history. Phase 2
+meta-sprint evals (sprint-06 through sprint-12) likewise remain at root path
+as append-only history — only Sprints 00–06 of the Python library build use
+the `phase-02/` subdirectory going forward.
+
 ## Adversarial Hygiene: `verified_via_command` Per Criterion
 
 Sprint 9's transcript trailer captures messages, tool calls, token usage, timing, and thinking summary per evaluator run. Sprint 10 adds the per-criterion `verified_via_command` boolean to the same channel as the audit ground truth for "did the evaluator actually run the verification command, or did it grade by inference?"
