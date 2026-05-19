@@ -1,0 +1,133 @@
+{
+  "sprint": 3,
+  "phase": 2,
+  "title": "Prompt caching and Batch API",
+  "tasks": [
+    {
+      "task_id": "s03-c1",
+      "criterion": "`cache_control` breakpoints appear on system prompt in outgoing request: running `uv run pytest tests/models/test_caching.py -k test_system_prompt_cache_control -v --tb=short` exits 0 and output contains `PASSED`. `tests/models/test_caching.py` must contain `test_system_prompt_cache_control`. The test must: (a) mock `anthropic.Anthropic` so no real API calls are made, (b) call `AnthropicModel` (or a new `apply_cache_control` helper from `trine_eval.models.caching`) with a system prompt string, and (c) inspect the outgoing `messages.create` call and assert that the request payload's `system` argument is either a list containing a block with `\"cache_control\": {\"type\": \"ephemeral\"}` or that a top-level `cache_control` field is present on the system block.",
+      "grader_type": "deterministic",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/models/test_caching.py -k test_system_prompt_cache_control -v --tb=short 2>&1 | tee /tmp/s03c1.txt && grep -q \"PASSED\" /tmp/s03c1.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s03-c2",
+      "criterion": "`cache_control` breakpoints appear on tools block when tools are present: running `uv run pytest tests/models/test_caching.py -k test_tools_cache_control -v --tb=short` exits 0 and output contains `PASSED`. `tests/models/test_caching.py` must contain `test_tools_cache_control`. The test must: (a) mock `anthropic.Anthropic`, (b) call the model/helper with a non-empty `tools` list, and (c) assert the outgoing `tools` argument has `\"cache_control\": {\"type\": \"ephemeral\"}` on its last element (the canonical Anthropic pattern is to attach the breakpoint to the last item in the `tools` array).",
+      "grader_type": "deterministic",
+      "weight": 9,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/models/test_caching.py -k test_tools_cache_control -v --tb=short 2>&1 | tee /tmp/s03c2.txt && grep -q \"PASSED\" /tmp/s03c2.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s03-c3",
+      "criterion": "`cache_control` breakpoints appear on few-shot examples block when provided: running `uv run pytest tests/models/test_caching.py -k test_examples_cache_control -v --tb=short` exits 0 and output contains `PASSED`. `tests/models/test_caching.py` must contain `test_examples_cache_control`. The test must: (a) mock `anthropic.Anthropic`, (b) call the model/helper passing an `examples` list (few-shot / golden examples represented as message dicts), and (c) assert the last example message has `\"cache_control\": {\"type\": \"ephemeral\"}` on its final content block.",
+      "grader_type": "deterministic",
+      "weight": 9,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/models/test_caching.py -k test_examples_cache_control -v --tb=short 2>&1 | tee /tmp/s03c3.txt && grep -q \"PASSED\" /tmp/s03c3.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s03-c4",
+      "criterion": "Batch runner submits samples to `/v1/messages/batches` and demultiplexes results: running `uv run pytest tests/runner/test_batch.py -k test_batch_submit_and_demux -v --tb=short` exits 0 and output contains `PASSED`. `tests/runner/test_batch.py` must contain `test_batch_submit_and_demux`. The test must: (a) mock `anthropic.Anthropic` (including `client.messages.batches.create` and `client.messages.batches.retrieve`), (b) call `trine_eval.runner.batch.run_batch(task, model)` with a 3-sample task, (c) simulate the batch reaching `ended` status on the first poll, (d) simulate `results()` returning per-request results keyed by `custom_id`, and (e) assert the returned `EvalLog` has `len(scores) == 3`.",
+      "grader_type": "deterministic",
+      "weight": 14,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/runner/test_batch.py -k test_batch_submit_and_demux -v --tb=short 2>&1 | tee /tmp/s03c4.txt && grep -q \"PASSED\" /tmp/s03c4.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s03-c5",
+      "criterion": "Batch runner polls until completion and handles `in_progress` → `ended` transition: running `uv run pytest tests/runner/test_batch.py -k test_batch_polls_until_complete -v --tb=short` exits 0 and output contains `PASSED`. `tests/runner/test_batch.py` must contain `test_batch_polls_until_complete`. The test must: (a) mock `client.messages.batches.retrieve` to return `in_progress` on the first call and `ended` on the second, (b) assert `retrieve` was called at least twice (proving polling occurred), and (c) assert the final `EvalLog` reflects the demultiplexed results.",
+      "grader_type": "deterministic",
+      "weight": 11,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/runner/test_batch.py -k test_batch_polls_until_complete -v --tb=short 2>&1 | tee /tmp/s03c5.txt && grep -q \"PASSED\" /tmp/s03c5.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s03-c6",
+      "criterion": "Batch requests carry `cache_control` breakpoints (caching + batching compose): running `uv run pytest tests/runner/test_batch.py -k test_batch_carries_cache_control -v --tb=short` exits 0 and output contains `PASSED`. `tests/runner/test_batch.py` must contain `test_batch_carries_cache_control`. The test must: (a) mock `anthropic.Anthropic`, (b) call the batch runner with a task that includes a system prompt, (c) inspect the request body submitted to `batches.create` (the `requests` list), and (d) assert at least one request in the batch contains a system block with `\"cache_control\": {\"type\": \"ephemeral\"}`.",
+      "grader_type": "deterministic",
+      "weight": 12,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/runner/test_batch.py -k test_batch_carries_cache_control -v --tb=short 2>&1 | tee /tmp/s03c6.txt && grep -q \"PASSED\" /tmp/s03c6.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s03-c7",
+      "criterion": "F6 thinking-block round-trip preserved through the batch path (deterministic gate): running `uv run pytest tests/runner/test_batch.py -k test_batch_thinking_round_trip -v --tb=short` exits 0, output contains `PASSED`, and output contains the literal phrase `thinking blocks preserved byte-identical`. `tests/runner/test_batch.py` must contain `test_batch_thinking_round_trip`. The test must: (a) mock `anthropic.Anthropic` (including the batch endpoints), (b) construct a thinking block `{\"type\": \"thinking\", \"thinking\": \"...\", \"signature\": \"sig-batch-001\"}`, (c) simulate a batch result that returns a response containing that thinking block, (d) simulate a follow-up batch turn (multi-turn tool use) where the thinking block is echoed back, and (e) assert the thinking block in the follow-up batch request has `\"signature\" == \"sig-batch-001\"` — byte-identical to what was returned. The test must emit the literal phrase `thinking blocks preserved byte-identical` via `print()` so the C7 grep gate fires.",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/runner/test_batch.py -k test_batch_thinking_round_trip -v --tb=short 2>&1 | tee /tmp/s03c7.txt && grep -q \"thinking blocks preserved byte-identical\" /tmp/s03c7.txt && grep -q \"PASSED\" /tmp/s03c7.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s03-c8",
+      "criterion": "Full batch + caching test suite exits 0: `uv run pytest tests/models/test_caching.py tests/runner/test_batch.py` exits 0 with no failures or errors. All new test files from this sprint pass together. PASS when pytest exit code is 0, output contains `passed`, and no `FAILED` or `ERROR` lines appear.",
+      "grader_type": "deterministic",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/models/test_caching.py tests/runner/test_batch.py -v --tb=short 2>&1 | tee /tmp/s03c8.txt; EC=${PIPESTATUS[0]}; grep -E \"passed\" /tmp/s03c8.txt && ! grep -qE \"FAILED|ERROR\" /tmp/s03c8.txt && [ \"$EC\" = \"0\" ] && echo PASS || exit 1'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s03-c9",
+      "criterion": "No regressions in existing runner and model tests: all prior Sprint 1 and Sprint 2 tests under `tests/runner/` and `tests/models/` continue to pass. PASS when pytest exit code is 0, output contains `passed`, and no `FAILED` or `ERROR` lines appear in the output.",
+      "grader_type": "deterministic",
+      "weight": 5,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/runner/ tests/models/ -v --tb=short 2>&1 | tee /tmp/s03c9.txt; EC=${PIPESTATUS[0]}; grep -E \"passed\" /tmp/s03c9.txt && ! grep -qE \"FAILED|ERROR\" /tmp/s03c9.txt && [ \"$EC\" = \"0\" ] && echo PASS || exit 1'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s03-c10",
+      "criterion": "`cache_control` helper API shape is clean and caller-friendly (G1 behavioral): read `src/trine_eval/models/caching.py`. The implementation must: (a) expose a function that accepts `system: str | None`, `tools: list | None`, and `examples: list[dict] | None` and returns a dict with `cache_control` breakpoints applied at all three positions where content is present; (b) NOT require callers to manually construct `{\"cache_control\": {\"type\": \"ephemeral\"}}` dicts; (c) produce `\"cache_control\": {\"type\": \"ephemeral\"}` at each breakpoint position; (d) for the `examples` key specifically: the return dict contains `examples` as a library-internal key (the Anthropic `messages.create` API does not accept an `examples` parameter); callers must pop this key and prepend the annotated example messages to the `messages` array before calling `messages.create`; this caller contract must be visible in the module docstring or function docstring. A helper that only handles system prompt and ignores tools/examples is FAIL. A helper that requires callers to build cache_control dicts is FAIL. A caller or test that passes `examples` directly via `**kwargs` expansion into `messages.create` is FAIL.",
+      "grader_type": "llm-judge",
+      "weight": 7,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s03-c11",
+      "criterion": "Batch runner design is correct — `custom_id` mapping, polling, and `EvalLog` shape (G2 behavioral): read `src/trine_eval/runner/batch.py`. The implementation must: (a) assign a unique `custom_id` to each sample before submission (e.g., `sample.id` or a UUID); (b) submit all samples in a single `batches.create` call (not one call per sample); (c) poll `batches.retrieve(batch_id)` on a loop checking `processing_status` for `\"ended\"` (or equivalent terminal status); (d) iterate the batch results and map each result back to the originating sample by matching `custom_id` → sample; and (e) return an `EvalLog` whose `scores` list is the same length as the number of successfully demultiplexed samples. An implementation that calls `messages.create` per sample (the streaming path) rather than `batches.create` is FAIL.",
+      "grader_type": "llm-judge",
+      "weight": 9,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s03-sn1",
+      "criterion": "Historical Phase 1 and Phase 2 prior-sprint contracts and evals are unmodified: no file matching Phase-1 or prior Phase-2 sprint paths (using `sprint-0[12]*.md` for Phase-2 to exclude the current sprint-03 contract) is modified on this branch. PASS when the git diff against merge-base is empty for all covered paths.",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "bash -c 'BASE=$(git merge-base HEAD main 2>/dev/null || git rev-parse HEAD~$(git rev-list --count HEAD)^); diff_out=$(git diff $BASE..HEAD -- \".harness/contracts/sprint-0[1-9]*.md\" \".harness/contracts/sprint-1*.md\" \".harness/evals/sprint-0[1-9]*.md\" \".harness/evals/sprint-1*.md\" \".harness/contracts/phase-02/sprint-0[12]*.md\" \".harness/contracts/phase-02/sprint-1*.md\" \".harness/evals/phase-02/sprint-0[12]*.md\" \".harness/evals/phase-02/sprint-1*.md\" 2>/dev/null); [ -z \"$diff_out\" ] && echo PASS || (echo FAIL && echo \"$diff_out\" && exit 1)'",
+      "rubric_dimension": "structural"
+    },
+    {
+      "task_id": "s03-sn2",
+      "criterion": "No forbidden packages imported or declared: the strings `langgraph`, `ragas`, `pgvector`, and `fastapi` must not appear in `pyproject.toml`, `src/trine_eval/**/*.py`, or `tests/**/*.py`. PASS when `git grep` finds no matches.",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "bash -c 'git grep -rn --count -E \"langgraph|ragas|pgvector|fastapi\" pyproject.toml src/ tests/ 2>/dev/null | grep -v \"^Binary\" | grep -v \":0$\" && echo FAIL && exit 1 || echo PASS'",
+      "rubric_dimension": "structural"
+    },
+    {
+      "task_id": "s03-sn3",
+      "criterion": "No real Anthropic API calls in tests: no test under `tests/` calls `anthropic.Anthropic()` or `client.messages.batches.create` without mocking (i.e., without a `unittest.mock.patch` or `pytest-mock` fixture wrapping the call). The Evaluator must read `tests/models/test_caching.py`, `tests/runner/test_batch.py`, and any other file that imports `anthropic`, and verify that every `anthropic.Anthropic(...)` instantiation and every `batches.create` call is enclosed in a `mocker.patch(...)` block or a `unittest.mock.patch(...)` context manager. A bare `anthropic.Anthropic()` call at module level or in a test body without a surrounding patch is FAIL.",
+      "grader_type": "llm-judge",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": null,
+      "rubric_dimension": "behavioral"
+    }
+  ]
+}

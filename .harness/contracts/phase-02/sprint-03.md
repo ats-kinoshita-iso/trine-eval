@@ -76,9 +76,9 @@ Gate criteria — any failure blocks the sprint regardless of score.
 
 1. **Historical Phase 1 and Phase 2 prior-sprint contracts and evals are unmodified**: no file matching Phase-1 or prior Phase-2 sprint paths is modified on this branch. Verify by diffing all commits against the merge-base:
    ```
-   bash -c 'BASE=$(git merge-base HEAD main 2>/dev/null || git rev-parse HEAD~$(git rev-list --count HEAD)^); diff_out=$(git diff $BASE..HEAD -- ".harness/contracts/sprint-0[1-9]*.md" ".harness/contracts/sprint-1*.md" ".harness/evals/sprint-0[1-9]*.md" ".harness/evals/sprint-1*.md" ".harness/contracts/phase-02/sprint-0[1-9]*.md" ".harness/contracts/phase-02/sprint-1*.md" ".harness/evals/phase-02/sprint-0[1-9]*.md" ".harness/evals/phase-02/sprint-1*.md" 2>/dev/null); [ -z "$diff_out" ] && echo PASS || (echo FAIL && echo "$diff_out" && exit 1)'
+   bash -c 'BASE=$(git merge-base HEAD main 2>/dev/null || git rev-parse HEAD~$(git rev-list --count HEAD)^); diff_out=$(git diff $BASE..HEAD -- ".harness/contracts/sprint-0[1-9]*.md" ".harness/contracts/sprint-1*.md" ".harness/evals/sprint-0[1-9]*.md" ".harness/evals/sprint-1*.md" ".harness/contracts/phase-02/sprint-0[12]*.md" ".harness/contracts/phase-02/sprint-1*.md" ".harness/evals/phase-02/sprint-0[12]*.md" ".harness/evals/phase-02/sprint-1*.md" 2>/dev/null); [ -z "$diff_out" ] && echo PASS || (echo FAIL && echo "$diff_out" && exit 1)'
    ```
-   PASS when exit code is 0 (diff is empty). This covers both Phase-1 root-level files and Phase-2 subdirectory files under `.harness/contracts/phase-02/` and `.harness/evals/phase-02/`.
+   PASS when exit code is 0 (diff is empty). This covers both Phase-1 root-level files and Phase-2 subdirectory files under `.harness/contracts/phase-02/` and `.harness/evals/phase-02/`. The Phase-2 patterns use `sprint-0[12]*.md` (not `sprint-0[1-9]*.md`) to exclude the current sprint-03 contract from the immutability check.
 
 2. **No forbidden packages imported or declared**: the strings `langgraph`, `ragas`, `pgvector`, and `fastapi` must not appear in `pyproject.toml`, `src/trine_eval/**/*.py`, or `tests/**/*.py`. Verify via:
    ```
@@ -383,3 +383,111 @@ PASS: thinking block echoed verbatim in follow-up batch request, `signature` fie
 - **Issue 3 (Reference solution `examples` kwarg):** Applied Option A. The `apply_cache_control` function signature and `examples` return key are unchanged; the function docstring now explicitly documents that `examples` is a library-internal key, that `messages.create` does not accept it, and shows the 4-line caller-side pop-and-prepend pattern. The Reference Solution PASS/FAIL rubric was updated to require this documented caller contract. C10's LLM-judge criterion was updated to require (d): the `examples` key is library-internal, callers pop it and prepend to the `messages` array, direct `**kwargs` expansion into `messages.create` is FAIL. A new Technical Note was added explaining the `examples` caller contract with the canonical code pattern.
 - **Advisory Issue 4 (C8 `grep -E "passed"` weakness):** Fixed as part of the C8 rewrite above. The new command includes both `! grep -qE "FAILED|ERROR"` and the exit-code check, making the holistic gate as tight as the individual per-test greps.
 - **Advisory Issue 5 (C9 same pattern):** Applied the same `${PIPESTATUS[0]}` pattern to C9 for consistency. C9 already had `! grep -qE "FAILED|ERROR"` so this brings it fully in line with the Issue 1 fix.
+
+## Evaluator Review — Round 2
+
+**Status: NEEDS REVISION**
+
+**Round: 2**
+
+### Verification of Round 1 fixes
+
+- **Issue 1 (C8 masking): VERIFIED**
+
+  C8 (line 57) now reads:
+  ```
+  bash -c 'uv run pytest tests/models/test_caching.py tests/runner/test_batch.py -v --tb=short 2>&1 | tee /tmp/s03c8.txt; EC=${PIPESTATUS[0]}; grep -E "passed" /tmp/s03c8.txt && ! grep -qE "FAILED|ERROR" /tmp/s03c8.txt && [ "$EC" = "0" ] && echo PASS || exit 1'
+  ```
+  All three guard elements present: `EC=${PIPESTATUS[0]}` (captures pytest exit before tee swallows it), `! grep -qE "FAILED|ERROR"` (rejects mixed-pass runs), `[ "$EC" = "0" ]` (explicit exit-code gate). Empirically verified the shape exits 1 when given a FAILED+passed output and exits 0 on clean pass.
+
+- **Issue 2 (SN1 glob): NOT VERIFIED — NEW BLOCKING FLAW**
+
+  The four Phase-2 patterns were added as required:
+  - `.harness/contracts/phase-02/sprint-0[1-9]*.md`
+  - `.harness/contracts/phase-02/sprint-1*.md`
+  - `.harness/evals/phase-02/sprint-0[1-9]*.md`
+  - `.harness/evals/phase-02/sprint-1*.md`
+
+  However, the glob `sprint-0[1-9]*.md` matches `sprint-03.md` — the contract file being created this sprint. Running SN1 empirically against the current branch exits **1 (FAIL)** because `.harness/contracts/phase-02/sprint-03.md` is a new file on this branch and the diff includes it in the output. The SN1 gate would block every valid Generator that correctly creates the sprint-03 contract file.
+
+  Empirical result (verified via Bash):
+  ```
+  FAIL
+  diff --git a/.harness/contracts/phase-02/sprint-03.md b/.harness/contracts/phase-02/sprint-03.md
+  new file mode 100644
+  ... [full contract file shown as diff]
+  ```
+  Exit code: 1.
+
+  The fix must either (a) scope the Phase-2 patterns to only prior sprints (e.g., `sprint-0[12]*.md` for Sprint 3; `sprint-0[123]*.md` for Sprint 4), or (b) use `sprint-0[1-9]*.md` but exclude the current sprint's contract by adding a path exclude (`:(exclude).harness/contracts/phase-02/sprint-03*`), or (c) split the check into two diffs — one for Phase-1 files and one for Phase-2 files, with the Phase-2 check only covering directories that contain finalized prior-sprint artefacts (i.e., exclude the current sprint number).
+
+- **Issue 3 (Reference solution `examples` kwarg): VERIFIED**
+
+  Docstring at lines 122–126 explicitly states: `"examples": list[dict] — LIBRARY-INTERNAL KEY. The Anthropic messages.create API does NOT accept an "examples" parameter. Callers must pop this key and prepend the annotated example messages to the messages array before calling messages.create.`
+
+  The 4-line caller pop-and-prepend pattern is shown at lines 130–134:
+  ```python
+  cached = apply_cache_control(system=sys, tools=tools, examples=exs)
+  example_messages = cached.pop("examples", [])
+  messages = example_messages + user_messages
+  response = client.messages.create(messages=messages, **cached)
+  ```
+
+  C10(d) at line 69 makes direct `**kwargs` expansion into `messages.create` a FAIL: "the helper must NOT be designed so that callers expand its full return dict directly into `messages.create(**kwargs)`; this caller contract must be visible in the module docstring or function docstring."
+
+  Technical Note at line 277 repeats the canonical code pattern. Two independent evaluators would agree on C10 verdicts. VERIFIED.
+
+- **Issue 4 (C8 grep weakness): VERIFIED**
+
+  Covered by the C8 rewrite. The revised command includes `! grep -qE "FAILED|ERROR"` which rejects any run where individual tests fail. The shape test confirms this correctly rejects mixed-pass output.
+
+- **Issue 5 (C9 pattern): VERIFIED**
+
+  C9 (line 63) now reads:
+  ```
+  bash -c 'uv run pytest tests/runner/ tests/models/ -v --tb=short 2>&1 | tee /tmp/s03c9.txt; EC=${PIPESTATUS[0]}; grep -E "passed" /tmp/s03c9.txt && ! grep -qE "FAILED|ERROR" /tmp/s03c9.txt && [ "$EC" = "0" ] && echo PASS || exit 1'
+  ```
+  Same three-guard pattern as C8. VERIFIED.
+
+### Empirical checks
+
+**SN1 empirical run (current branch against merge-base):**
+```
+$ BASE=8617c2f; git diff $BASE..HEAD -- "[patterns]"
+FAIL
+diff --git a/.harness/contracts/phase-02/sprint-03.md b/.harness/contracts/phase-02/sprint-03.md
+new file mode 100644
+...
+```
+Exit code: 1. SN1 FAILS on the current branch because sprint-03.md itself matches the newly-added Phase-2 glob.
+
+**C8/C9 shape sanity check (FAILED+passed scenario):**
+Input to shape check: file containing `"FAILED test1"` and `"1 failed, 1 passed"`, `EC=1`.
+`grep -E "passed"` matches (grep exits 0), `! grep -qE "FAILED|ERROR"` fails (grep finds FAILED), compound `&&` chain breaks, `|| exit 1` fires.
+Exit code: 1 (correct — does NOT print PASS on a partially-failing run).
+
+**C8/C9 shape sanity check (all-pass scenario):**
+Input: file containing `"test1 PASSED"` and `"2 passed, 0 failed"`, `EC=0`.
+All guards pass. Output: `PASS`. Exit code: 0 (correct).
+
+**Weight arithmetic:** C1(10)+C2(9)+C3(9)+C4(14)+C5(11)+C6(12)+C7(8)+C8(6)+C9(5)+C10(7)+C11(9) = 100%. Confirmed. Behavioral coverage: all 11 criteria behavioral = 100% ≥ 60% threshold. Confirmed.
+
+### Remaining concerns
+
+SN1 glob over-captures current sprint — **blocking**. The `sprint-0[1-9]*.md` pattern in the Phase-2 glob matches the sprint-03 contract file being created this sprint. Any Generator that correctly creates `.harness/contracts/phase-02/sprint-03.md` (as required by the harness workflow) will trigger SN1 FAIL. This is a self-defeating gate.
+
+Recommended fix — change the Phase-2 contract pattern to exclude the current sprint number. For Sprint 3 specifically, change:
+```
+".harness/contracts/phase-02/sprint-0[1-9]*.md"
+```
+to:
+```
+".harness/contracts/phase-02/sprint-0[12]*.md"
+```
+(covering only sprint-01 and sprint-02, which are finalized). Similarly the eval pattern: `.harness/evals/phase-02/sprint-0[12]*.md`. For Sprint 4, the pattern advances to `sprint-0[123]*.md`, etc. Alternatively, use a git pathspec exclude: `:(exclude).harness/contracts/phase-02/sprint-03*`.
+
+No other blocking issues found.
+
+### Final verdict
+
+**NEEDS REVISION** — SN1 glob introduced in Round 2 matches the current sprint's own contract file, causing SN1 to emit FAIL on every correct Generator build. All five Round 1 issues are otherwise addressed; this single new flaw must be resolved before APPROVAL.
