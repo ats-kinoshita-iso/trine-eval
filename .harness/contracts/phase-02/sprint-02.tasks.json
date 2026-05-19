@@ -18,7 +18,7 @@
       "grader_type": "deterministic",
       "weight": 16,
       "is_gate": false,
-      "verification_command": "bash -c 'uv run pytest tests/runner/test_caps.py -v --tb=short 2>&1 | tee /tmp/s02c2.txt && grep -q \"PASSED\" /tmp/s02c2.txt && grep -E \"4 passed|[5-9] passed|[1-9][0-9]+ passed\" /tmp/s02c2.txt && echo PASS'",
+      "verification_command": "bash -c 'uv run pytest tests/runner/test_caps.py -v --tb=short 2>&1 | tee /tmp/s02c2.txt && grep -q \"PASSED\" /tmp/s02c2.txt && grep -E \"4 passed|[5-9] passed|[1-9][0-9]+ passed\" /tmp/s02c2.txt && ! grep -qE \"cap_hit.*max_concurrency|max_concurrency.*cap_hit\" tests/runner/test_caps.py && echo PASS'",
       "rubric_dimension": "behavioral"
     },
     {
@@ -81,7 +81,7 @@
       "grader_type": "deterministic",
       "weight": 4,
       "is_gate": false,
-      "verification_command": "bash -c 'grep -q \"phase-02-N\" rules/harness-conventions.md && grep -q \"current_sprint\" rules/harness-conventions.md && grep -q \"current_phase\" rules/harness-conventions.md && echo PASS || echo FAIL'",
+      "verification_command": "bash -c 'grep -q \"phase-02-N\" rules/harness-conventions.md && grep -q \"current_sprint\" rules/harness-conventions.md && grep -q \"current_phase\" rules/harness-conventions.md && echo PASS || (echo FAIL && exit 1)'",
       "rubric_dimension": "structural"
     },
     {

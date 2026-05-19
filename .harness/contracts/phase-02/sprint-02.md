@@ -18,7 +18,7 @@ Each criterion must be independently testable. Weights sum to 100%.
 
 2. **Hard-cap enforcement — all four caps fire correctly**: running the following exits 0 and prints `PASS`:
    ```
-   bash -c 'uv run pytest tests/runner/test_caps.py -v --tb=short 2>&1 | tee /tmp/s02c2.txt && grep -q "PASSED" /tmp/s02c2.txt && grep -E "4 passed|[5-9] passed|[1-9][0-9]+ passed" /tmp/s02c2.txt && echo PASS'
+   bash -c 'uv run pytest tests/runner/test_caps.py -v --tb=short 2>&1 | tee /tmp/s02c2.txt && grep -q "PASSED" /tmp/s02c2.txt && grep -E "4 passed|[5-9] passed|[1-9][0-9]+ passed" /tmp/s02c2.txt && ! grep -qE "cap_hit.*max_concurrency|max_concurrency.*cap_hit" tests/runner/test_caps.py && echo PASS'
    ```
    `tests/runner/test_caps.py` must contain at least four independent tests, one per cap type. Three tests — for `token_limit`, `time_limit`, and `cost_limit` — must use a mock or fake task/model that drives the cap to trigger before all samples complete and assert the returned `EvalLog.metadata` contains a `"cap_hit"` key whose value names the triggered cap (e.g., `"token_limit"`, `"time_limit"`, `"cost_limit"`). The fourth test — for `max_concurrency` — must verify that no more than the configured number of tasks run concurrently at any instant (e.g., via a counter of simultaneous in-flight samples) without asserting `cap_hit`, because `max_concurrency` only throttles parallelism and does NOT cause early abort or set `cap_hit`. PASS when exit code is 0, output contains `PASSED`, and the grep for `4 passed` (or more) succeeds. [weight: 16%]
 
@@ -60,7 +60,7 @@ Each criterion must be independently testable. Weights sum to 100%.
 
 9. **`phase-02-N` key convention documented in `rules/harness-conventions.md`**: running the following exits 0:
    ```
-   bash -c 'grep -q "phase-02-N" rules/harness-conventions.md && grep -q "current_sprint" rules/harness-conventions.md && grep -q "current_phase" rules/harness-conventions.md && echo PASS || echo FAIL'
+   bash -c 'grep -q "phase-02-N" rules/harness-conventions.md && grep -q "current_sprint" rules/harness-conventions.md && grep -q "current_phase" rules/harness-conventions.md && echo PASS || (echo FAIL && exit 1)'
    ```
    The file must contain a new subsection (any heading level) that uses the literal string `phase-02-N`, references `current_sprint`, and references `current_phase` — documenting that Phase 2 sprint-state entries use `phase-02-N` keys and clarifying how `current_phase` disambiguates what `current_sprint` refers to. PASS when all three greps succeed (exit 0) and output contains `PASS`. [weight: 4%]
 
@@ -365,3 +365,82 @@ None identified. The sprint scope (runner, caps, log format, pytest plugin, OTel
 C1 (correct), C2 (correct after prose alignment in Issue 3), C3 (correct — both JSON and msgpack required with `2 passed` guard), C4 (correct — `[ "$CODE" = "100" ]` checks literal 100), C5 (correct), C6 (correct — both metric names checked case-insensitively), C7 (correct — noop exporter, no network), C9 (acceptable, see Issue 4 note), C10 (correct), C11 (correct — llm-judge with reference solution provided), C12 (acceptable llm-judge), SN1 (correct glob narrowing), SN2 (correct).
 
 **Required fixes before approval:** Bug 1 (C8 exit-code), Bug 2 (SN3 verification command). Issue 3 is strongly recommended. Issue 4 is advisory.
+
+## Evaluator Review — Round 2
+
+**Status: NEEDS REVISION**
+
+### Summary of Round 1 Fix Verification
+
+All four Round 1 fixes were checked by running commands against the current worktree.
+
+**Fix 1 — C8 exit-code (BUG 1): CONFIRMED FIXED.**
+Ran the exact `verification_command` from `sprint-02.tasks.json` for `s02-c8`:
+```
+bash -c 'python -c "import sys, yaml; d=yaml.safe_load(open(\"ops/langfuse-compose.yaml\")); sys.exit(0 if isinstance(d, dict) and \"services\" in d else 1)" && echo PASS'
+```
+Result: `FileNotFoundError` raised, shell exits 1. Correct — the criterion FAILs today, and will PASS only when the file exists with a `services` key. The `sys.exit()` form is authoritative; no `|| echo FAIL` masking.
+
+**Fix 2 — SN3 reclassified (BUG 2): CONFIRMED FIXED.**
+`tasks.json` field `s02-sn3.grader_type` is `"llm-judge"`. Field `verification_command` is `null`. Field `is_gate` is `true`. The markdown criterion prose (SN3 paragraph and Technical Notes) instructs the Evaluator to read `test_engine.py`, `test_caps.py`, `test_rescore_cli.py` and confirm every `anthropic.Anthropic(...)` call is wrapped in a patch context. Structure is correct.
+
+**Fix 3 — C2 prose alignment (ISSUE 3): CONFIRMED FIXED.**
+`tasks.json` `s02-c2.criterion` reads: "Three tests (token_limit, time_limit, cost_limit) assert EvalLog.metadata['cap_hit'] names the triggered cap and the log is partial. One test (max_concurrency) verifies bounded concurrency via an in-flight counter without asserting cap_hit, because max_concurrency only throttles parallelism and does not cause early abort." Markdown C2 prose matches. The three-cap/one-bound split is now explicit in both prose locations.
+
+**Fix 4 — C9 third grep added (ISSUE 4): CONFIRMED FIXED.**
+`tasks.json` `s02-c9.verification_command` contains three `grep -q` calls: `"phase-02-N"`, `"current_sprint"`, and `"current_phase"`. The `current_phase` grep was the advisory addition requested in Round 1.
+
+### New Issue Found in Round 2
+
+**BUG 3 — C9 verification command exits 0 on FAIL (same `|| echo FAIL` pattern as Round 1 BUG 1)**
+
+The C9 command in both the markdown and `tasks.json` is:
+```
+bash -c 'grep -q "phase-02-N" rules/harness-conventions.md && grep -q "current_sprint" rules/harness-conventions.md && grep -q "current_phase" rules/harness-conventions.md && echo PASS || echo FAIL'
+```
+
+Executed this command against the current worktree (file does not yet contain the required strings):
+```
+Result: prints "FAIL", exit code = 0
+```
+When any grep fails, the `|| echo FAIL` branch executes and exits 0. An automated harness checking only exit code sees a pass. The criterion says "PASS when all three greps succeed (exit 0) and output contains `PASS`" — but exit code 0 is a necessary condition that the command falsely satisfies on failure.
+
+This is structurally identical to Round 1 BUG 1 on C8. The `|| echo FAIL` idiom masks the exit code; `echo FAIL` exits 0 regardless of the grep failure.
+
+**Fix required (both markdown C9 and `tasks.json` `s02-c9.verification_command`):**
+```
+bash -c 'grep -q "phase-02-N" rules/harness-conventions.md && grep -q "current_sprint" rules/harness-conventions.md && grep -q "current_phase" rules/harness-conventions.md && echo PASS || (echo FAIL && exit 1)'
+```
+The `(echo FAIL && exit 1)` form propagates a non-zero exit code on any grep failure.
+
+### Decision on Generator's Residual C2 Concern
+
+The Generator asked whether a Generator that writes `cap_hit = "max_concurrency"` on the fourth test can pass C2 undetected (since `4 passed` only counts test count, not test content).
+
+**Decision: option (b) — add a grep to C2 that rejects `cap_hit.*max_concurrency` in the test source.**
+
+Rationale: C11 is an llm-judge criterion that reads `engine.py`, not `test_caps.py`. C11 cannot catch a test that misuses `cap_hit` on the max_concurrency case — that is a test-authoring error, not an engine error. C11 would correctly PASS on a well-written engine while a bad test slips through. Only a direct check of the test source catches the escape. Adding the grep to C2's `verification_command` keeps the check deterministic and paired with the criterion it protects.
+
+Add a third grep to C2's `verification_command` in both markdown and `tasks.json`:
+```
+bash -c 'uv run pytest tests/runner/test_caps.py -v --tb=short 2>&1 | tee /tmp/s02c2.txt && grep -q "PASSED" /tmp/s02c2.txt && grep -E "4 passed|[5-9] passed|[1-9][0-9]+ passed" /tmp/s02c2.txt && ! grep -qE "cap_hit.*max_concurrency|max_concurrency.*cap_hit" tests/runner/test_caps.py && echo PASS'
+```
+The `! grep -qE "cap_hit.*max_concurrency|max_concurrency.*cap_hit" tests/runner/test_caps.py` fails the command if any line in the test file associates `cap_hit` with `max_concurrency`. The `!` negation exits non-zero if the pattern is found, which blocks the `&& echo PASS` from printing. This is a compile-time check on the test source — it runs even if pytest is not installed.
+
+Note: this grep is a heuristic, not a proof. A determined Generator could write `cap_hit = the_max_concurrency_cap` and evade it. But it catches the most obvious escape (literal string adjacency) without requiring a second llm-judge pass.
+
+### Round 2 Required Fixes (Blocking)
+
+1. **C9 command exit-code (BUG 3):** Replace `|| echo FAIL` with `|| (echo FAIL && exit 1)` in both the markdown C9 command block and `tasks.json` `s02-c9.verification_command`. This is the only blocking issue.
+
+### Round 2 Advisory Fix
+
+2. **C2 anti-pattern grep:** Add the `! grep -qE "cap_hit.*max_concurrency|max_concurrency.*cap_hit"` guard to C2's `verification_command`. This closes the escape identified in the Generator's residual concern. Advisory — C11 provides a partial backstop, but it reads the engine not the tests.
+
+### Approved Criteria (Round 2 Status)
+
+C1 (approved), C2 (approved after advisory fix, acceptable as-is without it), C3 (approved), C4 (approved), C5 (approved), C6 (approved), C7 (approved), C8 (approved — BUG 1 fix confirmed working), C9 (BLOCKED — BUG 3 must be fixed), C10 (approved), C11 (approved), C12 (approved), SN1 (approved), SN2 (approved), SN3 (approved — BUG 2 fix confirmed: llm-judge, null verification_command, gate=true).
+
+Weight sum: 100%. Behavioral criterion weight: 89% (≥60% threshold met).
+
+**Required fix before approval:** BUG 3 (C9 exit-code). One change, one line, in two files.
