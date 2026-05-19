@@ -10,7 +10,7 @@
       "grader_type": "deterministic",
       "weight": 10,
       "is_gate": false,
-      "verification_command": "bash -c 'uv sync && uv run pytest --collect-only 2>&1 | grep -E \"^[0-9]+ tests? collected\" | head -1'",
+      "verification_command": "bash -c 'uv sync && uv run pytest --collect-only -q 2>&1 | grep -E \"^[0-9]+ tests? collected\" | head -1'",
       "rubric_dimension": "functional_correctness"
     },
     {

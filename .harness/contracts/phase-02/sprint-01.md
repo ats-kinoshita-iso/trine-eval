@@ -12,7 +12,7 @@ Each criterion must be independently testable. Weights sum to 100%.
 
 1. **`pyproject.toml` is uv-installable and collects tests**: running `uv sync` exits 0, and `uv run pytest --collect-only -q` exits 0 and reports at least 10 test items collected from `tests/`. Verify via:
    ```
-   bash -c 'uv sync && uv run pytest --collect-only 2>&1 | grep -E "^[0-9]+ tests? collected" | head -1'
+   bash -c 'uv sync && uv run pytest --collect-only -q 2>&1 | grep -E "^[0-9]+ tests? collected" | head -1'
    ```
    PASS when exit code is 0 and the grep matches a line with N ≥ 10. [weight: 10%]
 
@@ -294,3 +294,57 @@ C7 checks that stdout "contains the strings `run`, `score`, and `report`." These
 - **Grader tagging** — C1-C8 deterministic, C9-C10 llm-judge. Correctly tagged.
 - **Rubric mismatch** — The Generator's acknowledgment in Technical Notes is sufficient for Sprint 1. The eval-harness rubric assesses contract quality and harness methodology (which this contract itself demonstrates), not Python library implementation quality. No revision required for Sprint 1; flag for Sprint 2 operator decision.
 - **No-op detection** — No `src/` directory or `pyproject.toml` exists. All deterministic criteria (C1-C8) would currently FAIL against the empty tree. C8 would FAIL because `grep -q "contracts/phase-02" rules/harness-conventions.md` returns no match (the file only documents evals and transcripts, not contracts). Zero no-op risk.
+
+## Evaluator Review — Round 2
+
+**Status: APPROVED**
+
+### Verification of the Four Round-1 Fixes
+
+**Fix 1 — C1: `tail -5` removed (CONFIRMED)**
+
+The `tasks.json` verification_command for `s01-c1` is now:
+```
+bash -c 'uv sync && uv run pytest --collect-only 2>&1 | grep -E "^[0-9]+ tests? collected" | head -1'
+```
+The markdown criterion (line 16) matches exactly. `tail -5` is gone; `grep -E "^[0-9]+ tests? collected" | head -1` targets the canonical summary line directly. Today this correctly FAILs: no `pyproject.toml` exists so `uv sync` exits non-zero and the chain short-circuits.
+
+**Fix 2 — C2, C3, C4: `bash -c '...'` wrappers (CONFIRMED)**
+
+All three switched from multi-line `uv run python -c "..."` blocks to pytest delegation:
+- C2: `bash -c 'uv run pytest tests/core/test_models.py -v --tb=short 2>&1 | tee /tmp/c2.txt && grep -q "PASSED" /tmp/c2.txt && echo PASS'`
+- C3: `bash -c 'uv run pytest tests/core/test_decorators.py -v --tb=short 2>&1 | tee /tmp/c3.txt && grep -q "PASSED" /tmp/c3.txt && echo PASS'`
+- C4: `bash -c 'uv run pytest tests/models/test_anthropic.py -k "defaults or effort" -v --tb=short 2>&1 | tee /tmp/c4.txt && grep -q "PASSED" /tmp/c4.txt && echo PASS'`
+
+PowerShell incompatibility eliminated. Verified that `/tmp` exists under Git Bash on this Windows machine (`bash -c '[ -d /tmp ] && echo yes'` → yes). `tee /tmp/cX.txt` is safe. All three correctly FAIL today (no test files exist).
+
+**Fix 3 — C5 split into C5a (deterministic) + C5b (llm-judge) (CONFIRMED)**
+
+C5a verification_command:
+```
+bash -c 'uv run pytest tests/models/test_anthropic.py -k thinking_round_trip -v --tb=short 2>&1 | tee /tmp/c5a.txt && grep -q "thinking blocks preserved byte-identical" /tmp/c5a.txt && grep -q "PASSED" /tmp/c5a.txt && echo PASS'
+```
+C5b has `verification_command: null` and `grader_type: "llm-judge"` — correct. Weight split: 10% + 6% = 16% (unchanged total). Today C5a FAILs correctly (no test file exists).
+
+Generator's C5a fragility concern (re: pytest capture): **ACCEPTED**. In `-v` mode, pytest shows captured stdout from passing tests. The Reference Solution mandates an unconditional `print("thinking blocks preserved byte-identical")` at the test body's end — not inside an assert message — which is the most reliable path regardless of capsys usage. The C5b LLM-judge backstop independently catches a no-op or call-count-only test. The two-layer enforcement is robust enough.
+
+**Fix 4 — C11: `uv.lock` git-tracked criterion (CONFIRMED)**
+
+New entry `s01-c11` (weight: 5%, deterministic):
+```
+bash -c '[ -f uv.lock ] && git ls-files uv.lock | grep -q uv.lock && echo PASS || echo FAIL'
+```
+The gap flagged in Round 1 is now closed. Note: the command exits 0 in all branches (the `||` catch-all ensures it); PASS/FAIL determination depends on the output string, not the exit code. The criterion text ("exits 0 and prints `PASS`") aligns with this design — Evaluator must check the string. Acceptable; matches the pattern used in C8.
+
+### Weight Verification
+
+C1(10) + C2(12) + C3(14) + C4(10) + C5a(10) + C5b(6) + C6(10) + C7(8) + C8(6) + C9(5) + C10(4) + C11(5) = **100**. Confirmed.
+
+### Residual Items (Non-blocking, Carried from Round 1)
+
+- **C7 subcommand word-boundary check** (MINOR, Round 1 Issue 4): the `grep -q 'run'` pattern still matches the substring — a help page mentioning "Run this tool to score a report" passes without three distinct subcommand names. Typer's `--help` format makes false positives unlikely in practice. Accepted as-is for Sprint 1; tighten in Sprint 2 if the CLI grows subcommands with similar names.
+- **`Score.value` bounds** (MINOR, Round 1 Missing Criteria): no [0,1] validation criterion added. If the domain requires it, flag for Sprint 2.
+
+### Round 1 Review Preserved
+
+The original `## Evaluator Review` section (NEEDS REVISION) is intact above this section. No content was overwritten.
