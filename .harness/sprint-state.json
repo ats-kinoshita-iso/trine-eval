@@ -1,8 +1,20 @@
 {
-  "current_sprint": 3,
+  "current_sprint": 4,
   "current_phase": 2,
-  "last_updated": "2026-05-18T23:40:00-04:00",
+  "last_updated": "2026-05-19T06:56:31-04:00",
   "sprints": {
+    "phase-02-3": {
+      "phase": 2,
+      "number": 3,
+      "title": "Prompt caching and Batch API",
+      "status": "PASS",
+      "rounds": 2,
+      "criteria_passed": "11/11",
+      "weighted_score": 100,
+      "gates_passed": "3/3",
+      "date": "2026-05-19",
+      "note": "Round 1 PARTIAL (95/100, 3/3 gates) \u2014 C9 FAIL only: contract gap where C9's [ EC = 0 ] guard didn't anticipate Sprint 2's pytest plugin exit-100 override from test_plugin_exit.py (all 41 tests passed, EC=100). Contract negotiation hit max rounds (2) with new SN1 self-match flaw surfacing in Round 2; Generator fixed as fix(sprint-03): ebc1fd2 (narrow Phase-2 glob to sprint-0[12]*.md) before any source landed. Round 2 PASS after fix(sprint-03): 0e1db3f changed C9's exit-code check to disjunction ( [ EC = 0 ] || [ EC = 100 ] ); contract-only fix (no source change, verified via git diff --stat). Seven commits (ebc1fd2..0e1db3f) delivered: apply_cache_control helper (system/tools/examples breakpoints with EPHEMERAL constant, examples documented as library-internal pop-and-prepend key), batch runner (single batches.create call, custom_id=sample.id, polling loop on processing_status, demux via id_to_sample map, EvalLog with batch_id+via metadata), and 8 new tests covering G1+G2+F6 (cache_control on system/tools/examples; batch submit-and-demux; batch polling; batch carries cache_control; thinking-block byte-identical round-trip through batch). Total 41 tests under tests/runner/ + tests/models/. Eval at .harness/evals/phase-02/sprint-03-r2.md."
+    },
     "phase-02-2": {
       "phase": 2,
       "number": 2,
