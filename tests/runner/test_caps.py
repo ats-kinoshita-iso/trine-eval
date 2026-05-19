@@ -96,8 +96,12 @@ async def test_cost_limit_cap() -> None:
 
 
 @pytest.mark.asyncio
-async def test_max_concurrency_throttles_without_cap_hit() -> None:
-    """max_concurrency limits simultaneous in-flight samples without triggering cap_hit."""
+async def test_concurrency_limit_throttles_parallelism() -> None:
+    """max_concurrency limits simultaneous in-flight samples.
+
+    This cap only throttles throughput — it does NOT cause early abort
+    and does NOT set a cap_hit entry in metadata.
+    """
     max_conc = 3
     peak_concurrency = 0
     current_concurrency = 0
