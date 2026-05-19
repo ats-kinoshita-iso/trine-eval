@@ -96,3 +96,14 @@ Stopped. Current sprint state should be committed.
 - Date: 2026-05-18
 - Note: Round 1 FAIL on C4 (verification_command Python wrapper failed on Windows via cmd.exe). Round 2 PASS after fix bf30c09/b54a478 using explicit Git Bash path. Three real deltas delivered: `.harness/sprint-state.json` (new), `config.json` `python_build` section (6 fields), and Phase 2 eval-naming convention in `rules/harness-conventions.md`. Trials/tasks.json/adaptive-thinking/transcripts already shipped in meta-sprints 6–12, not re-implemented.
 - Rubric scores: Methodology 4/5, Grading 4/5, Separation 5/5, Context 4/5, Extensibility 4/5
+
+## Sprint 01 (Phase 2): Python library bootstrap + core primitives
+- Status: PASS
+- Rounds: 2
+- Passed criteria: 11/11
+- Weighted score: 100%
+- Gates: 2/2
+- Date: 2026-05-18
+- Note: First sprint producing runnable Python code. 7 implementation commits (e318adb..bf03dfd) created pyproject.toml (uv-managed Python 3.12+), uv.lock, src/trine_eval/ with Pydantic primitives (Sample/Score/Task/EvalLog), decorator registry (@task/@solver/@scorer/@metric/@tool), AnthropicModel wrapper (claude-opus-4-7 default, effort literal, interleaved-thinking beta header, byte-identical thinking-block round-trip), CLI stubs (run/score/report), and 49 pytest tests. Round 1 FAIL on SN1 only (broad eval-files glob matched sprint-00 Phase 2 files); round 2 PASS after fix 39a5ae7 narrowed glob to `sprint-0[1-9]*.md` + `sprint-1*.md`. Contract uses new `.harness/contracts/phase-02/` path (convention extended in commit bf03dfd to close Sprint 0 oversight). Eval at `.harness/evals/phase-02/sprint-01-r2.md`.
+## Session 2026-05-18T16:52:12-04:00
+Stopped. Current sprint state should be committed.
