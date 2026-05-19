@@ -126,11 +126,11 @@
     {
       "task_id": "s01-sn1",
       "sprint": 1,
-      "criterion": "Historical Phase 1 contracts and evals are unmodified: no file under .harness/contracts/sprint-0[1-9]*.md, .harness/contracts/sprint-1*.md, or .harness/evals/sprint-*.md is modified on the Sprint 01 branch (checked against merge-base with main).",
+      "criterion": "Historical Phase 1 contracts and evals are unmodified: no file under .harness/contracts/sprint-0[1-9]*.md, .harness/contracts/sprint-1*.md, .harness/evals/sprint-0[1-9]*.md, or .harness/evals/sprint-1*.md is modified on the Sprint 01 branch (checked against merge-base with main).",
       "grader_type": "deterministic",
       "weight": 0,
       "is_gate": true,
-      "verification_command": "bash -c 'BASE=$(git merge-base HEAD main 2>/dev/null || git rev-parse HEAD~$(git rev-list --count HEAD)^); diff_out=$(git diff $BASE..HEAD -- \".harness/contracts/sprint-0[1-9]*.md\" \".harness/contracts/sprint-1*.md\" \".harness/evals/sprint-*.md\" 2>/dev/null); [ -z \"$diff_out\" ] && echo PASS || (echo FAIL && echo \"$diff_out\" && exit 1)'",
+      "verification_command": "bash -c 'BASE=$(git merge-base HEAD main 2>/dev/null || git rev-parse HEAD~$(git rev-list --count HEAD)^); diff_out=$(git diff $BASE..HEAD -- \".harness/contracts/sprint-0[1-9]*.md\" \".harness/contracts/sprint-1*.md\" \".harness/evals/sprint-0[1-9]*.md\" \".harness/evals/sprint-1*.md\" 2>/dev/null); [ -z \"$diff_out\" ] && echo PASS || (echo FAIL && echo \"$diff_out\" && exit 1)'",
       "rubric_dimension": "generator_evaluator_separation"
     },
     {

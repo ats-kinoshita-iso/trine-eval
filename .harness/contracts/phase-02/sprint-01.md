@@ -68,9 +68,9 @@ Each criterion must be independently testable. Weights sum to 100%.
 
 Gate criteria — any failure blocks the sprint regardless of score.
 
-1. **Historical Phase 1 contracts and evals are unmodified**: no file under `.harness/contracts/sprint-0[1-9]*.md`, `.harness/contracts/sprint-1*.md`, or `.harness/evals/sprint-*.md` is modified on the Sprint 01 branch. Verify by diffing ALL commits on the branch against `main`'s merge-base:
+1. **Historical Phase 1 contracts and evals are unmodified**: no file under `.harness/contracts/sprint-0[1-9]*.md`, `.harness/contracts/sprint-1*.md`, `.harness/evals/sprint-0[1-9]*.md`, or `.harness/evals/sprint-1*.md` is modified on the Sprint 01 branch. Verify by diffing ALL commits on the branch against `main`'s merge-base:
    ```
-   bash -c 'BASE=$(git merge-base HEAD main 2>/dev/null || git rev-parse HEAD~$(git rev-list --count HEAD)^); diff_out=$(git diff $BASE..HEAD -- ".harness/contracts/sprint-0[1-9]*.md" ".harness/contracts/sprint-1*.md" ".harness/evals/sprint-*.md" 2>/dev/null); [ -z "$diff_out" ] && echo PASS || (echo FAIL && echo "$diff_out" && exit 1)'
+   bash -c 'BASE=$(git merge-base HEAD main 2>/dev/null || git rev-parse HEAD~$(git rev-list --count HEAD)^); diff_out=$(git diff $BASE..HEAD -- ".harness/contracts/sprint-0[1-9]*.md" ".harness/contracts/sprint-1*.md" ".harness/evals/sprint-0[1-9]*.md" ".harness/evals/sprint-1*.md" 2>/dev/null); [ -z "$diff_out" ] && echo PASS || (echo FAIL && echo "$diff_out" && exit 1)'
    ```
    PASS when exit code is 0 (diff is empty).
 
