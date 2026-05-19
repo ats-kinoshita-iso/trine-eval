@@ -123,6 +123,15 @@ Some evaluator tools are useful only on specific project types. Sprint 10 introd
 
 **Backward compatibility.** A project whose `.harness/config.json` lacks the `evaluator_tools` object hits the `"auto"` default. Combined with any non-`web-app` project type — including the current `eval-harness` project — `"auto"` resolves to "Playwright disabled," which is exactly Phase-1 behavior. No project that predates Sprint 10 sees a Playwright invocation. End-to-end Playwright invocation against a live `web-app` project is deferred to a synthetic verification sprint per the gap-closure plan, matching Sprint 8's posture for `thinking.profile` and Sprint 9's posture for transcript file writing.
 
+## Phase 2 Contract and Eval File Naming Convention
+
+Phase 2 (Python library build, Sprints 00–06) contract files use a `phase-02/`
+subdirectory under `.harness/contracts/`. Canonical paths for Phase 2 contract
+artifacts:
+
+- `.harness/contracts/phase-02/sprint-NN.md` — sprint contract markdown
+- `.harness/contracts/phase-02/sprint-NN.tasks.json` — machine-readable tasks
+
 ## Phase 2 Eval File Naming Convention
 
 Phase 2 (Python library build, Sprints 00–06) eval files use a `phase-02/`
