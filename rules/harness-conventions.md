@@ -123,6 +123,26 @@ Some evaluator tools are useful only on specific project types. Sprint 10 introd
 
 **Backward compatibility.** A project whose `.harness/config.json` lacks the `evaluator_tools` object hits the `"auto"` default. Combined with any non-`web-app` project type — including the current `eval-harness` project — `"auto"` resolves to "Playwright disabled," which is exactly Phase-1 behavior. No project that predates Sprint 10 sees a Playwright invocation. End-to-end Playwright invocation against a live `web-app` project is deferred to a synthetic verification sprint per the gap-closure plan, matching Sprint 8's posture for `thinking.profile` and Sprint 9's posture for transcript file writing.
 
+## Sprint-State Phase-Qualifier Convention
+
+`sprint-state.json` uses a namespaced key scheme to avoid collisions between
+Phase 1 and Phase 2 sprint entries:
+
+- **Phase 1** sprint entries use bare integer keys: `"1"` through `"12"`.
+- **Phase 2** sprint entries use `phase-02-N` keys: `"phase-02-0"`, `"phase-02-1"`,
+  `"phase-02-2"`, etc.
+- The `current_phase` field disambiguates which phase `current_sprint` refers to:
+  when `current_phase == 2`, `current_sprint: 2` means Phase 2 Sprint 2, whose
+  state entry is keyed `"phase-02-2"`.
+- **Bridging exception:** Sprint 0 of Phase 2 used the bare key `"0"` because
+  Phase 1 had no Sprint 0 and no collision was possible. Sprint 1 introduced
+  the `phase-02-N` form; Sprint 2+ use it exclusively.
+
+Tooling that reads `sprint-state.json` must interpret `current_sprint` in the
+context of `current_phase` — do not assume bare integer keys for Phase 2.
+
+Sprint 0 introduced the `phase-02/` subdirectory for contract and eval files.
+
 ## Phase 2 Contract and Eval File Naming Convention
 
 Phase 2 (Python library build, Sprints 00–06) contract files use a `phase-02/`
