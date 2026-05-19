@@ -1,0 +1,25 @@
+# Python virtual environment
+.venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# pytest
+.pytest_cache/
+
+# Ruff
+.ruff_cache/
+
+# mypy
+.mypy_cache/
+
+# Build / distribution
+dist/
+build/
+*.egg-info/
+
+# Coverage
+.coverage
+htmlcov/
