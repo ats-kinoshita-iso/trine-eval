@@ -46,12 +46,13 @@
         "deterministic-seeds-pinned-versions",
         "otel-langfuse-tracing",
         "pytest-plugin-exit-code-gating",
-        "accuracy-per-dollar-success-per-1k-tokens"
+        "accuracy-per-dollar-success-per-1k-tokens",
+        "sprint-state-phase-qualifier-docs"
       ],
       "compass_ids": ["A6", "A9", "G3", "G4", "H1", "H2", "H3", "H4", "H5"],
       "estimated_complexity": "high",
       "dependencies": [1],
-      "scope_notes": "Runner with hard caps; msgpack binary + JSON replayable log; deterministic seed plumbing; OpenTelemetry spans exported to self-hosted Langfuse (ops/langfuse-compose.yaml); pytest plugin with exit code 100 on failure; G4 cost reporting."
+      "scope_notes": "Runner with hard caps; msgpack binary + JSON replayable log; deterministic seed plumbing; OpenTelemetry spans exported to self-hosted Langfuse (ops/langfuse-compose.yaml); pytest plugin with exit code 100 on failure; G4 cost reporting. Also documents the sprint-state.json phase-qualifier convention: Phase 2 sprint entries use `phase-02-N` keys (e.g., `phase-02-1`, `phase-02-2`) to avoid clobbering Phase 1's bare-integer keys (`1`..`12`). Sprint 0 introduced this implicitly by using `0` (no Phase 1 collision); Sprint 01 (Phase 2) introduced the `phase-02-N` form. Sprint 2's docs criterion adds the convention to `rules/harness-conventions.md` and clarifies what `current_sprint` means relative to `current_phase`."
     },
     {
       "number": 3,
