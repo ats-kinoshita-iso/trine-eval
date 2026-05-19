@@ -1,0 +1,160 @@
+{
+  "sprint": 4,
+  "phase": 2,
+  "title": "LLM-as-judge: CoT rubric, binary scores, bootstrap CI, three-tier grading, calibration",
+  "tasks": [
+    {
+      "task_id": "s04-c1",
+      "criterion": "CoT-rubric scorer constructs prompt with criterion text and golden answer, returns binary Score: running `uv run pytest tests/judge/test_cot_rubric.py -k test_rubric_prompt_contains_criterion_and_golden -v --tb=short` exits 0 and output contains `PASSED`. The test must: (a) mock `anthropic.Anthropic` so no real API calls are made, (b) call `trine_eval.judge.rubric.model_graded_qa(sample, criterion=\"Explain photosynthesis\", golden_answer=\"Plants convert light to energy\", judge_model=mock_model)`, (c) capture the prompt string passed to the mocked judge model, (d) assert the prompt contains both the criterion text and the golden answer as substrings, and (e) assert the returned `Score` object has `value` equal to `0.0` or `1.0`.",
+      "grader_type": "deterministic",
+      "weight": 12,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/judge/test_cot_rubric.py -k test_rubric_prompt_contains_criterion_and_golden -v --tb=short 2>&1 | tee /tmp/s04c1.txt && grep -q \"PASSED\" /tmp/s04c1.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s04-c2",
+      "criterion": "CoT-rubric scorer parses judge response into binary Score and stores CoT in `reasoning`: running `uv run pytest tests/judge/test_cot_rubric.py -k test_rubric_parses_verdict_and_reasoning -v --tb=short` exits 0 and output contains `PASSED`. The test must: (a) mock the judge model to return a response containing `PASS` and reasoning text, (b) call `model_graded_qa`, (c) assert `Score.value == 1.0`, (d) assert `Score.reasoning` is a non-empty string. A second case must mock the judge to return `FAIL` and assert `Score.value == 0.0`.",
+      "grader_type": "deterministic",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/judge/test_cot_rubric.py -k test_rubric_parses_verdict_and_reasoning -v --tb=short 2>&1 | tee /tmp/s04c2.txt && grep -q \"PASSED\" /tmp/s04c2.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s04-c3",
+      "criterion": "`@scorer` decorator registers the CoT-rubric scorer in the registry: running `uv run pytest tests/judge/test_cot_rubric.py -k test_rubric_scorer_registered -v --tb=short` exits 0 and output contains `PASSED`. The test must: (a) import `trine_eval.core.registry` and (b) assert that `\"model_graded_qa\"` (or the scorer's registered name) is a key in `registry.scorers`. The scorer must be registered as a side-effect of importing `trine_eval.judge.rubric`.",
+      "grader_type": "deterministic",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/judge/test_cot_rubric.py -k test_rubric_scorer_registered -v --tb=short 2>&1 | tee /tmp/s04c3.txt && grep -q \"PASSED\" /tmp/s04c3.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s04-c4",
+      "criterion": "Binary TPR and TNR computed correctly against labeled fixture: running `uv run pytest tests/judge/test_calibration.py -k test_tpr_tnr_formula -v --tb=short` exits 0 and output contains `PASSED`. The test must: (a) import `trine_eval.judge.calibration.compute_tpr_tnr`, (b) construct a set with TP=3, FN=1, TN=3, FP=1, (c) assert `TPR == 0.75`, (d) assert `TNR == 0.75`, (e) assert `TPR + TNR == 1.5`. Edge case: perfect scorer returns `TPR + TNR == 2.0`.",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/judge/test_calibration.py -k test_tpr_tnr_formula -v --tb=short 2>&1 | tee /tmp/s04c4.txt && grep -q \"PASSED\" /tmp/s04c4.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s04-c5",
+      "criterion": "50-item calibration fixture exists with exactly 25 positive and 25 negative items, and calibration gate passes: running `uv run pytest tests/judge/test_calibration.py -k test_calibration_fixture_gate -v --tb=short` exits 0 and output contains `PASSED`. The test must: (a) read `tests/fixtures/calibration/items.jsonl`, (b) assert exactly 50 lines, (c) assert 25 items with `label: 1` and 25 with `label: 0`, (d) apply a deterministic mock scorer, and (e) call `compute_tpr_tnr` and assert `TPR + TNR >= 1.5`.",
+      "grader_type": "deterministic",
+      "weight": 9,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/judge/test_calibration.py -k test_calibration_fixture_gate -v --tb=short 2>&1 | tee /tmp/s04c5.txt && grep -q \"PASSED\" /tmp/s04c5.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s04-c6",
+      "criterion": "Bootstrap CI brackets the point estimate and `confidence=0.95` by default: running `uv run pytest tests/judge/test_bootstrap.py -k test_bootstrap_ci_brackets_mean -v --tb=short` exits 0 and output contains `PASSED`. The test must: (a) import `trine_eval.judge.bootstrap.bootstrap_ci`, (b) call it with 100 scores all equal to `1.0`, (c) assert `lower <= 1.0 <= upper`, (d) assert `BootstrapCI.confidence == 0.95`, and (e) with a mixed list assert `lower <= 0.5 <= upper`.",
+      "grader_type": "deterministic",
+      "weight": 7,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/judge/test_bootstrap.py -k test_bootstrap_ci_brackets_mean -v --tb=short 2>&1 | tee /tmp/s04c6.txt && grep -q \"PASSED\" /tmp/s04c6.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s04-c7",
+      "criterion": "Bootstrap CI variance: `n_resamples=10` produces a different CI than `n_resamples=1000`: running `uv run pytest tests/judge/test_bootstrap.py -k test_bootstrap_variance_with_n_resamples -v --tb=short` exits 0 and output contains `PASSED`. The test must: (a) generate a fixed list of 50 scores (`[0.0]*25 + [1.0]*25`) with `random.seed(0)` set before each call, (b) call `bootstrap_ci(scores, n_resamples=10)` and record `width_10 = ci_10.upper - ci_10.lower`, (c) call `bootstrap_ci(scores, n_resamples=1000)` and record `width_1000`, (d) assert `ci_10.lower != ci_1000.lower OR ci_10.upper != ci_1000.upper` (the two intervals must NOT be byte-identical — proves the resampling responds to `n_resamples`; this catches a trivial implementation that returns a constant `(0.0, 1.0)` regardless of resamples), and (e) assert `width_10 >= width_1000 OR width_10 != width_1000` (allowing either direction of width change while requiring some response).",
+      "grader_type": "deterministic",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/judge/test_bootstrap.py -k test_bootstrap_variance_with_n_resamples -v --tb=short 2>&1 | tee /tmp/s04c7.txt && grep -q \"PASSED\" /tmp/s04c7.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s04-c8",
+      "criterion": "Three-tier dispatcher routes `tier=code` scorer without invoking the judge model: running `uv run pytest tests/judge/test_dispatch.py -k test_dispatch_code_tier_no_judge -v --tb=short` exits 0 and output contains `PASSED`. The test must: (a) import `trine_eval.judge.dispatch.dispatch_score`, (b) create a mock scorer with `tier=\"code\"`, (c) call `dispatch_score(sample, scorer=mock_code_scorer, judge_model=mock_judge)`, (d) assert `Score.metadata[\"tier\"] == \"code\"`, and (e) assert the mock judge model was never called.",
+      "grader_type": "deterministic",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/judge/test_dispatch.py -k test_dispatch_code_tier_no_judge -v --tb=short 2>&1 | tee /tmp/s04c8.txt && grep -q \"PASSED\" /tmp/s04c8.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s04-c9",
+      "criterion": "Three-tier dispatcher routes `tier=model` scorer through the judge and `tier=human` scorer to the queue: running `uv run pytest tests/judge/test_dispatch.py -k test_dispatch_model_and_human_tiers -v --tb=short` exits 0 and output contains `PASSED`. The test must: (a) for tier=model: assert judge IS called once and Score.metadata[\"tier\"] == \"model\"; (b) for tier=human: assert sample is enqueued, no synchronous Score is returned, and mock_judge was NOT called.",
+      "grader_type": "deterministic",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/judge/test_dispatch.py -k test_dispatch_model_and_human_tiers -v --tb=short 2>&1 | tee /tmp/s04c9.txt && grep -q \"PASSED\" /tmp/s04c9.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s04-c10",
+      "criterion": "Human annotation queue enqueue -> list -> resolve round-trip: running `uv run pytest tests/judge/test_queue.py -k test_queue_enqueue_list_resolve -v --tb=short` exits 0 and output contains `PASSED`. The test must: (a) import `trine_eval.judge.queue.ListQueue`, (b) create a fresh `ListQueue`, (c) enqueue a sample, (d) call `list()` and assert 1 pending item, (e) call `resolve(id, value=1.0)` and assert it returns `Score(value=1.0)`, and (f) call `list()` again and assert the item is gone.",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/judge/test_queue.py -k test_queue_enqueue_list_resolve -v --tb=short 2>&1 | tee /tmp/s04c10.txt && grep -q \"PASSED\" /tmp/s04c10.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s04-c11",
+      "criterion": "Full judge test suite exits 0 with no failures: `uv run pytest tests/judge/` exits 0 with no FAILED or ERROR lines. This is a holistic green-light check for all new test files from this sprint. PASS when pytest exit code is 0, output contains `passed`, and no `FAILED` or `ERROR` lines appear.",
+      "grader_type": "deterministic",
+      "weight": 2,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/judge/ -v --tb=short 2>&1 | tee /tmp/s04c11.txt; EC=${PIPESTATUS[0]}; grep -E \"passed\" /tmp/s04c11.txt && ! grep -qE \"FAILED|ERROR\" /tmp/s04c11.txt && [ \"$EC\" = \"0\" ] && echo PASS || exit 1'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s04-c12",
+      "criterion": "No regressions in prior runner, model, and core tests: all prior Sprint 1, 2, and 3 tests under `tests/runner/`, `tests/models/`, and `tests/core/` continue to pass. PASS when pytest exits 0 (or 100 -- Sprint 2's pytest plugin deliberately overrides session exit to 100 when a trine_eval test records a score below threshold), output contains `passed`, and no `FAILED` or `ERROR` lines appear.",
+      "grader_type": "deterministic",
+      "weight": 2,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/runner/ tests/models/ tests/core/ -v --tb=short 2>&1 | tee /tmp/s04c12.txt; EC=${PIPESTATUS[0]}; grep -E \"passed\" /tmp/s04c12.txt && ! grep -qE \"FAILED|ERROR\" /tmp/s04c12.txt && ( [ \"$EC\" = \"0\" ] || [ \"$EC\" = \"100\" ] ) && echo PASS || exit 1'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s04-c13",
+      "criterion": "CoT-rubric scorer API shape and prompt construction are correct (E1 behavioral): read `src/trine_eval/judge/rubric.py`. The implementation must: (a) expose `model_graded_qa` accepting `sample`, `criterion: str`, and `golden_answer: str`; (b) construct a prompt embedding both `criterion` and `golden_answer`; (c) call the judge model exactly once per invocation; (d) parse the response for a binary verdict and return `Score(value=0.0|1.0)`; (e) store the full judge response text in `Score.reasoning` (preferred) OR `Score.explanation` (acceptable if the Generator chose to reuse Sprint 1's existing field) — the full CoT text must be present, regardless of which field name is used. Storing only the extracted verdict token (PASS/FAIL/1/0) rather than the full response is FAIL; (f) be registered in `trine_eval.core.registry.scorers` via `@scorer`. An implementation that ignores `golden_answer` in the prompt is FAIL.",
+      "grader_type": "llm-judge",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s04-c14",
+      "criterion": "Three-tier dispatcher design is correct -- tier isolation and `tier` metadata key (E6 behavioral): read `src/trine_eval/judge/dispatch.py`. The implementation must: (a) read the scorer's declared `tier` attribute to decide routing; (b) for tier=code: call scorer directly, record metadata[\"tier\"]=\"code\", NEVER invoke judge_model; (c) for tier=model: call judge and record metadata[\"tier\"]=\"model\"; (d) for tier=human: enqueue the sample, return None (no synchronous score); (e) NOT auto-escalate code -> model under any condition. A dispatcher that calls judge_model for code tier is FAIL. Auto-escalation logic present is FAIL.",
+      "grader_type": "llm-judge",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s04-sn1",
+      "criterion": "Historical Phase 1 and Phase 2 prior-sprint contracts and evals are unmodified: no file matching Phase-1 or prior Phase-2 sprint paths is modified by any commit whose message contains `(sprint-04)`. Verification iterates over all `(sprint-04)`-prefixed commits reachable from HEAD but not from the sprint-03 Phase-2 completion commit, checking each commit's individual diff against the prior-sprint glob. The Phase-2 patterns use `sprint-0[123]*.md` to exclude the current sprint-04 contract. When no sprint-04 commits exist yet, the loop exits PASS immediately.",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "bash -c 'failed=0; S03BASE=$(git log --format=%H --grep=\"complete sprint 03 (Phase 2)\" -1 2>/dev/null); SPRINT_COMMITS=$(git log --format=%H --grep=\"(sprint-04)\" HEAD ${S03BASE:+^$S03BASE} 2>/dev/null); for c in $SPRINT_COMMITS; do diff_out=$(git diff \"${c}^\"..\"${c}\" -- \".harness/contracts/sprint-0[1-9]*.md\" \".harness/contracts/sprint-1*.md\" \".harness/evals/sprint-0[1-9]*.md\" \".harness/evals/sprint-1*.md\" \".harness/contracts/phase-02/sprint-0[123]*.md\" \".harness/contracts/phase-02/sprint-1*.md\" \".harness/evals/phase-02/sprint-0[123]*.md\" \".harness/evals/phase-02/sprint-1*.md\" 2>/dev/null); if [ -n \"$diff_out\" ]; then echo \"FAIL: $c modified prior-sprint files\"; echo \"$diff_out\" | head -20; failed=1; fi; done; [ \"$failed\" = \"0\" ] && echo PASS || exit 1'",
+      "rubric_dimension": "structural"
+    },
+    {
+      "task_id": "s04-sn2",
+      "criterion": "No forbidden packages imported or declared: the strings `langgraph`, `ragas`, `pgvector`, and `fastapi` must not appear in `pyproject.toml`, `src/trine_eval/**/*.py`, or `tests/**/*.py`. PASS when `git grep` finds no matches.",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "bash -c 'git grep -rn --count -E \"langgraph|ragas|pgvector|fastapi\" pyproject.toml src/ tests/ 2>/dev/null | grep -v \"^Binary\" | grep -v \":0$\" && echo FAIL && exit 1 || echo PASS'",
+      "rubric_dimension": "structural"
+    },
+    {
+      "task_id": "s04-sn3",
+      "criterion": "No real Anthropic API calls in tests: no test under `tests/judge/` calls `anthropic.Anthropic()` or any `client.messages.*` method without mocking. The Evaluator must read `tests/judge/test_cot_rubric.py`, `tests/judge/test_dispatch.py`, and any other file under `tests/judge/` that imports `anthropic`, and verify every `anthropic.Anthropic(...)` instantiation and every `messages.create` / `batches.create` call is enclosed in a `mocker.patch(...)` block or `unittest.mock.patch(...)` context manager. A bare `anthropic.Anthropic()` call without a surrounding patch is FAIL.",
+      "grader_type": "llm-judge",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": null,
+      "rubric_dimension": "behavioral"
+    }
+  ]
+}
