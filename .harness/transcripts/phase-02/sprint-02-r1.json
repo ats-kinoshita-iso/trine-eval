@@ -1,0 +1,51 @@
+{
+  "sprint": 2,
+  "round": 1,
+  "trial": 1,
+  "messages": [
+    {"role": "user", "content": "Evaluate Sprint 2 against its finalized contract. Round 1, Trial N/A."},
+    {"role": "assistant", "content": "Read contract, tasks.json, config.json, rubric. Ran all 12 verification commands. Read source files for LLM-judge criteria. Wrote eval to .harness/evals/phase-02/sprint-02-r1.md."}
+  ],
+  "tool_calls": [
+    {"task_id": "setup", "command": "Read .harness/config.json", "exit_code": 0},
+    {"task_id": "setup", "command": "Read .harness/contracts/phase-02/sprint-02.md", "exit_code": 0},
+    {"task_id": "setup", "command": "Read .harness/contracts/phase-02/sprint-02.tasks.json", "exit_code": 0},
+    {"task_id": "setup", "command": "Read skills/eval-rubric/rubrics/eval-harness.md", "exit_code": 0},
+    {"task_id": "setup", "command": "Read .harness/evals/phase-02/sprint-01-r2.md (calibration)", "exit_code": 0},
+    {"task_id": "s02-c1", "command": "bash -c 'uv run pytest tests/runner/test_engine.py -k test_run_noop -v --tb=short 2>&1 | tee /tmp/s02c1.txt && grep -q \"PASSED\" /tmp/s02c1.txt && echo PASS'", "exit_code": 0},
+    {"task_id": "s02-c2", "command": "bash -c 'uv run pytest tests/runner/test_caps.py -v --tb=short 2>&1 | tee /tmp/s02c2.txt && grep -q \"PASSED\" /tmp/s02c2.txt && grep -E \"4 passed|[5-9] passed|[1-9][0-9]+ passed\" /tmp/s02c2.txt && ! grep -qE \"cap_hit.*max_concurrency|max_concurrency.*cap_hit\" tests/runner/test_caps.py && echo PASS'", "exit_code": 0},
+    {"task_id": "s02-c3", "command": "bash -c 'uv run pytest tests/runner/test_logformat.py -v --tb=short 2>&1 | tee /tmp/s02c3.txt && grep -q \"PASSED\" /tmp/s02c3.txt && grep -E \"2 passed|[3-9] passed|[1-9][0-9]+ passed\" /tmp/s02c3.txt && echo PASS'", "exit_code": 0},
+    {"task_id": "s02-c4", "command": "bash -c 'uv run pytest tests/runner/test_plugin_exit.py --tb=short 2>&1; CODE=$?; [ \"$CODE\" = \"100\" ] && echo PLUGIN_OK || (echo \"Got exit $CODE expected 100\" && exit 1)'", "exit_code": 0},
+    {"task_id": "s02-c5", "command": "bash -c 'uv run pytest tests/runner/test_rescore_cli.py -v --tb=short 2>&1 | tee /tmp/s02c5.txt && grep -q \"PASSED\" /tmp/s02c5.txt && echo PASS'", "exit_code": 0},
+    {"task_id": "s02-c6", "command": "bash -c 'uv run pytest tests/runner/test_report_cli.py -v --tb=short 2>&1 | tee /tmp/s02c6.txt && grep -q \"PASSED\" /tmp/s02c6.txt && echo PASS'", "exit_code": 0},
+    {"task_id": "s02-c7", "command": "bash -c 'uv run pytest tests/observability/test_otel.py -v --tb=short 2>&1 | tee /tmp/s02c7.txt && grep -q \"PASSED\" /tmp/s02c7.txt && echo PASS'", "exit_code": 0},
+    {"task_id": "s02-c8", "command": "bash -c 'python -c \"import sys, yaml; d=yaml.safe_load(open(\\\"ops/langfuse-compose.yaml\\\")); sys.exit(0 if isinstance(d, dict) and \\\"services\\\" in d else 1)\" && echo PASS'", "exit_code": 0},
+    {"task_id": "s02-c9", "command": "bash -c 'grep -q \"phase-02-N\" rules/harness-conventions.md && grep -q \"current_sprint\" rules/harness-conventions.md && grep -q \"current_phase\" rules/harness-conventions.md && echo PASS || (echo FAIL && exit 1)'", "exit_code": 0},
+    {"task_id": "s02-c10", "command": "bash -c 'uv run pytest tests/runner/ tests/observability/ -v --tb=short 2>&1 | tee /tmp/s02c10.txt && grep -E \"passed\" /tmp/s02c10.txt && echo PASS'", "exit_code": 0},
+    {"task_id": "s02-c11", "command": "Read src/trine_eval/runner/engine.py (llm-judge)", "exit_code": 0},
+    {"task_id": "s02-c12", "command": "Read pyproject.toml (llm-judge)", "exit_code": 0},
+    {"task_id": "s02-sn1", "command": "bash -c 'BASE=$(git merge-base HEAD main 2>/dev/null || git rev-parse HEAD~$(git rev-list --count HEAD)^); diff_out=$(git diff $BASE..HEAD -- \".harness/contracts/sprint-0[1-9]*.md\" \".harness/contracts/sprint-1*.md\" \".harness/evals/sprint-0[1-9]*.md\" \".harness/evals/sprint-1*.md\" 2>/dev/null); [ -z \"$diff_out\" ] && echo PASS || (echo FAIL && echo \"$diff_out\" && exit 1)'", "exit_code": 0},
+    {"task_id": "s02-sn2", "command": "bash -c 'git grep -rn --count -E \"langgraph|ragas|pgvector|fastapi\" pyproject.toml src/ tests/ 2>/dev/null | grep -v \"^Binary\" | grep -v \":0$\" && echo FAIL && exit 1 || echo PASS'", "exit_code": 0},
+    {"task_id": "s02-sn3", "command": "Read tests/models/test_anthropic.py, tests/runner/test_rescore_cli.py, tests/batch-api-smoke.py (llm-judge)", "exit_code": 0}
+  ],
+  "criteria_audit": [
+    {"task_id": "s02-c1", "verified_via_command": true},
+    {"task_id": "s02-c2", "verified_via_command": true},
+    {"task_id": "s02-c3", "verified_via_command": true},
+    {"task_id": "s02-c4", "verified_via_command": true},
+    {"task_id": "s02-c5", "verified_via_command": true},
+    {"task_id": "s02-c6", "verified_via_command": true},
+    {"task_id": "s02-c7", "verified_via_command": true},
+    {"task_id": "s02-c8", "verified_via_command": true},
+    {"task_id": "s02-c9", "verified_via_command": true},
+    {"task_id": "s02-c10", "verified_via_command": true},
+    {"task_id": "s02-c11", "verified_via_command": false},
+    {"task_id": "s02-c12", "verified_via_command": false},
+    {"task_id": "s02-sn1", "verified_via_command": true},
+    {"task_id": "s02-sn2", "verified_via_command": true},
+    {"task_id": "s02-sn3", "verified_via_command": false}
+  ],
+  "token_usage": {"input": null, "output": null, "cache_hit": null},
+  "timing": {"ttft_ms": null, "total_ms": null},
+  "thinking_summary": "Ran each deterministic criterion's literal verification_command from tasks.json, checking exit code and expected output. For C1-C10, SN1-SN2: all commands exited 0 with expected PASS/PLUGIN_OK output. For C11 (engine design), read engine.py fully and verified all five cap-design requirements against the reference solution — Semaphore, token accumulation, wall-clock time_limit, cost from Opus 4.7 pricing, and cap_hit metadata. For C12 (pyproject.toml), read and confirmed all four runtime deps, the pytest11 entry point, and absence of forbidden packages. For SN3, grep found three test files importing anthropic; read each and confirmed every anthropic.Anthropic() instantiation is inside a patch context. No borderline verdicts; no rationalization required."
+}

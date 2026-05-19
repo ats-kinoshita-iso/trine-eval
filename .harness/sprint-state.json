@@ -1,8 +1,20 @@
 {
-  "current_sprint": 2,
+  "current_sprint": 3,
   "current_phase": 2,
-  "last_updated": "2026-05-18T22:47:29-04:00",
+  "last_updated": "2026-05-18T23:40:00-04:00",
   "sprints": {
+    "phase-02-2": {
+      "phase": 2,
+      "number": 2,
+      "title": "Runner, replayable logs, pytest plugin, observability",
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "12/12",
+      "weighted_score": 100,
+      "gates_passed": "3/3",
+      "date": "2026-05-18",
+      "note": "First clean first-round PASS since early Phase 1. Contract negotiation hit max rounds (2) with Round 2 NEEDS REVISION (C9 exit-mask + C2 advisory). Generator fixed both as fix(sprint-02): 682c7f1 before any source landed. 11 implementation commits (682c7f1..8a17ea3): async runner with hard caps (token/time/cost/concurrency), binary+JSON replayable log format, deterministic seeds, OTel+Langfuse, pytest plugin (exit 100), token-efficiency metrics, CLI score/report subcommands, ops/langfuse-compose.yaml, sprint-state phase-qualifier docs. 78 tests passing (29 new for Sprint 2). Eval at .harness/evals/phase-02/sprint-02-r1.md."
+    },
     "phase-02-1": {
       "phase": 2,
       "number": 1,
