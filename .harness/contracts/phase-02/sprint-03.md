@@ -60,9 +60,9 @@ Each criterion must be independently testable. Weights sum to 100%.
 
 9. **No regressions in existing runner and model tests**: running the following exits 0 and prints `PASS`:
    ```
-   bash -c 'uv run pytest tests/runner/ tests/models/ -v --tb=short 2>&1 | tee /tmp/s03c9.txt; EC=${PIPESTATUS[0]}; grep -E "passed" /tmp/s03c9.txt && ! grep -qE "FAILED|ERROR" /tmp/s03c9.txt && [ "$EC" = "0" ] && echo PASS || exit 1'
+   bash -c 'uv run pytest tests/runner/ tests/models/ -v --tb=short 2>&1 | tee /tmp/s03c9.txt; EC=${PIPESTATUS[0]}; grep -E "passed" /tmp/s03c9.txt && ! grep -qE "FAILED|ERROR" /tmp/s03c9.txt && ( [ "$EC" = "0" ] || [ "$EC" = "100" ] ) && echo PASS || exit 1'
    ```
-   All prior Sprint 1 and Sprint 2 tests under `tests/runner/` and `tests/models/` continue to pass. PASS when pytest exit code is 0, output contains `passed`, and no `FAILED` or `ERROR` lines appear in the output. [weight: 5%]
+   All prior Sprint 1 and Sprint 2 tests under `tests/runner/` and `tests/models/` continue to pass. PASS when pytest exits 0 (or 100 — Sprint 2's pytest plugin deliberately overrides session exit to 100 when a `@pytest.mark.trine_eval` test records a score below threshold; the regression check accepts 100 because no genuine test failure prints `FAILED` or `ERROR`), output contains `passed`, and no `FAILED` or `ERROR` lines appear. [weight: 5%]
 
 ### LLM-as-judge (requires reading comprehension)
 
