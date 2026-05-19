@@ -18,3 +18,4 @@ class EvalLog(BaseModel):
     model: str
     timestamp: datetime
     aggregate: dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
