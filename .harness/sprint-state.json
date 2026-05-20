@@ -1,8 +1,20 @@
 {
-  "current_sprint": 5,
+  "current_sprint": 6,
   "current_phase": 2,
-  "last_updated": "2026-05-19T19:54:57-04:00",
+  "last_updated": "2026-05-20T19:26:42-04:00",
   "sprints": {
+    "phase-02-5": {
+      "phase": 2,
+      "number": 5,
+      "title": "Docker sandbox + cheap pre-filter + regression-safety gate",
+      "status": "PASS",
+      "rounds": 1,
+      "criteria_passed": "16/16",
+      "weighted_score": 100,
+      "gates_passed": "3/3",
+      "date": "2026-05-20",
+      "note": "Clean first-round PASS. Contract APPROVED Round 1 by a properly-forked Evaluator subagent (zero blocking issues, 2 advisories: C6 dual-call mock subtlety and C3/C4 timeout-path exemption from docker-ps check). Single implementation commit `5bf884d` shipped `src/trine_eval/sandbox/` package (3 modules): `docker.py` (`run_in_sandbox` + `SandboxResult`, `--network=none` default-deny, `--rm` always, `--cpus`/`--memory` limits, label-based `docker ps` leftover check, `subprocess.TimeoutExpired` -> `timed_out=True` + `exit_code=-1`); `prefilter.py` (`run_prefilter` + `PrefilterResult` with `stage`/`passed`/`reason`/`stdout`/`stderr`, four-stage ruff->mypy->ast-diff->pytest pipeline with short-circuit on first failure verified via call-count assertion); `regression_gate.py` (`evaluate_regression_gate` + `RegressionGateResult` with pre/post-patch test status capture, FAIL_TO_PASS positive verification, PASS_TO_PASS regression detection, trivial-pass-bypass catcher). 12 new tests under `tests/sandbox/` (all `subprocess.run` patched per SN3). Total 101 tests passing (89 prior + 12 new); 89-test regression suite all green via the `( [ EC=0 ] || [ EC=100 ] )` disjunction. SN1 commit-scoped diff with `S04BASE=git log --grep='complete sprint 04 (Phase 2)' -1` anchor PASSES on current branch. Rubric scores: methodology 4/5, grading 4/5, separation 5/5 (no fallback penalty this sprint \u2014 Sprint 4's penalty was scoped to that sprint), context 4/5, extensibility 4/5. Eval at `.harness/evals/phase-02/sprint-05-r1.md`."
+    },
     "phase-02-4": {
       "phase": 2,
       "number": 4,
@@ -13,7 +25,7 @@
       "weighted_score": 100,
       "gates_passed": "3/3",
       "date": "2026-05-19",
-      "note": "Clean first-round PASS. Contract negotiation hit max rounds (2): Round 1 NEEDS REVISION with 2 BLOCKING (SN1 merge-base baseline predated Phase 2 — widened sprint-0[123]*.md glob now matches sprint-03.md and fails the diff against main; C7 bootstrap-variance OR-disjunction admitted a trivially-broken (0.0,1.0) bootstrap) + 1 ADVISORY (C13 Score.reasoning vs Score.explanation ambiguity). Round 1 review was main-thread fallback (Process Note in contract) — two Evaluator subagent dispatches investigated thoroughly but ran out of turns before writing the review section. Generator's Round 2 revision fixed all three: SN1 now uses commit-scoped diff iterating over `(sprint-04)`-prefixed commits scoped via `S03BASE=git log --grep='complete sprint 03 (Phase 2)' -1` to exclude historical Phase-1 sprint-04 commits; C7 added clause (d) requiring `ci_10.lower != ci_1000.lower OR ci_10.upper != ci_1000.upper`; C13 clause (e) inlined `Score.reasoning OR Score.explanation` acceptance. Round 2 forked Evaluator review APPROVED. Two implementation commits (97f60fa..b39c2f7): added `Score.reasoning: str | None = None` field to Sprint 1's score.py, then created `src/trine_eval/judge/` package (rubric.py with `model_graded_qa` @scorer-registered + binary verdict parser + _COT_PROMPT_TEMPLATE embedding criterion+golden_answer; calibration.py with `compute_tpr_tnr` returning (TP/(TP+FN), TN/(TN+FP)); bootstrap.py with `BootstrapCI` NamedTuple + percentile estimator; dispatch.py with `dispatch_score` reading scorer.tier and routing code/model/human with NO auto-escalation; queue.py with in-memory `ListQueue`+singleton). 50-item synthetic calibration fixture at `tests/fixtures/calibration/items.jsonl` (25 positive + 25 negative). 11 new tests under `tests/judge/`; 78-test regression suite all green (89 total). Round-1 main-thread fallback penalty: generator_evaluator_separation 3/5 instead of 5/5. Eval at `.harness/evals/phase-02/sprint-04-r1.md`."
+      "note": "Clean first-round PASS. Contract negotiation hit max rounds (2): Round 1 NEEDS REVISION with 2 BLOCKING (SN1 merge-base baseline predated Phase 2 \u2014 widened sprint-0[123]*.md glob now matches sprint-03.md and fails the diff against main; C7 bootstrap-variance OR-disjunction admitted a trivially-broken (0.0,1.0) bootstrap) + 1 ADVISORY (C13 Score.reasoning vs Score.explanation ambiguity). Round 1 review was main-thread fallback (Process Note in contract) \u2014 two Evaluator subagent dispatches investigated thoroughly but ran out of turns before writing the review section. Generator's Round 2 revision fixed all three: SN1 now uses commit-scoped diff iterating over `(sprint-04)`-prefixed commits scoped via `S03BASE=git log --grep='complete sprint 03 (Phase 2)' -1` to exclude historical Phase-1 sprint-04 commits; C7 added clause (d) requiring `ci_10.lower != ci_1000.lower OR ci_10.upper != ci_1000.upper`; C13 clause (e) inlined `Score.reasoning OR Score.explanation` acceptance. Round 2 forked Evaluator review APPROVED. Two implementation commits (97f60fa..b39c2f7): added `Score.reasoning: str | None = None` field to Sprint 1's score.py, then created `src/trine_eval/judge/` package (rubric.py with `model_graded_qa` @scorer-registered + binary verdict parser + _COT_PROMPT_TEMPLATE embedding criterion+golden_answer; calibration.py with `compute_tpr_tnr` returning (TP/(TP+FN), TN/(TN+FP)); bootstrap.py with `BootstrapCI` NamedTuple + percentile estimator; dispatch.py with `dispatch_score` reading scorer.tier and routing code/model/human with NO auto-escalation; queue.py with in-memory `ListQueue`+singleton). 50-item synthetic calibration fixture at `tests/fixtures/calibration/items.jsonl` (25 positive + 25 negative). 11 new tests under `tests/judge/`; 78-test regression suite all green (89 total). Round-1 main-thread fallback penalty: generator_evaluator_separation 3/5 instead of 5/5. Eval at `.harness/evals/phase-02/sprint-04-r1.md`."
     },
     "phase-02-3": {
       "phase": 2,
