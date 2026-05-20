@@ -37,6 +37,9 @@ Before negotiating any new contract, verify that every previously graduated capa
 2. For each entry in the `tasks` array:
    - Execute `task.verification_command` **verbatim** — do not paraphrase, reconstruct, or substitute variables. The exact string recorded in `regression.json` is what ran when the criterion was graduated; running the same command preserves the audit chain.
    - Record PASS if exit code is `0`, FAIL otherwise. Capture stdout, stderr, and exit code.
+
+> **Windows-bash invocation hazard.** Do not invoke `task.verification_command` via `subprocess.run(['bash', '-c', cmd])`. On Windows with WSL installed, Python's PATH resolver picks `wsl bash` (no distros by default) and the command fails silently with a "no installed distributions" message. Use either `subprocess.run(cmd, shell=True)` (cmd.exe; finds `uv` on PATH) or explicit `C:\Program Files\Git\bin\bash.exe`. Surfaced in this project's Sprint 5 setup; workaround validated in Sprint 6 Step 0.5.
+
 3. Write an aggregate results file to `.harness/regression/runs/run-<UTC-ISO8601>.json` with shape:
    ```json
    { "timestamp": "2026-04-24T18:45:00Z", "sprint_about_to_run": 7,
@@ -101,6 +104,10 @@ Read the contract file. If status is NEEDS REVISION and negotiation round < `con
 If max rounds reached without approval, proceed with the latest version and note this in progress.md.
 
 If `contract_negotiation` is disabled, whoever drafted the contract (Generator or main thread) writes it once and it's automatically approved.
+
+### 1d. After APPROVED — emit `tasks.json`
+
+Per `skills/sprint-contract/SKILL.md` lines 90–132, the Generator (or main thread in minimal mode) writes `.harness/contracts/sprint-{NN}.tasks.json` immediately after the Evaluator writes `**Status: APPROVED**` and before the Generator enters IMPLEMENTATION mode. Emission is guarded by `config.taxonomy.emit_tasks_json` (default `true`). This is a mechanical transcription of the approved markdown contract — schema and field semantics are defined in sprint-contract SKILL. The JSON file is the machine-readable source of record for the Step 0.5 regression gate, batched-eval grouping, and harness-summary's saturation-graduation step. Skipping emission forces downstream synthesis from markdown — every graduated entry in `regression.json` will be flagged `synthesized_from: contract markdown` and the audit chain weakens.
 
 ## Step 2: Implementation
 
@@ -248,7 +255,9 @@ Once the sprint passes (or max retries exhausted):
    git commit -m "harness: complete sprint {NN} evaluation"
    ```
 
-3. Report to the user:
+> **Windows encoding hazard for `sprint-state.json` and `progress.md`.** Write JSON / markdown files containing UTF-8 superscripts (`²`, `³`), em-dashes, or other non-ASCII via `Path(...).write_text(content, encoding='utf-8')`. Bash heredocs on Windows + Git Bash produce mojibake (`²` becomes `Â²`). Multiple sprints in this project's run required the Python workaround when their progress entries contained `σ²` or similar.
+
+4. Report to the user:
    - Sprint outcome (PASS/PARTIAL/FAIL)
    - How many rounds it took
    - Key findings from the eval
