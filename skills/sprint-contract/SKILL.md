@@ -74,6 +74,18 @@ For `cli-tool` and `eval-harness` deliverables, the Evaluator may skip the edge-
 
 **How edge cases are graded.** Each edge case criterion is graded PASS or FAIL using the same code-based-first hierarchy as Success Criteria. The difference is what the harness does with the result: edge-case PASS/FAIL counts go into the **Edge Case Pass Rate** metric (see `skills/harness-summary/SKILL.md`), not into the weighted score. A sprint with 10 edge case criteria where 7 pass reports an Edge Case Pass Rate of 70% — independent of whether the weighted score was 100% or 60%.
 
+## Functional Smoke Criteria
+
+Functional Smoke criteria are a **fourth** class of contract criterion, complementary to mocked Success Criteria, Should-NOT gates, and Edge Case criteria. They exercise the deliverable against **real external systems** (live Anthropic API, real Docker, real filesystem, real judge model) to validate that code which passes architectural mocked tests also functions end-to-end. They were added in Sprint 07 alongside the `Functional Integration Coverage` rubric dimension.
+
+**Why separate from Success Criteria.** A mocked test that asserts the right argv shape ships next to code that returns a beautifully-structured response — both pass — but the code may not actually trigger a cache hit, demultiplex a real batch result, or run a real container. Folding functional smoke into the 100% weighted total would let a sprint claim "100% coverage" on mocked tests alone; reporting smoke separately makes the asymmetry visible. The Functional Integration Coverage rubric dimension (10% weight) consumes the smoke pass rate plus structural indicators (env-var gating, budget cap, fixture parity).
+
+**Gating and budget.** Live-API smoke tests are gated by env vars (`TRINE_EVAL_LIVE_API=1`, `TRINE_EVAL_LIVE_DOCKER=1`, etc.) so CI default skips them. Each sprint's combined live-API spend must stay under the budget defined in `config.json` `functional_smoke.budget_usd` (currently $1.00/sprint), enforced via the runner's existing `cost_limit` parameter. Recorded fixtures (VCR-style JSON, replay-style captures) are an acceptable substitute when live cost is prohibitive; they preserve the functional signal without the per-run dollar cost.
+
+**Where smoke tests live.** Place them under `tests/smoke/<system>/test_<feature>_live.py`. The pytest `skipif` boilerplate at the top of each file gates on the relevant env var. The conventions doc (`rules/harness-conventions.md` — see "Architectural vs Functional Verification") is the source of record for the directory layout and env-var registry.
+
+**How smoke results are graded.** Each Functional Smoke criterion is graded PASS or FAIL using the same code-based-first hierarchy as Success Criteria. The result feeds the **Functional Smoke Pass Rate** metric in `harness-summary` and informs the `Functional Integration Coverage` rubric dimension. A sprint with 4 smoke criteria where 3 pass reports a Functional Smoke Pass Rate of 75%, independent of the weighted Success Criteria total.
+
 ## Reference Solutions
 
 Reference solutions provide known-working outputs for criteria where grader calibration is valuable. They are **optional** — not every criterion needs one.
@@ -104,7 +116,8 @@ After the contract is approved (Status: APPROVED from the Evaluator review), emi
       "weight": 8,
       "is_gate": false,
       "verification_command": "jq -e '.trials' .harness/config.json",
-      "rubric_dimension": "methodology_completeness"
+      "rubric_dimension": "methodology_completeness",
+      "bucket": 1
     },
     {
       "task_id": "s06-sn1",
@@ -113,7 +126,8 @@ After the contract is approved (Status: APPROVED from the Evaluator review), emi
       "weight": 0,
       "is_gate": true,
       "verification_command": null,
-      "rubric_dimension": "generator_evaluator_separation"
+      "rubric_dimension": "generator_evaluator_separation",
+      "bucket": 2
     }
   ]
 }
@@ -128,6 +142,7 @@ After the contract is approved (Status: APPROVED from the Evaluator review), emi
 - `is_gate` — `true` for Should-NOT gates, `false` for scored success criteria.
 - `verification_command` — For deterministic criteria, a runnable shell command whose exit code or stdout determines PASS/FAIL. For llm-judge criteria, `null`. Sprint 7's regression gate executes these commands directly.
 - `rubric_dimension` — Which rubric dimension this criterion informs (e.g., `methodology_completeness`, `grading_architecture`). Used by Sprint 8 for batching by dimension and by harness-summary for per-dimension rollups.
+- `bucket` — Integer `1`, `2`, or `3`, matching the bucket framework in [`rules/harness-conventions.md`](rules/harness-conventions.md) → "Three Buckets of Verification". Used by `harness-summary` to compute bucket distribution per sprint and feed the `Functional Integration Coverage` rubric dimension. Sprint contracts authored before Sprint 07 do not carry this field; the summary skill treats missing-`bucket` as `1` (the most conservative reading) for those legacy entries.
 
 **Emission process:** The Generator (or main thread in minimal mode) writes the JSON file after reading the approved contract. The Evaluator does not need to review the JSON separately — it is a mechanical transcription of the approved markdown contract, and any drift between the two is caught by the Evaluator's subsequent reads of both files during the EVALUATION step.
 
@@ -151,7 +166,71 @@ These are the recurring authoring mistakes the Evaluator has flagged across Spri
 
 5. **prose-vs-verification trap.** Does the criterion's English prose actually describe what the verification command runs? When the prose says "verify the file contains a markdown table" but the command is `grep -q '|'`, the prose is over-promising — the grader is grading something narrower than the prose claims. Either tighten the prose to match the command exactly, or strengthen the command to verify what the prose claims. The two must be the same test.
 
+6. **bucket discipline trap.** Is the verification command bucket 1 (`grep -q "X" file.md`, `assert key in dict`, `[ -f path ]`) when a bucket 2 (behavioral with mocks) version would catch more? See `rules/harness-conventions.md` → "Three Buckets of Verification" for the canonical definitions. Bucket-1 criteria only verify that plumbing exists — a deliverable could ship at 100% PASS with bucket-1-only criteria while being non-functional at runtime. For every criterion authored as bucket 1, ask: "If I replaced this with a behavioral test that asserts an *outcome* of running the new code, would the test be feasible?" If yes, replace it. Bucket 1 is acceptable only when the deliverable is genuinely plumbing-only (a config key must be present; a convention must be documented). When the deliverable is behavior (a new function, a new agent instruction, a new sprint workflow), the verification must assert behavior. For harness-side deliverables whose "behavior" only manifests when an agent reads and acts on a new instruction, the bucket-2 pattern is **subagent-driven verification**: spawn a real subagent via the `Task` tool with a constructed input, assert on the subagent's output. This pays no raw API cost — the subagent uses Claude Code's existing auth chain. See the "Subagent-Driven Behavioral Verification" subsection below for the pattern.
+
 If any item fails, fix the contract before invoking the Evaluator. Catching these at authoring time saves a negotiation round.
+
+### Subagent-Driven Behavioral Verification
+
+Most harness-side deliverables (a new skill section, an updated agent prompt, a new convention) only manifest as observable behavior when an agent reads and acts on them. The bucket-1 verification "the documentation landed" (`grep -q "X" agents/evaluator.md`) is cheap but catches only the gross omission. The bucket-2 verification is "an agent reading that documentation actually behaves differently" — and the cheap way to get there is to spawn a real subagent.
+
+**Pattern.** Author the criterion's verification as a script that:
+
+1. Constructs an input that should trigger the new behavior (a 10+-criterion contract for the Evaluator turn-budget guidance; a draft contract with a Windows-bash anti-pattern for the cross-platform-verification guidance; etc.).
+2. Spawns the relevant subagent (`Task` with `subagent_type` matching `Generator`, `Evaluator`, or `general-purpose`) with that input and a focused prompt.
+3. Asserts on the subagent's output — does the eval file appear with skeleton-then-fill structure? Did the Generator flag the anti-pattern in contract review? Etc.
+
+**Cost.** The subagent runs through Claude Code's existing auth chain — no separate `ANTHROPIC_API_KEY`, no separate budget. The cost is the user's existing Claude Code session tokens, the same tokens spent on every other subagent dispatch in normal workflow. For verifications that need to be deterministic and fast in CI, prefer a smaller fixture-style verification; the subagent-driven version is best run on-demand or in a less-frequent verification cadence.
+
+**Example.** For the R4 deliverable (Turn-budget defensive authorship in `agents/evaluator.md`), the bucket-1 verification is `grep -qE '^## Turn-budget defensive authorship' agents/evaluator.md`. The bucket-2 subagent-driven verification would:
+
+```python
+# Pseudo-pattern
+spawn_subagent(
+    subagent_type="Evaluator",
+    prompt="Evaluate the synthetic 12-criterion contract at tests/fixtures/turn-budget/contract-12-criteria.md against tests/fixtures/turn-budget/rubric-stub.md. Write the eval to /tmp/eval-out.md.",
+)
+# After dispatch, assert on /tmp/eval-out.md:
+assert eval_file_exists("/tmp/eval-out.md")  # file landed
+assert "pending" in initial_file_state         # skeleton-first pattern was used
+assert all_criteria_have_results(final_state)  # evidence was filled in
+```
+
+The bucket-2 verification catches the regression "documentation lands but agent doesn't follow it" — the actual failure mode Sprint 04 hit before R4 existed. The bucket-1 verification can't catch that.
+
+## Cross-platform verification commands
+
+Every Phase 2 R1 failure was a verification-command bug — never an implementation bug. Three concrete patterns kept biting, all preventable at contract-authoring time. Each pattern below is the *fix*; the trap is the natural-looking command you'd otherwise write.
+
+**1. Windows shell routing.** `python -c "subprocess.run(cmd, shell=True)"` routes through `cmd.exe` on Windows and cannot parse bash syntax (no `set -e`, no `[[ ]]`, no arrays). Sprint 00 C4 shipped this and failed empirically on the operator's Windows machine. Fix template — invoke Git Bash explicitly when you must wrap a bash command in Python:
+
+```python
+import os, subprocess
+bash = r'C:\Program Files\Git\usr\bin\bash.exe' if os.name == 'nt' else 'bash'
+subprocess.run([bash, '-c', cmd], check=True)
+```
+
+Prefer a single `bash -c '...'` invocation over the Python wrapper when no Python pre-processing is needed — `bash` exists on Windows via Git for Windows and is the harness's target shell.
+
+**2. Glob over-match.** `.harness/evals/sprint-*.md` matches `sprint-00-r1.md` even though sprint-00 is the *current* sprint and should be exempt from a "historical artifacts unmodified" check. Sprint 01 R1 shipped this glob and the SN1 gate failed. Fix template — anchor the digit range and test the glob against `git ls-files` output before contract approval:
+
+```bash
+# Restrict to sprints 01-09 and 1x, excluding sprint-00:
+git ls-files '.harness/contracts/sprint-0[1-9]*.md' '.harness/contracts/sprint-1*.md'
+# Each newly finalized sprint widens the bracket: sprint-0[12]*.md → sprint-0[123]*.md → ...
+```
+
+Every gate glob must FAIL when run against a clean pre-implementation checkout *and* PASS when run against a correct post-implementation checkout. Test both before approval.
+
+**3. Exit-code expectations.** `[ "$EC" = "0" ]` rejects exit 100, but Sprint 2's pytest plugin (`pytest_plugin.py` `pytest_sessionfinish`) deliberately overrides session exit to 100 when a `@pytest.mark.trine_eval` test records a score below threshold. Sprint 03 C9's "no regressions" check shipped the strict `= 0` form and failed because the prior-sprint plugin produced exit 100 with all tests passing. Fix template — disjunction plus a redundant content guard:
+
+```bash
+EC=${PIPESTATUS[0]}
+grep -E "passed" /tmp/output.txt && ! grep -qE "FAILED|ERROR" /tmp/output.txt \
+  && ( [ "$EC" = "0" ] || [ "$EC" = "100" ] ) && echo PASS || exit 1
+```
+
+The `! grep -qE "FAILED|ERROR"` guard catches genuine test failures even if some other prior-sprint feature introduces a new sanctioned exit code. Document any new intentional exit codes in `rules/harness-conventions.md` so downstream contract authors know to accept them.
 
 ## Guidelines for Good Criteria
 

@@ -127,6 +127,30 @@ where `total edge-case PASS` sums the PASS counts across every contributing spri
 
 **Where to render.** Add the aggregate as a new line beneath the per-sprint Edge Case Pass Rate column, in the Overview section: `Cross-sprint edge-case pass rate: P/T = X%` (or `N/A`). The aggregator script `tests/edge-case-aggregate.py` computes this value from the fixture project; the production summary computes it identically from the parent `.harness/contracts/` and `.harness/evals/` trees.
 
+### Functional Smoke Pass Rate
+
+Sprint contracts may declare an optional **Functional Smoke** section (see `skills/sprint-contract/SKILL.md`). Functional Smoke criteria exercise the deliverable against real external systems (live Anthropic API, real Docker, real filesystem, real judge model) and inform the `Functional Integration Coverage` rubric dimension. They are **not** weighted and **not** counted toward the 100% weighted score.
+
+The summary reports their results separately as **Functional Smoke Pass Rate** — a distinct column in the per-sprint table and an aggregate value across sprints. This is structurally identical to Edge Case Pass Rate, but answers a different question: *does the code work end-to-end against real systems?* rather than *does the code handle ambiguous inputs?*
+
+**Why separate from the weighted score.** Mocked architectural tests can pass at 100% on code that fails the moment it touches a real API — wrong cache_control key shape, batch demux that doesn't match the real `custom_id` echo, judge prompts the real model interprets differently. Folding functional smoke into the weighted total would let a sprint claim "100% PASS" on the mocked surface while shipping broken integration. Reporting Functional Smoke Pass Rate as its own metric makes the architectural/functional gap visible, and the `Functional Integration Coverage` rubric dimension consumes both the pass rate and structural indicators (env-var gating, budget cap, fixture parity).
+
+**How to compute.** For each sprint, count `functional_smoke_passed / functional_smoke_total` over the criteria in the contract's `## Functional Smoke` section (or 0/0 = N/A when the section is omitted). Aggregate across sprints by summing passes and totals separately, not by averaging per-sprint rates — same rule as edge cases. Report N/A explicitly when no sprint declared functional smoke criteria.
+
+**Per-rubric expectations.** Most meaningful for projects whose deliverables integrate with paid or external systems (`api-service`, anything using `anthropic`, anything using Docker). For pure documentation, pure refactor, or pure-internal sprints, N/A is the expected reading.
+
+**Render in the per-sprint table.** Add a `Functional Smoke Pass Rate` column to the per-sprint table; show `N/A` when the sprint declared no functional smoke criteria. The column sits to the right of `Edge Case Pass Rate` — same column class (optional, not weighted).
+
+#### Cross-sprint functional smoke aggregation
+
+```
+cross-sprint functional smoke pass rate = total smoke PASS / total smoke criteria
+```
+
+Sum passes and totals separately across every sprint that declared `## Functional Smoke`. Sprints that omit the section contribute neither to numerator nor denominator. Render as `N/A` when no sprint has declared functional smoke. Place the aggregate beneath the per-sprint column in the Overview section: `Cross-sprint functional smoke pass rate: P/T = X%` (or `N/A`). The summing rule is the same one defended at length under Edge Case Pass Rate above — averaging per-sprint rates would over-weight sprints with few smoke criteria.
+
+**Cost reporting.** Alongside the pass rate, surface the per-sprint and cross-sprint live-API spend (USD). Source the cost from the runner's `EvalLog.metadata` — each smoke run records its actual `cost_usd` via the existing Opus 4.7 pricing path in `src/trine_eval/runner/engine.py`. A sprint that comes in at $0.94 (under the $1.00 cap) is fine; a sprint that hits the cap should be flagged in `## Recommendations` as a candidate for fixture conversion.
+
 ### Recommendations
 - Based on patterns, what should the next sprint focus on?
 - Are there systemic issues that rubric changes could address?
@@ -134,6 +158,7 @@ where `total edge-case PASS` sums the PASS counts across every contributing spri
 - Which criteria should be graduated from capability eval to regression suite?
 - Where is the largest gap between pass@k and pass^k? (indicates where to invest in consistency)
 - Is Edge Case Pass Rate consistently below the weighted score? (indicates one-sided optimization — the agent passes obvious cases but skids on ambiguous ones)
+- Is Functional Smoke Pass Rate consistently below the weighted score, or is the Functional Integration Coverage rubric stuck at 2/5 or below? (indicates architectural-only optimization — the agent passes mocked tests but its code may not work against real systems)
 
 ### Transcript Links for FAIL Criteria and Grader Disagreements
 
@@ -178,8 +203,8 @@ Write the summary to `.harness/summary.md`:
 - Consistency gap (pass@k - pass^k): {value} — {interpretation}
 
 ## Per-Sprint Results
-| Sprint | Title | Verdict | Rounds | Pass Rate | Weighted | pass^k |
-|--------|-------|---------|--------|-----------|----------|--------|
+| Sprint | Title | Verdict | Rounds | Pass Rate | Weighted | pass^k | Edge Case Pass Rate | Functional Smoke Pass Rate |
+|--------|-------|---------|--------|-----------|----------|--------|---------------------|----------------------------|
 | 1      | ...   | PASS    | 2      | 85%       | 87%      | 72%    |
 
 ## Trend Analysis
