@@ -29,6 +29,28 @@
       "rubric_dimension": "methodology_completeness",
       "graduated_from_sprint": 13,
       "rationale": "Sprint 10 introduced the criteria_audit / verified_via_command channel; Sprints 11 and 12 each produced clean audits, making the pattern saturated at 3 consecutive sprints (S10/S11/S12). This invariant runs the audit script against every committed eval round file that has a Transcript Trailer (skipping pre-Sprint-9 evals that predate the schema). Catches both new fabrication in fresh evals and retroactive edits that introduce false verified_via_command:true flags. Phase 1 evals (no trailer) are safely skipped via the grep guard."
+    },
+    {
+      "task_id": "s03-sn2",
+      "criterion": "No forbidden packages imported or declared: the strings `langgraph`, `ragas`, `pgvector`, and `fastapi` must not appear in `pyproject.toml`, `src/trine_eval/**/*.py`, or `tests/**/*.py`. PASS when `git grep` finds no matches.",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "bash -c 'git grep -rn --count -E \"langgraph|ragas|pgvector|fastapi\" pyproject.toml src/ tests/ 2>/dev/null | grep -v \"^Binary\" | grep -v \":0$\" && echo FAIL && exit 1 || echo PASS'",
+      "rubric_dimension": "structural",
+      "graduated_from_sprint": 3,
+      "rationale": "Phase 2 \"no forbidden v0.2-only packages\" gate saturated across Sprints 01-05 (5 consecutive first-round PASS). The same git grep over the langgraph|ragas|pgvector|fastapi alternation has been carried verbatim from sprint-01.tasks.json onward; it represents the v0.1 scope boundary (v0.2 features deferred per progress.md line 82). Graduated at the third consecutive first-round PASS (Sprint 03). Source: .harness/contracts/phase-02/sprint-03.tasks.json (s03-sn2)."
+    },
+    {
+      "task_id": "s04-sn3-deterministic",
+      "criterion": "No real Anthropic API calls in tests: every `anthropic.Anthropic(...)` call in any tracked Python file under tests/ must be enclosed in a `with patch(\"anthropic.Anthropic\") ...:` context manager OR a `@patch(\"anthropic.Anthropic\")` decorator. Verified deterministically by `tests/audit-anthropic-mocked.py`, which AST-parses each file and walks the parent chain of every `anthropic.Anthropic(...)` Call node to confirm enclosure.",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "bash -c 'failed=0; for f in $(git ls-files tests/ | grep -E \"\\.py$\" | grep -v -E \"^tests/(fixtures|audit-|smoke/)\"); do if grep -lE \"anthropic\\.Anthropic\\(\" \"$f\" > /dev/null 2>&1; then if ! python tests/audit-anthropic-mocked.py \"$f\" > /dev/null 2>&1; then echo \"UNMOCKED: $f\"; failed=1; fi; fi; done; exit $failed'",
+      "rubric_dimension": "behavioral",
+      "graduated_from_sprint": 4,
+      "rationale": "SN3 (no real Anthropic API calls in tests) was an LLM-judge gate that saturated across Phase 2 Sprints 02-04 (3 consecutive first-round PASS: s02-sn3, s03-sn3, s04-sn3) but could not be graduated as-is because its `verification_command` was null. Sprint 06 mechanizes the check via `tests/audit-anthropic-mocked.py` (AST-based parent-chain walk to confirm every `anthropic.Anthropic(...)` Call is inside a `with patch(\"anthropic.Anthropic\")` block or `@patch(\"anthropic.Anthropic\")` decorator), closing the saturation gap. The command iterates only over git-tracked test files under tests/ excluding three directories: `tests/fixtures/` (intentionally holds an unmocked fixture for the audit script's own self-test), `tests/audit-*.py` (the audit scripts themselves reference the string `anthropic.Anthropic` but make no instantiation), and `tests/smoke/` (the Sprint 07 bucket-3 functional smoke layer is BY DESIGN unmocked — the whole point of those tests is to exercise the real Anthropic API end-to-end, gated by the TRINE_EVAL_LIVE_API env var; auditing them as if they should be mocked would defeat their purpose). Append-only per the skill's contract. Source: .harness/contracts/phase-02/sprint-04.tasks.json (s04-sn3), generalized for deterministic execution. The smoke-directory exemption was added in commit-fix after the bucket-discipline retrofit landed."
     }
   ]
 }

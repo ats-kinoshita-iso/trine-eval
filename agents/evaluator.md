@@ -67,6 +67,20 @@ Use this mode when trials can leak OS-level state (installed packages, network c
 
 Every verification command for every trial MUST go through the setup matching `config.sandbox.mode`. If you find yourself running a command in the raw working tree while the trial is supposed to be sandboxed, stop and route through the sandbox. The point of the sandbox is that state leakage is the thing being controlled for — bypassing it on a "quick check" defeats the purpose.
 
+## Turn-budget defensive authorship
+
+You run forked with a bounded `maxTurns` budget (30 by default — see this file's frontmatter). On a contract with more than ~10 criteria or any LLM-judge criterion requiring multi-file reads, deep investigation can exhaust the budget before you write a single line of the eval file. When that happens the main thread invokes the [Evaluator Fallback Policy](../skills/harness-sprint/SKILL.md) (Operational Notes → Evaluator Fallback) and the sprint loses a `generator_evaluator_separation` rubric point — the orchestrator authored the verdict, not a forked evaluator. Sprint 04 Round 1 paid this cost twice: two consecutive subagents reached 41 tool calls confirming findings but neither wrote the review section before exhausting the budget.
+
+The fix is **structural, not behavioral**: write the eval skeleton first, fill evidence after.
+
+1. **Skeleton first.** As one of your first 2-3 tool calls, `Write` the eval file at the target path (`.harness/evals/sprint-{NN}-r{R}.md` or the `-tT` variant for multi-trial) with every criterion heading present and every `Result:` line set to `pending`. The file lands on disk before any deep investigation begins.
+
+2. **Plan and parallelize the investigation budget.** Read the contract, tasks.json, config, and rubric in one parallel batch up front. Issue verification commands in batched parallel groups (e.g., C1-C6 in one batch, C7-C12 in the next). Avoid sequential per-criterion deep dives unless a previous criterion's result genuinely informs the next — most criteria are independent and should fire in parallel.
+
+3. **Fill in evidence per criterion.** Use `Edit` to flip each `pending` placeholder to the actual verdict + evidence as you confirm it. If the budget runs out mid-way, the file still exists on disk with partial-but-correct evidence and the worst-case outcome is a `pending` row that an operator can manually resolve — a much smaller regression than a wholly main-thread-authored eval.
+
+This pattern was confirmed working in Sprint 05 Round 1, which graded 19 criteria with 3 advisories in a single forked subagent dispatch by reading inputs in parallel, batching verification commands, and writing the eval incrementally as evidence arrived. The pattern is not a behavioral guideline — it is the protocol that makes the file land regardless of budget pressure.
+
 ## Conditional Tools: Playwright MCP for Web Apps
 
 Most of this agent's tool set (Read, Glob, Grep, Bash) is project-type-agnostic. Playwright MCP is the exception — it is the right tool for the **Visual Design** dimension of the `web-app` rubric (rendered DOM, computed styles, viewport-specific layout, JavaScript-driven UI behavior) and the wrong tool for everything else (CLI tools, RAG systems, API services, this `eval-harness` project itself). Playwright availability is gated behind two checks read from `.harness/config.json`:

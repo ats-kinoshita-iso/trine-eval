@@ -126,3 +126,83 @@ Max negotiation rounds (2) reached without APPROVED status. Round 2 surfaced one
 - Rubric scores: see eval file
 ## Session 2026-05-18T23:41:42-04:00
 Stopped. Current sprint state should be committed.
+
+## Sprint 03 (Phase 2) contract negotiation note
+Max negotiation rounds (2) reached without APPROVED status. Round 1 flagged 3 blocking issues (C8 `| tee` exit-code masking; SN1 glob did not cover Phase-2 paths under `.harness/contracts/phase-02/` and `.harness/evals/phase-02/`; reference solution used a fictional `examples` kwarg for `messages.create`). Generator's Round 2 revision (a5f112) fixed Issues 1, 3, 4, 5 cleanly but introduced a new blocking flaw in the SN1 fix: the new Phase-2 glob `sprint-0[1-9]*.md` matches the current sprint's own contract file (`.harness/contracts/phase-02/sprint-03.md`), causing SN1 to FAIL on every correct Generator build. Empirically verified by the Evaluator (SN1 exits 1 against the current branch). Generator will fix during IMPLEMENTATION as the first commit (per Sprint 0 / Sprint 2 precedent: contract bugs surfacing post-negotiation get fixed as `fix(sprint-03):` commits before any source lands). The fix: narrow the Phase-2 contract pattern from `sprint-0[1-9]*.md` to `sprint-0[12]*.md` (covering only finalized sprints 01–02), and the same for the evals pattern. Same `fix(sprint-03):` commit also emits the sibling `sprint-03.tasks.json` (per Sprint 2 precedent, the tasks.json is emitted by the Generator alongside the contract fix when negotiation hits max rounds).
+
+## Sprint 03 (Phase 2): Prompt caching and Batch API
+- Status: PASS
+- Rounds: 2
+- Passed criteria: 11/11
+- Weighted score: 100%
+- Gates: 3/3
+- Date: 2026-05-19
+- Note: Round 1 PARTIAL (95/100, 3/3 gates) — C9 FAIL only: contract authorship gap where `[ EC = 0 ]` guard did not anticipate Sprint 2's pytest plugin exit-100 override (`tests/runner/test_plugin_exit.py` deliberately records score 0.0, `src/trine_eval/pytest_plugin.py:67-69` sets `session.exitstatus = 100`); all 41 tests actually passed with no FAILED/ERROR output. Contract negotiation hit max rounds (2) with new SN1 self-match flaw in Round 2; Generator fixed as `fix(sprint-03): ebc1fd2` (narrowed Phase-2 glob to `sprint-0[12]*.md`) before any source landed. Round 2 PASS after `fix(sprint-03): 0e1db3f` changed C9's exit-code check to disjunction `( [ EC = 0 ] || [ EC = 100 ] )` — contract-only fix verified via `git diff --stat` (only `sprint-03.md` and `sprint-03.tasks.json` modified). Seven implementation commits (ebc1fd2..0e1db3f): SN1 glob fix + tasks.json emission; `apply_cache_control` helper (system/tools/examples breakpoints, EPHEMERAL constant, examples as library-internal pop-and-prepend key with module+function docstrings); `run_batch` runner (single `batches.create` call, `custom_id=sample.id`, polling loop on `processing_status`, demux via `id_to_sample` map, `EvalLog` with `batch_id`+`via` metadata); 8 new tests covering G1+G2+F6 (cache_control on system/tools/examples; batch submit-and-demux; batch polling `in_progress`→`ended`; batch carries cache_control; thinking-block byte-identical round-trip through batch via `warnings.warn` so phrase appears in `2>&1`-captured output); C7 phrase-emission switched to `sys.stderr` for grep gate compatibility; C9 verification command tightened. 41 tests under `tests/runner/` + `tests/models/`, all green. Eval at `.harness/evals/phase-02/sprint-03-r2.md`.
+- Rubric scores: methodology_completeness 4/5, grading_quality 4/5, generator_evaluator_separation 5/5, context_management 4/5, extensibility 3/5
+## Session 2026-05-19T06:57:51-04:00
+Stopped. Current sprint state should be committed.
+
+## Sprint 04 (Phase 2) contract negotiation note
+Max negotiation rounds (2) reached. Round 1 main-thread fallback authorship (Process Note in `.harness/contracts/phase-02/sprint-04.md`): two Evaluator subagent dispatches investigated thoroughly (the second reached 41 tool calls confirming SN1 baseline failure and bootstrap-variance edge cases) but neither completed the `Write` of the review section before turn budget exhausted. Main thread transcribed the review per Evaluator Fallback policy in `skills/harness-sprint/SKILL.md`. Round 2 forked Evaluator review APPROVED. The fallback was a one-off — implementation and evaluation both ran cleanly as forked subagents.
+
+## Sprint 04 (Phase 2): LLM-as-judge: CoT rubric, binary scores, bootstrap CI, three-tier grading, calibration
+- Status: PASS
+- Rounds: 1
+- Passed criteria: 14/14
+- Weighted score: 100%
+- Gates: 3/3
+- Date: 2026-05-19
+- Note: Clean first-round PASS. Contract negotiation hit max rounds (2): Round 1 NEEDS REVISION (2 BLOCKING + 1 ADVISORY) — SN1 merge-base baseline predated Phase 2 so the widened `sprint-0[123]*.md` glob (covering finalized sprint-03) caught sprint-03.md as "new file" against `git merge-base HEAD main` and failed empirically; C7's `width_10 >= width_1000 OR ci_10 != ci_1000` disjunction admitted a trivially-broken constant-output bootstrap (both clauses passed for `(0.0, 1.0)`-returning impl); C13's `Score.reasoning` requirement was acknowledged-only in Technical Notes (not in the criterion text), risking inter-evaluator disagreement when `Score` exposed `explanation` instead. Round 2 revision fixed all three: SN1 swapped to commit-scoped diff iterating over `(sprint-04)`-prefixed commits with `S03BASE=git log --grep='complete sprint 03 (Phase 2)' -1` anchor excluding historical Phase-1 sprint-04 commits; C7 added clause (d) requiring `ci_10.lower != ci_1000.lower OR ci_10.upper != ci_1000.upper`; C13 inlined `Score.reasoning OR Score.explanation` acceptance into clause (e). Round 2 forked Evaluator APPROVED. Two implementation commits (`97f60fa`..`b39c2f7`): added `Score.reasoning: str | None = None` to Sprint 1's `score.py`; then created `src/trine_eval/judge/` package — `rubric.py` (`model_graded_qa` registered via `@scorer`, prompt embeds criterion + golden_answer, response parsed for PASS/1/correct vs FAIL/0/incorrect, full response stored in `Score.reasoning`), `calibration.py` (`compute_tpr_tnr` returning `(TP/(TP+FN), TN/(TN+FP))`), `bootstrap.py` (`BootstrapCI` NamedTuple + percentile resampling), `dispatch.py` (`dispatch_score` reads `scorer.tier`, routes `code|model|human` with NO auto-escalation, never calls judge_model for code tier), `queue.py` (in-memory `ListQueue` + singleton `get_default_queue`). 50-item calibration fixture at `tests/fixtures/calibration/items.jsonl` (25 positive + 25 negative). 11 new tests under `tests/judge/`; 78-test regression suite all green (89 total). Round-1 main-thread fallback penalty applied: generator_evaluator_separation 3/5 instead of 5/5. Eval at `.harness/evals/phase-02/sprint-04-r1.md`.
+- Rubric scores: methodology_completeness 4/5, grading_quality 4/5, generator_evaluator_separation 3/5, context_management 4/5, extensibility 4/5
+
+## Sprint 05 (Phase 2): Docker sandbox + cheap pre-filter + regression-safety gate
+- Status: PASS
+- Rounds: 1
+- Passed criteria: 16/16
+- Weighted score: 100%
+- Gates: 3/3
+- Date: 2026-05-20
+- Note: Clean first-round PASS. Contract APPROVED Round 1 by a properly-forked Evaluator subagent (zero blocking issues; 2 advisories — C6 dual-call mock subtlety + C3/C4 timeout-path exemption from the `docker ps` leftover check). Single implementation commit `5bf884d` shipped `src/trine_eval/sandbox/` package (three modules): `docker.py` (`run_in_sandbox` + `SandboxResult` with `--network=none` default-deny, `--rm` always, `--cpus`/`--memory` limits, label-based `docker ps` leftover-container check, `subprocess.TimeoutExpired` → `timed_out=True` + `exit_code=-1`); `prefilter.py` (`run_prefilter` + `PrefilterResult{stage,passed,reason,stdout,stderr}` with four-stage `ruff→mypy→ast-diff→pytest` pipeline, short-circuit on first failure verified via call-count assertion on downstream stages); `regression_gate.py` (`evaluate_regression_gate` + `RegressionGateResult{fail_to_pass_passed,fail_to_pass_total,pass_to_pass_regressions,verdict}` with pre/post-patch test status capture, FAIL_TO_PASS positive verification, PASS_TO_PASS regression detection with regressing-test-name reporting, trivial-pass-bypass catcher per Sprint-4 C7 pattern). 12 new tests under `tests/sandbox/` — every `subprocess.run([...docker...])` call is `patch("subprocess.run", ...)`-wrapped per SN3. Total 101 tests passing (89 prior + 12 new); 89-test regression suite all green via the `( [ EC=0 ] || [ EC=100 ] )` disjunction. SN1 commit-scoped diff with `S04BASE=git log --grep='complete sprint 04 (Phase 2)' -1` anchor PASSES on current branch (the Sprint-4 fix continues to work as intended). Rubric scores: methodology 4/5, grading 4/5, separation 5/5 (no fallback penalty this sprint), context 4/5, extensibility 4/5. Eval at `.harness/evals/phase-02/sprint-05-r1.md`.
+- Rubric scores: methodology_completeness 4/5, grading_quality 4/5, generator_evaluator_separation 5/5, context_management 4/5, extensibility 4/5
+## Session 2026-05-19T19:56:16-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-05-20T19:27:32-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-05-20T19:38:24-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-05-20T20:05:45-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-05-20T20:22:07-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-05-20T20:23:49-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-05-20T20:49:06-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-05-21T00:49:06Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-05-20T20:50:54-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-05-21T00:50:54Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-05-20T20:52:58-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-05-21T00:52:58Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-05-20T20:54:41-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-05-21T00:54:41Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-05-20T20:57:24-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-05-21T00:57:24Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-05-20T21:03:40-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-05-21T01:03:40Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->

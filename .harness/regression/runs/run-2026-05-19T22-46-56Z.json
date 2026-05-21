@@ -1,0 +1,33 @@
+{
+  "timestamp": "2026-05-19T22:46:56Z",
+  "sprint_about_to_run": 4,
+  "results": [
+    {
+      "task_id": "harness-tasks-json-coverage",
+      "graduated_from_sprint": 12,
+      "verification_command": "bash -c 'set -e; missing=0; for f in $(git ls-files \".harness/contracts/sprint-*.md\"); do n=$(basename \"$f\" .md); if [ \"$n\" = \"sprint-fx\" ] || [ \"$n\" = \"sprint-fy\" ]; then continue; fi; t=\".harness/contracts/$n.tasks.json\"; if [ \"$n\" \\!= \"sprint-01\" ] && [ \"$n\" \\!= \"sprint-02\" ] && [ \"$n\" \\!= \"sprint-03\" ] && [ \"$n\" \\!= \"sprint-04\" ] && [ \"$n\" \\!= \"sprint-05\" ]; then if [ ! -f \"$t\" ]; then echo \"MISSING $t\"; missing=1; fi; fi; done; exit $missing'",
+      "verdict": "PASS",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "task_id": "harness-historical-artifacts-immutable",
+      "graduated_from_sprint": 12,
+      "verification_command": "bash -c 'set -e; sprints=$(git ls-files \".harness/contracts/sprint-*.md\" \".harness/evals/sprint-*.md\" | grep -v \"sprint-12\"); if [ -z \"$sprints\" ]; then echo \"no historical artifacts found\"; exit 1; fi; diff_out=$(git diff HEAD -- $sprints); if [ -n \"$diff_out\" ]; then echo \"HISTORICAL ARTIFACTS MODIFIED:\"; echo \"$diff_out\" | head -50; exit 1; fi; exit 0'",
+      "verdict": "PASS",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "task_id": "harness-verified-via-command-audit",
+      "graduated_from_sprint": 13,
+      "verification_command": "bash -c 'set -e; failed=0; for f in $(git ls-files \".harness/evals/sprint-*-r*.md\"); do if grep -q \"^## Transcript Trailer\" \"$f\"; then if ! python tests/audit-verified-via-command.py \"$f\" >/dev/null 2>&1; then echo \"FABRICATION DETECTED: $f\"; failed=1; fi; fi; done; exit $failed'",
+      "verdict": "PASS",
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ]
+}

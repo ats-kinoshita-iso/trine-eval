@@ -1,0 +1,176 @@
+{
+  "sprint": 5,
+  "tasks": [
+    {
+      "task_id": "s05-c1",
+      "criterion": "`run_in_sandbox` default `network` parameter is `\"none\"` and constructed argv contains `--network=none`: running the following exits 0 and prints `PASS`: `bash -c 'uv run pytest tests/sandbox/test_docker.py -k test_default_network_is_none -v --tb=short 2>&1 | tee /tmp/s05c1.txt && grep -q \"PASSED\" /tmp/s05c1.txt && echo PASS'`",
+      "grader_type": "deterministic",
+      "weight": 7,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/sandbox/test_docker.py -k test_default_network_is_none -v --tb=short 2>&1 | tee /tmp/s05c1.txt && grep -q \"PASSED\" /tmp/s05c1.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s05-c2",
+      "criterion": "Every `run_in_sandbox` invocation includes `--rm` in the docker run argv: running the following exits 0 and prints `PASS`: `bash -c 'uv run pytest tests/sandbox/test_docker.py -k test_rm_always_present -v --tb=short 2>&1 | tee /tmp/s05c2.txt && grep -q \"PASSED\" /tmp/s05c2.txt && echo PASS'`",
+      "grader_type": "deterministic",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/sandbox/test_docker.py -k test_rm_always_present -v --tb=short 2>&1 | tee /tmp/s05c2.txt && grep -q \"PASSED\" /tmp/s05c2.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s05-c3",
+      "criterion": "`run_in_sandbox` enforces hard timeout — returns `SandboxResult(timed_out=True)` when subprocess timeout elapses: running the following exits 0 and prints `PASS`: `bash -c 'uv run pytest tests/sandbox/test_docker.py -k test_timeout_enforcement -v --tb=short 2>&1 | tee /tmp/s05c3.txt && grep -q \"PASSED\" /tmp/s05c3.txt && echo PASS'`",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/sandbox/test_docker.py -k test_timeout_enforcement -v --tb=short 2>&1 | tee /tmp/s05c3.txt && grep -q \"PASSED\" /tmp/s05c3.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s05-c4",
+      "criterion": "Zero containers remain after `run_in_sandbox` call — `docker ps` verification asserts empty: running the following exits 0 and prints `PASS`: `bash -c 'uv run pytest tests/sandbox/test_docker.py -k test_no_leftover_containers -v --tb=short 2>&1 | tee /tmp/s05c4.txt && grep -q \"PASSED\" /tmp/s05c4.txt && echo PASS'`",
+      "grader_type": "deterministic",
+      "weight": 7,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/sandbox/test_docker.py -k test_no_leftover_containers -v --tb=short 2>&1 | tee /tmp/s05c4.txt && grep -q \"PASSED\" /tmp/s05c4.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s05-c5",
+      "criterion": "CPU and memory limits are passed as `--cpus` and `--memory` flags in the docker run argv: running the following exits 0 and prints `PASS`: `bash -c 'uv run pytest tests/sandbox/test_docker.py -k test_resource_limits -v --tb=short 2>&1 | tee /tmp/s05c5.txt && grep -q \"PASSED\" /tmp/s05c5.txt && echo PASS'`",
+      "grader_type": "deterministic",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/sandbox/test_docker.py -k test_resource_limits -v --tb=short 2>&1 | tee /tmp/s05c5.txt && grep -q \"PASSED\" /tmp/s05c5.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s05-c6",
+      "criterion": "`SandboxResult` has correct shape: `exit_code`, `stdout`, `stderr`, `duration_s`, `timed_out` fields: running the following exits 0 and prints `PASS`: `bash -c 'uv run pytest tests/sandbox/test_docker.py -k test_sandbox_result_shape -v --tb=short 2>&1 | tee /tmp/s05c6.txt && grep -q \"PASSED\" /tmp/s05c6.txt && echo PASS'`",
+      "grader_type": "deterministic",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/sandbox/test_docker.py -k test_sandbox_result_shape -v --tb=short 2>&1 | tee /tmp/s05c6.txt && grep -q \"PASSED\" /tmp/s05c6.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s05-c7",
+      "criterion": "Four-stage pre-filter pipeline runs all four stages in order on success and returns `PrefilterResult(passed=True)`: running the following exits 0 and prints `PASS`: `bash -c 'uv run pytest tests/sandbox/test_prefilter.py -k test_all_stages_run_on_success -v --tb=short 2>&1 | tee /tmp/s05c7.txt && grep -q \"PASSED\" /tmp/s05c7.txt && echo PASS'`",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/sandbox/test_prefilter.py -k test_all_stages_run_on_success -v --tb=short 2>&1 | tee /tmp/s05c7.txt && grep -q \"PASSED\" /tmp/s05c7.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s05-c8",
+      "criterion": "Pre-filter pipeline short-circuits on first failure — stages after the failing stage are NOT invoked: running the following exits 0 and prints `PASS`: `bash -c 'uv run pytest tests/sandbox/test_prefilter.py -k test_short_circuit_on_failure -v --tb=short 2>&1 | tee /tmp/s05c8.txt && grep -q \"PASSED\" /tmp/s05c8.txt && echo PASS'`",
+      "grader_type": "deterministic",
+      "weight": 9,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/sandbox/test_prefilter.py -k test_short_circuit_on_failure -v --tb=short 2>&1 | tee /tmp/s05c8.txt && grep -q \"PASSED\" /tmp/s05c8.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s05-c9",
+      "criterion": "`PrefilterResult` has the correct shape: `stage`, `passed`, `reason`, `stdout`, `stderr` fields: running the following exits 0 and prints `PASS`: `bash -c 'uv run pytest tests/sandbox/test_prefilter.py -k test_prefilter_result_shape -v --tb=short 2>&1 | tee /tmp/s05c9.txt && grep -q \"PASSED\" /tmp/s05c9.txt && echo PASS'`",
+      "grader_type": "deterministic",
+      "weight": 7,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/sandbox/test_prefilter.py -k test_prefilter_result_shape -v --tb=short 2>&1 | tee /tmp/s05c9.txt && grep -q \"PASSED\" /tmp/s05c9.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s05-c10",
+      "criterion": "Regression gate FAIL_TO_PASS positive case — test that was failing now passes -> `verdict=\"pass\"`: running the following exits 0 and prints `PASS`: `bash -c 'uv run pytest tests/sandbox/test_regression_gate.py -k test_fail_to_pass_positive -v --tb=short 2>&1 | tee /tmp/s05c10.txt && grep -q \"PASSED\" /tmp/s05c10.txt && echo PASS'`",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/sandbox/test_regression_gate.py -k test_fail_to_pass_positive -v --tb=short 2>&1 | tee /tmp/s05c10.txt && grep -q \"PASSED\" /tmp/s05c10.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s05-c11",
+      "criterion": "Regression gate PASS_TO_PASS regression — test that was passing now fails -> `verdict=\"fail\"` with regressing test in `pass_to_pass_regressions`: running the following exits 0 and prints `PASS`: `bash -c 'uv run pytest tests/sandbox/test_regression_gate.py -k test_pass_to_pass_regression -v --tb=short 2>&1 | tee /tmp/s05c11.txt && grep -q \"PASSED\" /tmp/s05c11.txt && echo PASS'`",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/sandbox/test_regression_gate.py -k test_pass_to_pass_regression -v --tb=short 2>&1 | tee /tmp/s05c11.txt && grep -q \"PASSED\" /tmp/s05c11.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s05-c12",
+      "criterion": "Regression gate trivial-pass-bypass catcher — a gate that ignores inputs and always returns `verdict=\"pass\"` must FAIL this test: running the following exits 0 and prints `PASS`: `bash -c 'uv run pytest tests/sandbox/test_regression_gate.py -k test_trivial_pass_bypass_rejected -v --tb=short 2>&1 | tee /tmp/s05c12.txt && grep -q \"PASSED\" /tmp/s05c12.txt && echo PASS'`",
+      "grader_type": "deterministic",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/sandbox/test_regression_gate.py -k test_trivial_pass_bypass_rejected -v --tb=short 2>&1 | tee /tmp/s05c12.txt && grep -q \"PASSED\" /tmp/s05c12.txt && echo PASS'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s05-c13",
+      "criterion": "Full sandbox test suite exits 0 with no failures: running the following exits 0 and prints `PASS`: `bash -c 'uv run pytest tests/sandbox/ -v --tb=short 2>&1 | tee /tmp/s05c13.txt; EC=${PIPESTATUS[0]}; grep -E \"passed\" /tmp/s05c13.txt && ! grep -qE \"FAILED|ERROR\" /tmp/s05c13.txt && [ \"$EC\" = \"0\" ] && echo PASS || exit 1'`",
+      "grader_type": "deterministic",
+      "weight": 2,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/sandbox/ -v --tb=short 2>&1 | tee /tmp/s05c13.txt; EC=${PIPESTATUS[0]}; grep -E \"passed\" /tmp/s05c13.txt && ! grep -qE \"FAILED|ERROR\" /tmp/s05c13.txt && [ \"$EC\" = \"0\" ] && echo PASS || exit 1'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s05-c14",
+      "criterion": "No regressions in prior runner, model, core, and judge tests: running the following exits 0 and prints `PASS`: `bash -c 'uv run pytest tests/runner/ tests/models/ tests/core/ tests/judge/ -v --tb=short 2>&1 | tee /tmp/s05c14.txt; EC=${PIPESTATUS[0]}; grep -E \"passed\" /tmp/s05c14.txt && ! grep -qE \"FAILED|ERROR\" /tmp/s05c14.txt && ( [ \"$EC\" = \"0\" ] || [ \"$EC\" = \"100\" ] ) && echo PASS || exit 1'`",
+      "grader_type": "deterministic",
+      "weight": 2,
+      "is_gate": false,
+      "verification_command": "bash -c 'uv run pytest tests/runner/ tests/models/ tests/core/ tests/judge/ -v --tb=short 2>&1 | tee /tmp/s05c14.txt; EC=${PIPESTATUS[0]}; grep -E \"passed\" /tmp/s05c14.txt && ! grep -qE \"FAILED|ERROR\" /tmp/s05c14.txt && ( [ \"$EC\" = \"0\" ] || [ \"$EC\" = \"100\" ] ) && echo PASS || exit 1'",
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s05-c15",
+      "criterion": "`run_in_sandbox` API shape and security defaults are correct (A7 behavioral): read `src/trine_eval/sandbox/docker.py`. The implementation must expose `run_in_sandbox` with `network` defaulting to `\"none\"`, always include `--rm`, `--network`, `--cpus`, `--memory`, and bind-mount in the docker argv; catch `TimeoutExpired` returning `SandboxResult(timed_out=True)` without re-raising; invoke a post-call `docker ps --filter label=...` check; and return `SandboxResult` with all five fields. A function that defaults `network` to anything other than `\"none\"`, omits `--rm`, or omits the post-call container check is FAIL.",
+      "grader_type": "llm-judge",
+      "weight": 5,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s05-c16",
+      "criterion": "Regression gate design is correct — PASS_TO_PASS auto-fail and `RegressionGateResult` shape (D4 behavioral): read `src/trine_eval/sandbox/regression_gate.py`. The implementation must expose `evaluate_regression_gate` with the required parameters; run the test suite BEFORE applying the patch; apply the patch; run AFTER; detect PASS->FAIL transitions in `pass_to_pass` and add to `pass_to_pass_regressions`; set `verdict=\"fail\"` if regressions exist OR any `fail_to_pass` test still fails; return `RegressionGateResult` with `fail_to_pass_passed`, `fail_to_pass_total`, `pass_to_pass_regressions`, and `verdict`. An unconditional `verdict=\"pass\"` return or missing pre-patch baseline is FAIL.",
+      "grader_type": "llm-judge",
+      "weight": 5,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "behavioral"
+    },
+    {
+      "task_id": "s05-sn1",
+      "criterion": "Historical Phase 1 and Phase 2 prior-sprint contracts and evals are unmodified: no file matching Phase-1 or prior Phase-2 sprint paths is modified by any commit whose message contains `(sprint-05)`. Verification iterates over all `(sprint-05)`-prefixed commits reachable from HEAD but not from the sprint-04 Phase-2 completion commit and checks each commit's individual diff against the prior-sprint glob. The Phase-2 patterns use `sprint-0[1234]*.md` (covering sprint-01 through sprint-04). When no sprint-05 commits exist, the loop exits PASS.",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "bash -c 'failed=0; S04BASE=$(git log --format=%H --grep=\"complete sprint 04 (Phase 2)\" -1 2>/dev/null); SPRINT_COMMITS=$(git log --format=%H --grep=\"(sprint-05)\" HEAD ${S04BASE:+^$S04BASE} 2>/dev/null); for c in $SPRINT_COMMITS; do diff_out=$(git diff \"${c}^\"..\"${c}\" -- \".harness/contracts/sprint-0[1-9]*.md\" \".harness/contracts/sprint-1*.md\" \".harness/evals/sprint-0[1-9]*.md\" \".harness/evals/sprint-1*.md\" \".harness/contracts/phase-02/sprint-0[1234]*.md\" \".harness/contracts/phase-02/sprint-1*.md\" \".harness/evals/phase-02/sprint-0[1234]*.md\" \".harness/evals/phase-02/sprint-1*.md\" 2>/dev/null); if [ -n \"$diff_out\" ]; then echo \"FAIL: $c modified prior-sprint files\"; echo \"$diff_out\" | head -20; failed=1; fi; done; [ \"$failed\" = \"0\" ] && echo PASS || exit 1'",
+      "rubric_dimension": "structural"
+    },
+    {
+      "task_id": "s05-sn2",
+      "criterion": "No forbidden packages imported or declared: the strings `langgraph`, `ragas`, `pgvector`, and `fastapi` must not appear in `pyproject.toml`, `src/trine_eval/**/*.py`, or `tests/**/*.py`.",
+      "grader_type": "deterministic",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "bash -c 'git grep -rn --count -E \"langgraph|ragas|pgvector|fastapi\" pyproject.toml src/ tests/ 2>/dev/null | grep -v \"^Binary\" | grep -v \":0$\" && echo FAIL && exit 1 || echo PASS'",
+      "rubric_dimension": "structural"
+    },
+    {
+      "task_id": "s05-sn3",
+      "criterion": "No real `docker run` invocations in tests — every `subprocess.run` call in `tests/sandbox/` is mocked: the Evaluator reads `tests/sandbox/*.py` and confirms that every call that would invoke `subprocess.run([...\"docker\"...])` is enclosed in a `unittest.mock.patch(\"subprocess.run\", ...)` context manager or `mocker.patch(...)`. A bare `subprocess.run` call without a surrounding patch is FAIL. No actual `docker run` command is executed during `uv run pytest tests/sandbox/`.",
+      "grader_type": "llm-judge",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": null,
+      "rubric_dimension": "behavioral"
+    }
+  ]
+}
