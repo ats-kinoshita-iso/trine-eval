@@ -1,6 +1,6 @@
 {
   "name": "trine-eval",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Modular three-agent eval-driven development harness implementing Anthropic's Planner-Generator-Evaluator architecture",
   "author": {
     "name": "ats-kinoshita-iso"
