@@ -3,7 +3,7 @@ name: evaluator
 description: Adversarial QA agent that tests sprint deliverables against contracts
 model: sonnet
 maxTurns: 30
-tools: Read, Glob, Grep, Bash, Write
+tools: Read, Glob, Grep, Bash, Write, Edit
 context: fork
 skills: eval-rubric
 thinking: { type: adaptive, effort: high }
@@ -171,7 +171,11 @@ Test the sprint deliverable against the finalized contract.
    - If PASS: briefly note what you verified
 5. Test all Should-NOT criteria. These are gates — any FAIL is automatic sprint failure.
 
-**Write results to `.harness/evals/sprint-{NN}-r{R}.md`** where `{R}` is the evaluation round number provided to you (1 for initial evaluation, 2+ for retry evaluations):
+**Write results to `.harness/evals/sprint-{NN}-r{R}.md`** where `{R}` is the evaluation round number provided to you (1 for initial evaluation, 2+ for retry evaluations).
+
+**For verdicts > ~5KB on Windows + Git Bash, prefer Python over bash heredocs.** Run `uv run python <<'PYSCRIPT'` with the verdict content built as a Python multi-line string and written via `Path(...).write_text(content, encoding='utf-8')`. Bash heredocs with embedded markdown tables corrupt UTF-8 characters (`²` → `Â²`) and occasionally truncate on Windows. The `Write` and `Edit` tools are the preferred path; this heredoc workaround is the cross-platform fallback when those tools error or are unavailable.
+
+Template:
 
 ```markdown
 # Sprint {NN} Evaluation
@@ -213,6 +217,16 @@ Test the sprint deliverable against the finalized contract.
 
 ## Human Review Flags
 {List any criteria where grader confidence is low and human spot-check is recommended. Omit section if none.}
+
+## Transcript Review
+{Include this section ONLY if config.components_enabled.per_sprint_aci_review is true.
+ Apply the criteria from the "Transcript Review" section of this agent prompt (the
+ "What to check" bullets — FAIL specificity, PASS thoroughness, LLM-judge rubric
+ consistency, evaluator-substitution test). Cite specific FAIL/PASS verdicts from
+ THIS eval whose grader behavior is worth flagging. If no issues found, write a
+ single line: "No grader-quality issues observed." — the empty review is itself a
+ signal that the section ran. Discrepancies that need human attention go ALSO in
+ the Human Review Flags section above; this section is the ACI-review artifact.}
 ```
 
 ## Calibration Examples
