@@ -1,0 +1,140 @@
+{
+  "sprint": 7,
+  "tasks": [
+    {
+      "task_id": "s07-c1",
+      "criterion": "Rubric file is loadable by eval-rubric skill: Simulate the eval-rubric skill's load sequence for `harness-build`: (a) read `.harness/config.json` (or a stub with `\"rubric\": \"harness-build\"`), (b) resolve the path `plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md`, (c) read that file. The criterion PASSes when the file is present, parses as valid markdown (no read error), and its first heading confirms it is the harness-build rubric (not a placeholder stub). The evaluator must record the resolved path and first heading as evidence. This simulates the skill's runtime lookup without requiring a full Claude Code session.",
+      "grader_type": "behavioral",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "extensibility_aci"
+    },
+    {
+      "task_id": "s07-c2",
+      "criterion": "Kickoff routing step produces correct rubric assignment: Simulate Step 1 and Step 2 of `harness-kickoff/SKILL.md` for a harness-build project: (a) read the updated SKILL.md, (b) follow the project-type detection branch for `harness-build`, (c) construct the `config.json` content that Step 2 would write. The criterion PASSes when the constructed JSON has `\"project_type\": \"harness-build\"` and `\"rubric\": \"harness-build\"`. The evaluator must quote the exact config.json template from SKILL.md that yields these values as evidence. This verifies the routing clause is present and correctly maps the project type to the rubric.",
+      "grader_type": "behavioral",
+      "weight": 12,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "extensibility_aci"
+    },
+    {
+      "task_id": "s07-c3",
+      "criterion": "Rubric file exists at correct path: `plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md` exists. Verify: `Test-Path plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md` returns True (PowerShell) or equivalent file-existence check.",
+      "grader_type": "structural",
+      "weight": 5,
+      "is_gate": false,
+      "verification_command": "Test-Path plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md",
+      "rubric_dimension": "extensibility_aci"
+    },
+    {
+      "task_id": "s07-c4",
+      "criterion": "Rubric has exactly 7 dimensions: The rubric file contains exactly 7 scored dimensions. Verify: count of level-3 headings (`###`) in `rubrics/harness-build.md` equals 7. Command: `grep -c '^### ' plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md` == 7.",
+      "grader_type": "structural",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -c '^### ' plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s07-c5",
+      "criterion": "Rubric has exactly 3 UNCONDITIONAL hard-threshold gates: The rubric's Hard Thresholds section contains entries for loop termination/bounds, sandboxing, and governance. Verify: `grep -ci 'loop.*terminat\\|terminat.*loop\\|max.*step\\|max.*token\\|agentic.*bound' plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md` >= 1 AND `grep -ci 'sandbox\\|isolat' plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md` >= 1 AND `grep -ci 'governance\\|human.*review\\|approval.*path\\|escalat' plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md` >= 1.",
+      "grader_type": "structural",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -ci 'loop.*terminat|terminat.*loop|max.*step|max.*token|agentic.*bound' plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md && grep -ci 'sandbox|isolat' plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md && grep -ci 'governance|human.*review|approval.*path|escalat' plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s07-c6",
+      "criterion": "Rubric is registered as sixth entry in eval-rubric SKILL.md: The Available Rubrics list in `plugins/trine-eval/skills/eval-rubric/SKILL.md` now contains exactly 6 entries, with `harness-build` as one of them. Verify: `grep -c \"^- \\`\" plugins/trine-eval/skills/eval-rubric/SKILL.md` == 6 AND `grep -c 'harness-build' plugins/trine-eval/skills/eval-rubric/SKILL.md` >= 1.",
+      "grader_type": "structural",
+      "weight": 7,
+      "is_gate": false,
+      "verification_command": "grep -c \"^- \\`\" plugins/trine-eval/skills/eval-rubric/SKILL.md && grep -c 'harness-build' plugins/trine-eval/skills/eval-rubric/SKILL.md",
+      "rubric_dimension": "extensibility_aci"
+    },
+    {
+      "task_id": "s07-c7",
+      "criterion": "Kickoff SKILL.md contains harness-build project type: The updated harness-kickoff SKILL.md names `harness-build` as a recognizable project type (in Step 1's detection list or type prompt). Verify: `grep -c 'harness-build' plugins/trine-eval/skills/harness-kickoff/SKILL.md` >= 1.",
+      "grader_type": "structural",
+      "weight": 5,
+      "is_gate": false,
+      "verification_command": "grep -c 'harness-build' plugins/trine-eval/skills/harness-kickoff/SKILL.md",
+      "rubric_dimension": "extensibility_aci"
+    },
+    {
+      "task_id": "s07-c8",
+      "criterion": "Rubric has a Hard Thresholds section: The rubric file contains a `## Hard Thresholds` heading with the word \"UNCONDITIONAL\" or equivalent strong gate language. Verify: `grep -c '## Hard Thresholds' plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md` >= 1 AND `grep -ci 'unconditional\\|automatic.*fail\\|blocks.*regardless\\|hard.fail' plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md` >= 1.",
+      "grader_type": "structural",
+      "weight": 5,
+      "is_gate": false,
+      "verification_command": "grep -c '## Hard Thresholds' plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md && grep -ci 'unconditional|automatic.*fail|blocks.*regardless|hard.fail' plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s07-c9",
+      "criterion": "Rubric dimensions align to playbook stages: The 7 rubric dimensions must collectively cover the nine stages of the agent-harness playbook plus the cross-cutting governance principle. PASS requires: (a) at least 5 of the following stage themes are addressable by one of the 7 dimensions: control plane / agentic loop, tool registry, projection / planning, skills / instruction execution, sandbox, observation / monitoring, external affordances, governance; (b) each dimension has a clear 1-5 scale with distinct and meaningful descriptions (not just \"level 1 is bad, level 5 is good\"); (c) dimension weights are explicitly stated and sum to 100%.",
+      "grader_type": "llm-judge",
+      "weight": 15,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s07-c10",
+      "criterion": "Hard-threshold gates are truly UNCONDITIONAL: The three hard-threshold gates (loop termination & bounds, sandboxing, governance placement) must be written as UNCONDITIONAL blockers — i.e., the rubric must state that failing any of these three gates causes automatic sprint failure regardless of the weighted score. PASS requires: (a) all three gate concepts are present in the Hard Thresholds section, (b) each gate's failure condition is stated without a score-based escape hatch (e.g., \"cannot be waived,\" \"regardless of weighted score,\" or \"automatic FAIL\"), and (c) each gate defines what the harness MUST have documented (not just a score threshold) — e.g., \"the harness must document a max-step or max-token bound; absence of this document causes automatic FAIL.\"",
+      "grader_type": "llm-judge",
+      "weight": 15,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s07-c11",
+      "criterion": "Kickoff routing is non-ambiguous and integrated: After reading the updated `harness-kickoff/SKILL.md`, an evaluator must be able to confirm that: (a) `harness-build` appears as an explicit project type option in Step 1's type-detection list (alongside the existing types), (b) Step 2's `config.json` template maps `harness-build` to `\"rubric\": \"harness-build\"` or the mapping is otherwise unambiguous (e.g., a routing table or comment), and (c) the new routing clause does not regress or obscure the existing project type options (`web-app`, `rag-system`, `cli-tool`, `api-service`, `eval-harness`).",
+      "grader_type": "llm-judge",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "extensibility_aci"
+    },
+    {
+      "task_id": "s07-sn1",
+      "criterion": "Should NOT regress Sprint 6 JIT annotations in harness-kickoff SKILL.md: The six `<!-- Context scope at this step: ... -->` comment blocks added in Sprint 6 must remain intact in `harness-kickoff/SKILL.md`. Verify: `grep -c '<!-- Context scope at this step:' plugins/trine-eval/skills/harness-kickoff/SKILL.md` >= 6. (Sprint 6 baseline: 6 such comments present — one per Step 1, Step 2, Step 2b, Step 3, Step 4, and Step 5.)",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "grep -c '<!-- Context scope at this step:' plugins/trine-eval/skills/harness-kickoff/SKILL.md",
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s07-sn2",
+      "criterion": "Should NOT remove or rename any of the existing 5 rubric entries in eval-rubric SKILL.md: The Available Rubrics list must retain all five original entries (`web-app`, `rag-system`, `cli-tool`, `api-service`, `eval-harness`) with their original names. Verify: `grep -c 'web-app\\|rag-system\\|cli-tool\\|api-service\\|eval-harness' plugins/trine-eval/skills/eval-rubric/SKILL.md` >= 5. (Each name must still be present — a rename would reduce this count.)",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "grep -c 'web-app\\|rag-system\\|cli-tool\\|api-service\\|eval-harness' plugins/trine-eval/skills/eval-rubric/SKILL.md",
+      "rubric_dimension": "extensibility_aci"
+    },
+    {
+      "task_id": "s07-sn3",
+      "criterion": "Should NOT remove the \"Context Retrieval Principles\" section from harness-kickoff SKILL.md: This section, added in Sprint 6, documents the JIT/lazy-loading philosophy for the skill. Verify: `grep -c 'Context Retrieval Principles' plugins/trine-eval/skills/harness-kickoff/SKILL.md` >= 1.",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "grep -c 'Context Retrieval Principles' plugins/trine-eval/skills/harness-kickoff/SKILL.md",
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s07-sn4",
+      "criterion": "Should NOT create an `examples/` directory at the repo root: Phase 2's ephemeral constraint prohibits committing permanent example fixtures. Verify: `Test-Path examples` returns False (PowerShell) or equivalent absence check on the repo root `examples/` directory.",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "test -d examples",
+      "rubric_dimension": "methodology_completeness"
+    }
+  ]
+}

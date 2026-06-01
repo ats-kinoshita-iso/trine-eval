@@ -1,0 +1,176 @@
+{
+  "sprint": 8,
+  "tasks": [
+    {
+      "task_id": "s08-c1",
+      "criterion": "Catalog contains 12–15 entries: Run `jq '.failures | length' plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json` and assert the returned integer N satisfies 12 ≤ N ≤ 15. PASS when exit code is 0 and output is a number in [12, 15].",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "jq '.failures | length' plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s08-c2",
+      "criterion": "Every entry has all required fields: Run `jq '[.failures[] | select(has(\"id\") and has(\"source\") and has(\"source_ref\") and has(\"title\") and has(\"problem\") and has(\"expected\") and has(\"success_criteria\") and has(\"rubric_dimension\") and has(\"severity\") and has(\"grader_type\"))] | length' plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json` and assert the returned count equals the total catalog length (same as B1). PASS when the select-filtered count equals the total count — no entry is missing a required field.",
+      "grader_type": "behavioral",
+      "weight": 12,
+      "is_gate": false,
+      "verification_command": "jq '[.failures[] | select(has(\"id\") and has(\"source\") and has(\"source_ref\") and has(\"title\") and has(\"problem\") and has(\"expected\") and has(\"success_criteria\") and has(\"rubric_dimension\") and has(\"severity\") and has(\"grader_type\"))] | length' plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s08-c3",
+      "criterion": "Every entry's `rubric_dimension` is one of the 7 valid harness-build dimensions: Run `jq '[.failures[].rubric_dimension] | unique | .[]' plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json` and assert each printed string is one of: `\"Control Plane & Agentic Loop\"`, `\"Tool Registry & Sandboxing\"`, `\"Projection & Planning\"`, `\"Skills & Instruction Execution\"`, `\"Observation & Monitoring\"`, `\"External Affordances\"`, or `\"Governance & Human Oversight\"`. PASS when all unique dimension values are members of that set (no spurious or misspelled dimension names). Any unrecognized string is a FAIL.",
+      "grader_type": "behavioral",
+      "weight": 12,
+      "is_gate": false,
+      "verification_command": "jq '[.failures[].rubric_dimension] | unique | .[]' plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s08-c4",
+      "criterion": "At least one entry exercises loop termination: Run `jq '[.failures[] | select(.rubric_dimension == \"Control Plane & Agentic Loop\")] | length' plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json` and assert the count >= 1. Additionally verify at least one such entry has a `success_criteria` string containing a numeric bound concept — run `jq '[.failures[] | select(.rubric_dimension == \"Control Plane & Agentic Loop\") | .success_criteria] | .[]' plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json` and confirm at least one result references a max-step count, max-token budget, or loop termination bound in its text. PASS when loop-dimension count >= 1 and at least one success_criteria for that dimension references a numeric or terminable bound (precondition for Phase 2 success criterion #9: seeding at least one loop-termination catalog entry that Sprint 10 will exercise when grading an ephemeral harness fixture).",
+      "grader_type": "behavioral",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "jq '[.failures[] | select(.rubric_dimension == \"Control Plane & Agentic Loop\")] | length' plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s08-c5",
+      "criterion": "SKILL.md merge procedure is simulation-traceable for a fresh kickoff: Simulate the kickoff merge procedure documented in the updated `bootstrap-failures/SKILL.md`: (a) Read the SKILL.md to locate the \"Templates by Rubric\" section describing the merge. (b) Trace the procedure for a harness-build project where no prior `.harness/bootstrap/failure-catalog.json` exists: the kickoff reads `templates/by-rubric/harness-build.json` and writes its `failures` array to the project catalog. (c) Trace the procedure for an existing catalog: the merge is additive by `id` — only entries whose `id` does not already exist in the project catalog are appended; existing entries are not overwritten. PASS when the SKILL.md contains a section explicitly describing steps (b) and (c) and the evaluator can quote the exact merge rule (additive by `id`, no overwrite) from the SKILL.md text. The evaluator must record the exact quoted text as evidence.",
+      "grader_type": "behavioral",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s08-c6",
+      "criterion": "Template file is valid JSON: Run `jq empty plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json` and assert exit code 0 (no parse error). A malformed JSON file fails this criterion regardless of content.",
+      "grader_type": "behavioral",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "jq empty plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s08-c7",
+      "criterion": "All entries have `source` set to `playbook-trap`: Run `jq '[.failures[] | select(.source != \"playbook-trap\")] | length' plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json` and assert the count is 0. Every entry in this template must set `source` to `\"playbook-trap\"`; a mix of source types is a FAIL.",
+      "grader_type": "behavioral",
+      "weight": 5,
+      "is_gate": false,
+      "verification_command": "jq '[.failures[] | select(.source != \"playbook-trap\")] | length' plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s08-c8",
+      "criterion": "All entries have a non-empty `source_ref` citing a playbook stage or trap: Run `jq '[.failures[] | select(.source_ref == \"\" or .source_ref == null)] | length' plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json` and assert the count is 0. Each `source_ref` must be a non-empty string. Verify at least one `source_ref` value contains a stage-like reference (e.g., \"Stage:\", \"Trap:\", or a playbook section name) by inspecting the first few values with `jq '[.failures[0:3][].source_ref]' plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json` — no grep regex required, visual inspection suffices.",
+      "grader_type": "behavioral",
+      "weight": 5,
+      "is_gate": false,
+      "verification_command": "jq '[.failures[] | select(.source_ref == \"\" or .source_ref == null)] | length' plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s08-c9",
+      "criterion": "Template file exists at the correct path: Verify `test -f \"plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json\"` returns exit 0. The `by-rubric/` subdirectory and `harness-build.json` file must both exist at the specified path.",
+      "grader_type": "structural",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "test -f \"plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json\"",
+      "rubric_dimension": "extensibility_aci"
+    },
+    {
+      "task_id": "s08-c10",
+      "criterion": "SKILL.md contains new `## Templates by Rubric` section: Run `grep -c '## Templates by Rubric' plugins/trine-eval/skills/bootstrap-failures/SKILL.md` and assert count >= 1. This section documents the `templates/by-rubric/<rubric-name>.json` layout (Sprint 8 artifact).",
+      "grader_type": "structural",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "grep -c '## Templates by Rubric' plugins/trine-eval/skills/bootstrap-failures/SKILL.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s08-c11",
+      "criterion": "SKILL.md mentions `by-rubric` directory layout and `harness-build.json`: Run `grep -c 'by-rubric' plugins/trine-eval/skills/bootstrap-failures/SKILL.md` >= 1 AND `grep -c 'harness-build' plugins/trine-eval/skills/bootstrap-failures/SKILL.md` >= 1. Both strings must appear in the file after the Sprint 8 update.",
+      "grader_type": "structural",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "grep -c 'by-rubric' plugins/trine-eval/skills/bootstrap-failures/SKILL.md && grep -c 'harness-build' plugins/trine-eval/skills/bootstrap-failures/SKILL.md",
+      "rubric_dimension": "extensibility_aci"
+    },
+    {
+      "task_id": "s08-c12",
+      "criterion": "Catalog quality: trap coverage across all 7 rubric dimensions: Read `harness-build.json` and assess whether the catalog provides meaningful coverage across all 7 harness-build rubric dimensions. PASS requires: (a) all 7 dimensions are represented by at least one entry (no dimension is unrepresented); (b) each entry's `title` and `problem` clearly describe a real failure mode a practitioner would encounter when building an agent harness (not a generic or contrived scenario); (c) each entry's `success_criteria` field is specific and unambiguous — it describes a verifiable outcome, not a vague goal (e.g., \"The harness declares a max_steps bound >= 1 in its config\" is good; \"The harness handles loops correctly\" is bad); (d) the three UNCONDITIONAL gate dimensions (Control Plane & Agentic Loop, Tool Registry & Sandboxing, Governance & Human Oversight) each have at least 2 entries, reflecting their higher risk weight.",
+      "grader_type": "llm-judge",
+      "weight": 12,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s08-c13",
+      "criterion": "SKILL.md update quality: merge procedure is clear, complete, and consistent: Read the updated `bootstrap-failures/SKILL.md`. PASS requires: (a) the new \"Templates by Rubric\" section clearly explains the `templates/by-rubric/<rubric-name>.json` directory layout and its purpose; (b) the kickoff merge procedure is described step-by-step (what file is read, what file is written, when the merge is triggered); (c) the additive-merge rule (by `id`, no overwrite of user-authored entries) is explicitly stated; (d) the updated SKILL.md integrates naturally with the existing content — the new section does not contradict or orphan any existing guidance about failure catalog usage; (e) the section is under 80 lines (consistent with the \"Skills must stay under 500 lines per SKILL.md\" constraint and the existing SKILL.md's lean style).",
+      "grader_type": "llm-judge",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s08-sn1",
+      "criterion": "Should NOT remove or corrupt the \"Sources of Real Failures\" enumeration in bootstrap-failures SKILL.md: The five-item numbered list introduced in Phase 1 (Bug reports, Manual test notes, Production incidents, Support tickets, Code review comments) must remain intact. Verify: `grep -c 'Sources of Real Failures' plugins/trine-eval/skills/bootstrap-failures/SKILL.md` >= 1. (Pre-sprint baseline: 1. This heading must survive the SKILL.md update.)",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "grep -c 'Sources of Real Failures' plugins/trine-eval/skills/bootstrap-failures/SKILL.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s08-sn2",
+      "criterion": "Should NOT remove or corrupt the failure-catalog schema example in bootstrap-failures SKILL.md: The JSON code block documenting the schema (with fields `id`, `source`, `source_ref`, `title`, `problem`, `expected`, `success_criteria`, `reference_solution`, `rubric_dimension`, `severity`, `grader_type`) must remain present. Verify: `grep -c '\"grader_type\"' plugins/trine-eval/skills/bootstrap-failures/SKILL.md` >= 1 AND `grep -c '\"rubric_dimension\"' plugins/trine-eval/skills/bootstrap-failures/SKILL.md` >= 1. (Pre-sprint baseline: 1 occurrence of each field name in the schema example.)",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "grep -c '\"grader_type\"' plugins/trine-eval/skills/bootstrap-failures/SKILL.md && grep -c '\"rubric_dimension\"' plugins/trine-eval/skills/bootstrap-failures/SKILL.md",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s08-sn3",
+      "criterion": "Should NOT remove the \"Integration with the Harness\" section and Data Flow diagram from bootstrap-failures SKILL.md: This section and its ASCII data-flow diagram document how the failure catalog feeds into the harness workflow — it must survive the Sprint 8 additions. Verify: `grep -c 'Integration with the Harness' plugins/trine-eval/skills/bootstrap-failures/SKILL.md` >= 1 AND `grep -c 'Data Flow' plugins/trine-eval/skills/bootstrap-failures/SKILL.md` >= 1. (Pre-sprint baseline: 1 occurrence of each.)",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "grep -c 'Integration with the Harness' plugins/trine-eval/skills/bootstrap-failures/SKILL.md && grep -c 'Data Flow' plugins/trine-eval/skills/bootstrap-failures/SKILL.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s08-sn4",
+      "criterion": "Should NOT remove or shorten the \"Conversion guidelines\" numbered list in bootstrap-failures SKILL.md: The 6-item numbered list under `### Conversion guidelines:` documents how to convert failure cases — it must not be truncated or replaced. Verify: `grep -c 'Conversion guidelines' plugins/trine-eval/skills/bootstrap-failures/SKILL.md` >= 1. (Pre-sprint baseline: 1.)",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "grep -c 'Conversion guidelines' plugins/trine-eval/skills/bootstrap-failures/SKILL.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s08-sn5",
+      "criterion": "Should NOT regress Sprint 6 JIT annotations in harness-kickoff SKILL.md: If Sprint 8 touches `harness-kickoff/SKILL.md` at all (the SKILL.md update for bootstrap-failures documents how kickoff *uses* the template, but the kickoff skill itself may not need edits), the six `<!-- Context scope at this step: ... -->` comment blocks must remain intact. Verify: `grep -c '<!-- Context scope at this step:' plugins/trine-eval/skills/harness-kickoff/SKILL.md` >= 6. (Pre-sprint baseline: 6 — Steps 1, 2, 2b, 3, 4, and 5.)",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "grep -c '<!-- Context scope at this step:' plugins/trine-eval/skills/harness-kickoff/SKILL.md",
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s08-sn6",
+      "criterion": "Should NOT create an `examples/` directory at the repo root: Phase 2's ephemeral constraint prohibits committing permanent example fixtures. Verify: `test -d \"examples\"` returns non-zero exit (ABSENT). (Pre-sprint baseline: ABSENT — confirmed.)",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "test -d \"examples\"",
+      "rubric_dimension": "methodology_completeness"
+    }
+  ]
+}
