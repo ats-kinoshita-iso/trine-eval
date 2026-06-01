@@ -65,3 +65,50 @@ Stopped. Current sprint state should be committed.
 Stopped. Current sprint state should be committed.
 ## Session 2026-04-28T13:31:11-04:00
 Stopped. Current sprint state should be committed.
+## Session 2026-05-12T08:23:26-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-05-12T08:29:03-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-05-12T08:30:10-04:00
+Stopped. Current sprint state should be committed.
+## Session 2026-05-31T23:41:23-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-01T03:41:23Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-05-31T23:44:28-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-01T03:44:28Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-05-31T23:56:31-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-01T03:56:31Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-06-01T10:13:04-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-01T14:13:04Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-06-01T10:16:34-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-01T14:16:34Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-06-01T10:24:13-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-01T14:24:13Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+
+## Sprint 07: harness-build Rubric (Phase 2)
+- Status: PASS
+- Rounds: 1
+- Passed criteria: 11/11
+- Weighted score: 100%
+- Gates: 4/4
+- Date: 2026-06-01
+- Rubric scores: Methodology 4/5, Grading 4/5, Separation 5/5, Context 4/5, Extensibility 4/5
+- Notes: First Phase 2 sprint. Contract used 3-way grader split (22% behavioral / 38% structural / 40% llm-judge); Technical Notes justify <60% behavioral on static-artifact grounds. Contract negotiation took 2 rounds (R1 NEEDS REVISION cited S6 broken grep, SN1 baseline count, B1/B2 labeling advisory; R2 APPROVED). `tasks.json` emission skipped — no schema documented in sprint-contract SKILL; consistent with sprints 01-06 baseline. Implementation in commit 27ed27e. New rubric: `plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md` (7 dimensions, 3 UNCONDITIONAL hard thresholds: loop termination & bounds, sandboxing, governance placement). Registry updated; kickoff routes `harness-build` project_type via new Step 2 routing table.
+
