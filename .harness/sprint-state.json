@@ -1,5 +1,5 @@
 {
-  "current_sprint": 10,
+  "current_sprint": 11,
   "sprints": [
     {
       "number": 1,
@@ -127,7 +127,33 @@
         "structural_pct": 9,
         "llm_judge_pct": 28
       }
+    },
+    {
+      "number": 10,
+      "title": "Planner template for agent-harness builds (Phase 2)",
+      "status": "pass",
+      "rounds": 1,
+      "criteria_passed": 11,
+      "criteria_total": 11,
+      "weighted_score": 100,
+      "phase": 2,
+      "rubric_scores": {
+        "methodology_completeness": 4,
+        "grading_architecture": 4,
+        "generator_evaluator_separation": 5,
+        "context_engineering": 4,
+        "extensibility_aci": 4
+      },
+      "should_not_gates": {
+        "passed": 5,
+        "total": 5
+      },
+      "grader_split": {
+        "behavioral_pct": 62,
+        "structural_pct": 8,
+        "llm_judge_pct": 30
+      }
     }
   ],
-  "last_updated": "2026-06-01T14:54:55-04:00"
+  "last_updated": "2026-06-01T19:58:52-04:00"
 }

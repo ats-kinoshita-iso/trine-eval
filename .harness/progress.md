@@ -152,3 +152,23 @@ Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
 - Date: 2026-06-01
 - Rubric scores: Methodology 4/5, Grading 4/5, Separation 5/5, Context 4/5, Extensibility 4/5
 - Notes: Phase 1.5 audit-chain repair sprint, inserted between Phase 1 and Phase 2 (renumbered current Phase 2 sprints 9-11 down to 10-12 in commit 497f184). Contract used 3-way grader split (63% behavioral / 9% structural / 28% llm-judge). Contract negotiation took 2 rounds (R1 NEEDS REVISION cited B3/B7 broken jq uniqueness command — missing parens around length comparison — and B9 ambiguous exit-code semantics on jq without `-e`; R2 APPROVED). Self-bootstrap handled via Option A: sprint-09.tasks.json emitted post-implementation using the freshly-ported in-repo schema (rather than the cached v0.3.3 2-way schema), closing the audit chain self-consistently. Implementation in 6 commits (98cfa49, a36004b, 8dfaf40, 633d968, c19ad3a, 67f0a10): schema ported additively to plugins/trine-eval/skills/sprint-contract/SKILL.md (+75 lines, no existing section modified) with `grader_type` adapted from cached 2-way to repo 3-way (behavioral/structural/llm-judge), `bucket` field omitted pending separate rules/harness-conventions.md port; `config.taxonomy.emit_tasks_json: true` added; back-filled sprint-07.tasks.json (15 entries: 11 success + 4 gates) and sprint-08.tasks.json (19 entries: 13 success + 6 gates); progress.md Sprint 7-8 notes updated to remove "skipped — no schema documented" wording; sprint-09.tasks.json emitted as 18 entries (13 success + 5 gates), first tasks.json produced using in-repo schema. Generator's deliberate S11 deviation (avoiding quoted "deterministic" in port prose) verified — `grep -c '"deterministic"'` in SKILL.md returns 0 while all three 3-way enum values appear ≥ 1. Out of scope and deferred: sprints 1-6 back-fill, `bucket` field, regression.json arming, batch API wiring.
+## Session 2026-06-01T14:55:27-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-01T18:55:27Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-06-01T16:43:42-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-01T20:43:42Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+
+## Sprint 10: Planner Template for Agent-Harness Builds (Phase 2)
+- Status: PASS
+- Rounds: 1
+- Passed criteria: 11/11
+- Weighted score: 100%
+- Gates: 5/5
+- Date: 2026-06-01
+- Rubric scores: Methodology 4/5, Grading 4/5, Separation 5/5, Context 4/5, Extensibility 4/5
+- Notes: Third Phase 2 sprint. Contract used 3-way grader split (62% behavioral / 8% structural / 30% llm-judge); behavioral coverage achieved via shell-verifiable `grep` counts whose pre-sprint vs post-sprint expected values differ (Sprint 8 reclassification precedent). Contract negotiation took 2 rounds (R1 NEEDS REVISION cited two issues: B7 ambiguous extraction `grep -A 20 '"number": 1' planner.md` would match BOTH the default sprints.json example block AND the harness-build example block — a correct implementation would FAIL B7 as written; and J11(c)/SN1 mis-counted "6 rules" vs the 7 rules actually present in planner.md). R2 APPROVED after the Generator (a) replaced B7's verification command with `awk '/^## Artifact 2/,/^## [A-Z]/' planner.md | grep -c 'playbook_stage'` to bound extraction to the Artifact 2 default-section block, and (b) corrected J11(c) to "7 rules" with a clarifying note in SN1. Implementation in commit 9a00543 (`feat(sprint-10): add harness-build mode and playbook_stage scoping to planner.md`). planner.md grew 70 → 179 lines: new `## Harness-Build Mode` section appended after the existing project-type-agnostic Process section, documenting dual-signal mode detection (existing config.json `project_type` + prompt-keyword fallback for first-run), the 7 playbook stages in dependency order (Control Plane & Agentic Loop → Tool Registry & Sandboxing → Projection & Planning → Skills & Instruction Execution → Observation & Monitoring → External Affordances → Governance & Human Oversight), and the optional `playbook_stage` field SCOPED to harness-build projects only (A6 prior decision honored — non-harness-build projects MUST NOT emit the field). Backward-compat SN1 gate (CRITICAL per A6) protected via 5 verbatim `grep` anchors — all 5 returned count 1 post-implementation, confirming the default project-type-agnostic path survived byte-for-byte. tasks.json emitted at Step 1d per Sprint-9-ported in-repo schema: 16 entries (11 success + 5 gates), 100% weight sum, all task_ids unique, 3-way `grader_type` enum. R1 evaluation PASSed all 11 criteria + 5/5 gates with zero retries.
