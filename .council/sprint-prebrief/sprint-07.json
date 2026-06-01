@@ -1,0 +1,19 @@
+{
+  "sprint_number": 7,
+  "classified_at": "2026-06-01T14:21:00Z",
+  "classified_by_agent": "orchestrator",
+  "cynefin": "complicated",
+  "confidence": 0.75,
+  "rationale": "Sprint 7 is the first sprint of Phase 2 and introduces the harness-build rubric, registers it in eval-rubric/SKILL.md, and extends harness-kickoff to route by project-type. The work is multi-component (rubric definition, registry update, kickoff routing) but cause-effect is knowable from the established pattern: the existing 5 rubrics demonstrate the rubric file format, the registry pattern, and the kickoff routing pattern, so the path to done is laid down. Risk is bounded by explicit Should-NOT gates protecting Sprint 6 JIT annotations and the existing 5-rubric registry list. Phase 1 telemetry (sprints 1-6 all PASS, uniform 100% weighted score) corroborates that this team and process handle complicated-class sprints reliably. The change is not 'clear' (more than a one-line edit; requires good-faith design of the new rubric's dimensions) and not 'complex' (no novel discovery required; the solution pattern is enumerable). Confidence is 0.75 rather than higher because the behavioral-coverage rule (HK-0002) lands as an inherited methodology constraint that will affect Sprint 7's contract for the first time; some criterion-design churn is plausible.",
+  "expected_loop_shape": "ad-hoc",
+  "projection_manifest": [
+    ".harness/sprints.json",
+    ".harness/sprint-state.json",
+    ".harness/spec.md",
+    ".council/henka-register.jsonl",
+    ".council/standard-work.json",
+    "plugins/trine-eval/skills/eval-rubric/SKILL.md",
+    "plugins/trine-eval/skills/sprint-contract/template.md"
+  ],
+  "autonomy_floor_observed": 4
+}

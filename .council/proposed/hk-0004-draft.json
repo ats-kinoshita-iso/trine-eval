@@ -1,0 +1,70 @@
+{
+  "henka_id": "HK-0004",
+  "sprint_context": 9,
+  "fourM_axis": "Method",
+  "category": "architectural-discovery",
+  "change_origin": "passive",
+  "impact_level": "actionable",
+  "description": "The in-repo plugin source `plugins/trine-eval/skills/sprint-workflow/SKILL.md` documents only Steps 0, 1, 2, 3, 4, 5 — it does not contain Step 0.5 (regression gate), Step 1d (tasks.json emission), or Step 3d (Batch API submission grouping). The Sprint 9 schema port added prose in `plugins/trine-eval/skills/sprint-contract/SKILL.md` at lines 74, 140, 142 referencing these three steps as if they exist in the in-repo workflow. The references resolve only against the cached/published v0.3.3 plugin from which actual harness-sprint execution loads — the in-repo source has silently diverged from the published artifact. Architect and scope-guardian independently confirmed the gap; orchestrator spot-checked via direct grep (logged to audit-log). Andon issued `alert` (not `stop`) because runtime execution against the cached SKILL.md is unaffected; the divergence is documentation correctness, not execution risk. This Henkaten captures the structural discovery: the repo-source workflow has been drifting from the published workflow without registration, and Sprint 9's port now creates dangling references that make the drift visible.",
+  "affected_artifacts": [
+    "plugins/trine-eval/skills/sprint-workflow/SKILL.md",
+    "plugins/trine-eval/skills/sprint-contract/SKILL.md"
+  ],
+  "response_type": "propose-to-user",
+  "evidence": [
+    {
+      "claim": "In-repo sprint-workflow/SKILL.md defines exactly six steps (0, 1, 2, 3, 4, 5) — no Step 0.5, no Step 1d, no Step 3d.",
+      "evidence_class": "observed",
+      "confidence": "high",
+      "verification": "grep -nE '^## Step ' plugins/trine-eval/skills/sprint-workflow/SKILL.md",
+      "source_file": "plugins/trine-eval/skills/sprint-workflow/SKILL.md",
+      "source_line_range": "12-149"
+    },
+    {
+      "claim": "The Sprint 9 schema port wrote three references to non-existent in-repo workflow steps into sprint-contract/SKILL.md at lines 74, 140, 142.",
+      "evidence_class": "observed",
+      "confidence": "high",
+      "verification": "grep -nE 'Step 0\\.5|Step 1d|Step 3d' plugins/trine-eval/skills/sprint-contract/SKILL.md",
+      "source_file": "plugins/trine-eval/skills/sprint-contract/SKILL.md",
+      "source_line_range": "74,140,142"
+    },
+    {
+      "claim": "The reference points to a published v0.3.3 cached harness-sprint/SKILL.md that the harness execution path uses — the in-repo source has not been ported to parity.",
+      "evidence_class": "observed",
+      "confidence": "high",
+      "verification": "grep -nE '^## Step ' C:/Users/akino/.claude/plugins/cache/trine-eval/trine-eval/0.3.3/skills/harness-sprint/SKILL.md",
+      "source_file": "C:/Users/akino/.claude/plugins/cache/trine-eval/trine-eval/0.3.3/skills/harness-sprint/SKILL.md"
+    },
+    {
+      "claim": "Sprint 9's declared Out-of-Scope forbids touching any SKILL.md other than sprint-contract/SKILL.md, so the gap cannot be closed inside Sprint 9 — it requires a follow-up scheduled sprint.",
+      "evidence_class": "observed",
+      "confidence": "high",
+      "verification": "grep -n 'Out of Scope' .harness/contracts/sprint-09.md",
+      "source_file": ".harness/contracts/sprint-09.md"
+    },
+    {
+      "claim": "Architect (this swarm) issued andon `alert` (not `stop`) because the actual workflow execution loads from cached v0.3.3 SKILL.md which has the steps. Scope-guardian and henkaten-detector concurred. Orchestrator spot-checked the underlying grep claim and logged PASS to audit-log.",
+      "evidence_class": "observed",
+      "confidence": "high",
+      "verification": "jq -c 'select(.event_type == \"verification-spot-check\") | .verification_result' .council/audit-log.jsonl",
+      "source_file": ".council/audit-log.jsonl"
+    },
+    {
+      "claim": "Classified as change_origin=passive because the gap has been present continuously since the v0.3.3 / repo-source divergence began; Sprint 9 did not introduce the gap, only surfaced it through new prose that references the missing steps.",
+      "evidence_class": "inferred",
+      "confidence": "high"
+    }
+  ],
+  "andon_signal": {
+    "type": "alert",
+    "reason": "Documentation references in-repo workflow steps that do not exist in the in-repo workflow file; runtime execution against the cached v0.3.3 SKILL.md is unaffected, so this is documentation correctness, not execution risk. Resolved within takt budget — all three council agents (architect, scope-guardian, henkaten-detector) concurred alert is the correct level.",
+    "evidence": [
+      "plugins/trine-eval/skills/sprint-workflow/SKILL.md (six steps only)",
+      "plugins/trine-eval/skills/sprint-contract/SKILL.md:74,140,142 (dangling references)"
+    ],
+    "swarm_request": ["architect", "scope-guardian", "henkaten-detector"]
+  },
+  "status": "classified",
+  "detected_at": "2026-06-01T19:00:00Z",
+  "detected_by_agent": "henkaten-detector"
+}

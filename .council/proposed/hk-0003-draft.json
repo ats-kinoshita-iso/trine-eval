@@ -1,0 +1,54 @@
+{
+  "henka_id": "HK-0003",
+  "sprint_context": 9,
+  "fourM_axis": "Method",
+  "category": "process-drift",
+  "change_origin": "passive",
+  "impact_level": "actionable",
+  "description": "Sprints 7, 8, and 9 ran the full /trine-eval:harness-sprint loop end-to-end without invoking the council fan-out documented in `.council/config.json` as `review_frequency: every-sprint`. Sprint 7 has a sprint-prebrief file; Sprint 8 and Sprint 9 do not. No post-sprint course-corrections file exists in `.council/course-corrections/` for any of Sprints 7-9. The Phase 1.5 plan insertion (DEC pending) was authored by the orchestrator in a /trine-eval:harness-sprint context, not via a council position paper + nemawashi. This is a Method-axis drift: the stated cadence is per-sprint, observed cadence is per-three-sprints (and only when the user manually invokes /henkaten-council:council-autorun). The risk is corrective lag: scope-guardian and architect findings about sprints 7-9 have not been recorded, and any drift that occurred has accumulated unaudited across three sprints.",
+  "affected_artifacts": [
+    ".council/config.json",
+    ".council/sprint-prebrief/",
+    ".council/course-corrections/",
+    ".council/decision-log.jsonl"
+  ],
+  "response_type": "propose-to-user",
+  "evidence": [
+    {
+      "claim": "review_frequency in .council/config.json is set to every-sprint.",
+      "evidence_class": "observed",
+      "confidence": "high",
+      "verification": "jq -r '.review_frequency // \"absent\"' .council/config.json",
+      "source_file": ".council/config.json"
+    },
+    {
+      "claim": "Only sprint-07.json exists in .council/sprint-prebrief/; sprint-08.json and sprint-09.json are absent.",
+      "evidence_class": "observed",
+      "confidence": "high",
+      "verification": "ls .council/sprint-prebrief/ | sort",
+      "source_file": ".council/sprint-prebrief/"
+    },
+    {
+      "claim": "decision-log.jsonl contains 7 DEC entries, all from sprint-context 0, 6, or 7; no entries for sprint-context 8 or sprint-context 9.",
+      "evidence_class": "observed",
+      "confidence": "high",
+      "verification": "jq -r '.sprint_context' .council/decision-log.jsonl | sort -n | uniq -c",
+      "source_file": ".council/decision-log.jsonl"
+    },
+    {
+      "claim": "Sprints 7, 8, 9 all completed PASS at 100% weighted, so the drift was not surfaced by a sprint failure that would otherwise force council attention.",
+      "evidence_class": "observed",
+      "confidence": "high",
+      "verification": "jq -r '.sprints[6:9] | .[] | [.number, .status, .weighted_score] | @tsv' .harness/sprint-state.json",
+      "source_file": ".harness/sprint-state.json"
+    },
+    {
+      "claim": "The Phase 1.5 plan amendment (Sprint 9 insertion, sprints 9-11 renumbered to 10-12) was decided unilaterally by the orchestrator within a /trine-eval:harness-sprint context, not via a council position paper. Reversibility is reversible (git revert of 497f184), but the change is structurally similar to DEC-0002 (spec amendment) and DEC-0004 (sprint reordering) which both went through nemawashi-equivalent ratification.",
+      "evidence_class": "inferred",
+      "confidence": "high"
+    }
+  ],
+  "status": "classified",
+  "detected_at": "2026-06-01T18:30:00Z",
+  "detected_by_agent": "orchestrator"
+}

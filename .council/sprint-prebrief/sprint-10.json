@@ -1,0 +1,19 @@
+{
+  "sprint_number": 10,
+  "classified_at": "2026-06-01T18:35:00Z",
+  "classified_by_agent": "orchestrator",
+  "cynefin": "complicated",
+  "confidence": 0.75,
+  "rationale": "Sprint 10 (renumbered from Sprint 9 after Phase 1.5 insertion) is the third Phase 2 sprint. Scope: introduce a project-type-aware Planner template that mirrors the playbook's nine stages plus governance for harness-build projects, add a `playbook_stage` field to sprints.json entries scoped to harness-build mode, and preserve backward-compat (running Planner without harness-build mode must produce identical output to today). Cause-effect is knowable: Sprint 7 delivered the harness-build rubric (7 dimensions) and Sprint 8 delivered the playbook traps catalog (13 trap-derived entries cited by stage). The Planner just needs to consume that structure and emit it as ordered sprint decomposition. The architect's A6 prior decision (recorded in DEC-0006) constrained the `playbook_stage` field to harness-build-only, preventing schema bleed. Sprint 7-8 telemetry shows uniform 100% weighted PASS on Phase 2 work; Sprint 9 (Phase 1.5 audit-chain repair) added the tasks.json schema that Sprint 10's harness-build Planner output can now emit downstream. The work is multi-component (Planner mode dispatch, stage-aligned decomposition logic, backward-compat protection) but the solution space is enumerable from the playbook's stage list. Not 'clear' (more than mechanical, requires genuine design of mode-dispatch shape and the playbook_stage schema) and not 'complex' (no novel discovery; the stage taxonomy is given by the playbook). Confidence 0.75 because the backward-compat Should-NOT gate (Planner without harness-build mode produces byte-identical output) is testable but tight — minor template wording shifts could trip it.",
+  "expected_loop_shape": "ad-hoc",
+  "projection_manifest": [
+    ".harness/spec.md",
+    ".harness/sprints.json",
+    ".harness/sprint-state.json",
+    "plugins/trine-eval/agents/planner.md",
+    "plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md",
+    "plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json",
+    ".harness/contracts/sprint-08.tasks.json"
+  ],
+  "autonomy_floor_observed": 4
+}

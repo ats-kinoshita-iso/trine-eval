@@ -1,0 +1,21 @@
+{
+  "decision_id": "DEC-0009",
+  "timestamp": "2026-06-01T19:13:00Z",
+  "decision_type": "course-correction-minor",
+  "decision_outcome": "applied",
+  "council_agents_involved": ["orchestrator"],
+  "evidence_cited": [
+    {"evidence_class": "observed", "verification": "jq -c 'select(.henka_id == \"HK-0001\")' .council/henka-register.jsonl", "summary": "HK-0001 carried status=responded with resolution_summary already populated naming DEC-0002 and Phase 2 amendment, but lacked closed_at"},
+    {"evidence_class": "observed", "verification": "jq -c 'select(.henka_id == \"HK-0002\")' .council/henka-register.jsonl", "summary": "HK-0002 status was classified but DEC-0007 ratified the underlying methodology change; needed promotion to responded with resolution_summary citing DEC-0007"}
+  ],
+  "applied_automatically": true,
+  "user_approval_required": false,
+  "affected_files": [".council/henka-register.jsonl"],
+  "linked_henka_id": "HK-0001",
+  "sprint_context": 9,
+  "autonomy_level_used": 4,
+  "effective_autonomy_at_decision": 4,
+  "reversibility": "reversible",
+  "nemawashi_walkthrough_version": null,
+  "description": "Audit-trail hygiene: promote HK-0001 status from `responded` to `resolved` (closed_at set; resolution_summary already present from prior session); promote HK-0002 status from `classified` to `responded` (responded_at set; resolution_summary added citing DEC-0007 ratification and Sprint 9 commit 98cfa49 schema-port closure). Per henkaten-detector recommendation (this fan-out) and §3 audit-chain completion requirement. Both updates are append-only-equivalent jsonl field rewrites within `.council/` working directory; fully reversible via git revert."
+}

@@ -1,0 +1,22 @@
+{
+  "decision_id": "DEC-0008",
+  "timestamp": "2026-06-01T19:12:00Z",
+  "decision_type": "course-correction-minor",
+  "decision_outcome": "applied",
+  "council_agents_involved": ["orchestrator", "henkaten-detector", "architect", "scope-guardian"],
+  "evidence_cited": [
+    {"evidence_class": "observed", "verification": "grep -nE '^## Step ' plugins/trine-eval/skills/sprint-workflow/SKILL.md", "summary": "in-repo workflow has only Steps 0,1,2,3,4,5 — no 0.5/1d/3d"},
+    {"evidence_class": "observed", "verification": "grep -nE 'Step 0\\.5|Step 1d|Step 3d' plugins/trine-eval/skills/sprint-contract/SKILL.md", "summary": "ported schema references three nonexistent in-repo steps at lines 74,140,142"},
+    {"evidence_class": "observed", "verification": "jq -c 'select(.event_type == \"verification-spot-check\") | .verification_result' .council/audit-log.jsonl", "summary": "orchestrator spot-checked the grep claim and confirmed in audit-log"}
+  ],
+  "applied_automatically": true,
+  "user_approval_required": false,
+  "affected_files": [".council/henka-register.jsonl"],
+  "linked_henka_id": "HK-0004",
+  "sprint_context": 9,
+  "autonomy_level_used": 4,
+  "effective_autonomy_at_decision": 4,
+  "reversibility": "reversible",
+  "nemawashi_walkthrough_version": null,
+  "description": "Emit HK-0004 (architectural-discovery: in-repo sprint-workflow/SKILL.md missing Steps 0.5, 1d, 3d referenced by the Sprint 9 ported schema). Andon `alert` raised by architect, concurred by scope-guardian and henkaten-detector, resolved within takt budget. Runtime execution unaffected (cached v0.3.3 SKILL.md is what /trine-eval:harness-sprint actually loads). Recorded for follow-up sprint planning; auto-applied per minor-reversible single-prompt-equivalent path at L4 because (a) the henkaten-detector's classify-and-recommend protocol explicitly produced a fully-formed HK-0004 candidate, (b) emission is a jsonl append (reversible-with-caveat) within a council-write directory, and (c) the gap-detection process itself ran via the standard fan-out protocol with verification spot-check passing."
+}
