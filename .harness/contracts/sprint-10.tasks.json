@@ -1,0 +1,149 @@
+{
+  "sprint": 10,
+  "tasks": [
+    {
+      "task_id": "s10-c1",
+      "criterion": "Harness-build detection branch produces stage-aligned sprints.json structure [weight: 14%]: Simulate the harness-build mode detection in the updated `planner.md`: (a) Read the updated `planner.md`. (b) Locate the conditional branch or section that activates when `project_type` is `harness-build` (e.g., a section headed \"Harness-Build Mode\" or an `if project_type == harness-build` conditional). (c) Trace the instructions for that branch to determine what `sprints.json` structure the Planner would produce. The criterion PASSes when the traced output structure: (i) includes at least one sprint entry with a `playbook_stage` field, (ii) the `playbook_stage` value is one of the seven valid stage names, and (iii) the sprint order mirrors the playbook dependency order (Control Plane & Agentic Loop before Tool Registry & Sandboxing, both before Governance & Human Oversight). The evaluator must quote the relevant branch text from `planner.md` as evidence and construct a representative example `sprints.json` fragment showing the traced output.",
+      "grader_type": "behavioral",
+      "weight": 14,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s10-c2",
+      "criterion": "planner.md contains the harness-build mode section heading [weight: 8%]: Run `grep -c 'Harness-Build Mode\\|harness-build mode\\|harness_build mode' plugins/trine-eval/agents/planner.md` and assert count >= 1. Pre-sprint baseline: 0 (no such heading exists). Post-sprint: >= 1. PASS when count >= 1. This is a non-trivially-anticipated count change — the heading does not exist pre-sprint, so this is not a no-op.",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -c 'Harness-Build Mode\\|harness-build mode\\|harness_build mode' plugins/trine-eval/agents/planner.md",
+      "rubric_dimension": "extensibility_aci"
+    },
+    {
+      "task_id": "s10-c3",
+      "criterion": "planner.md contains the `playbook_stage` field name and documents it as harness-build-only [weight: 10%]: Run `grep -c 'playbook_stage' plugins/trine-eval/agents/planner.md` and assert count >= 2 (the field name must appear at least twice: once in a definition/documentation context and once in an example or constraint statement). Pre-sprint baseline: 0. Post-sprint: >= 2. Additionally run `grep -c 'harness.build' plugins/trine-eval/agents/planner.md` and assert count >= 3 (the term must appear in the mode detection description, the playbook_stage documentation, and the backward-compat note or example). Pre-sprint baseline: 0. Post-sprint: >= 3. PASS when both count conditions hold.",
+      "grader_type": "behavioral",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "grep -c 'playbook_stage' plugins/trine-eval/agents/planner.md",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s10-c4",
+      "criterion": "planner.md contains the seven valid playbook_stage values [weight: 8%]: Run the following 7 greps and assert each returns >= 1: `grep -c 'Control Plane' plugins/trine-eval/agents/planner.md`, `grep -c 'Tool Registry' plugins/trine-eval/agents/planner.md`, `grep -c 'Projection' plugins/trine-eval/agents/planner.md`, `grep -c 'Skills.*Instruction\\|Instruction.*Skills' plugins/trine-eval/agents/planner.md`, `grep -c 'Observation.*Monitoring\\|Monitoring.*Observation' plugins/trine-eval/agents/planner.md`, `grep -c 'External Affordances' plugins/trine-eval/agents/planner.md`, `grep -c 'Governance' plugins/trine-eval/agents/planner.md`. Pre-sprint baseline: all 7 return 0 (none of these stage names appear in the current planner.md). Post-sprint: all 7 >= 1. PASS when all 7 conditions hold.",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -c 'Control Plane' plugins/trine-eval/agents/planner.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s10-c5",
+      "criterion": "planner.md preserves the original 5-step Process list verbatim [weight: 8%]: Run `grep -c '^1\\. Read existing project files' plugins/trine-eval/agents/planner.md` and assert count >= 1. Run `grep -c '^2\\. Analyze the user' plugins/trine-eval/agents/planner.md` and assert count >= 1. Run `grep -c '^3\\. Write \\`\\.harness/spec\\.md' plugins/trine-eval/agents/planner.md` and assert count >= 1. Run `grep -c '^4\\. Write \\`\\.harness/sprints\\.json' plugins/trine-eval/agents/planner.md` and assert count >= 1. Run `grep -c '^5\\. Report a brief summary' plugins/trine-eval/agents/planner.md` and assert count >= 1. Pre-sprint baseline: all 5 return 1. Post-sprint: all 5 must still return >= 1 (the default-path Process steps must survive the extension). PASS when all 5 conditions hold.",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -c '^1\\. Read existing project files' plugins/trine-eval/agents/planner.md",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s10-c6",
+      "criterion": "planner.md contains an explicit non-harness-build default path guard [weight: 6%]: Run `grep -ci 'non.harness.build\\|default path\\|project_type.*harness.build\\|if.*harness.build\\|when.*harness.build' plugins/trine-eval/agents/planner.md` and assert count >= 1. Pre-sprint baseline: 0. Post-sprint: >= 1. This confirms the planner.md explicitly conditions the harness-build extensions on a `project_type` signal rather than silently changing default behavior. PASS when count >= 1.",
+      "grader_type": "behavioral",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": "grep -ci 'non.harness.build\\|default path\\|project_type.*harness.build\\|if.*harness.build\\|when.*harness.build' plugins/trine-eval/agents/planner.md",
+      "rubric_dimension": "extensibility_aci"
+    },
+    {
+      "task_id": "s10-c7",
+      "criterion": "The sprints.json default template (non-harness-build path) does NOT contain `playbook_stage` [weight: 8%]: Run `grep -c 'playbook_stage' plugins/trine-eval/agents/planner.md` and capture the total count (expected >= 2 per B3). Then verify that the playbook_stage field only appears in the harness-build-specific section by checking that the default sprints.json example block in the planner.md (the one under `## Artifact 2:` for non-harness-build projects) does NOT contain `playbook_stage`. Verify by extracting only the Artifact 2 section (from its heading up to but not including the next `##`-level heading) and counting `playbook_stage` occurrences: `awk '/^## Artifact 2/,/^## [A-Z]/' plugins/trine-eval/agents/planner.md | grep -c 'playbook_stage'` assert count = 0. Pre-sprint baseline: 0 (verified). Post-sprint: must still return 0 in the Artifact 2 section even though `playbook_stage` appears elsewhere in the file. PASS when the awk-bounded count equals 0.",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "awk '/^## Artifact 2/,/^## [A-Z]/' plugins/trine-eval/agents/planner.md | grep -c 'playbook_stage'",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s10-c8",
+      "criterion": "planner.md file exists and is at least 80 lines long [weight: 4%]: Verify `test -f \"plugins/trine-eval/agents/planner.md\"` returns exit 0 AND `wc -l < plugins/trine-eval/agents/planner.md` returns a value >= 80. Pre-sprint baseline: file exists at 70 lines. The harness-build mode extension must add at least 10 lines. PASS when file exists and line count >= 80.",
+      "grader_type": "structural",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "test -f \"plugins/trine-eval/agents/planner.md\" && wc -l < plugins/trine-eval/agents/planner.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s10-c9",
+      "criterion": "The `playbook_stage` field is documented with its valid value set as harness-build-only [weight: 4%]: Run `grep -c 'harness.build.*only\\|only.*harness.build\\|SCOPED.*harness.build\\|harness.build.*SCOPED' plugins/trine-eval/agents/planner.md` and assert count >= 1. Pre-sprint baseline: 0. Post-sprint: >= 1. This confirms the planner.md explicitly scopes `playbook_stage` to harness-build projects per the A6 architecture decision. PASS when count >= 1.",
+      "grader_type": "structural",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "grep -c 'harness.build.*only\\|only.*harness.build\\|SCOPED.*harness.build\\|harness.build.*SCOPED' plugins/trine-eval/agents/planner.md",
+      "rubric_dimension": "extensibility_aci"
+    },
+    {
+      "task_id": "s10-c10",
+      "criterion": "Stage-aligned decomposition quality: the harness-build mode produces dependency-ordered sprints [weight: 18%]: Read the harness-build mode section of the updated `plugins/trine-eval/agents/planner.md`. PASS requires all of the following: (a) The instructions for harness-build mode direct the Planner to order sprints so that foundational infrastructure stages (Control Plane & Agentic Loop, Tool Registry & Sandboxing) precede higher-level stages (Skills & Instruction Execution, Observation & Monitoring, External Affordances) which precede the cross-cutting stage (Governance & Human Oversight). The dependency order must be explicitly stated or implied by a numbered/sequential stage list — not left implicit. (b) Each of the seven playbook stages is named in the harness-build mode instructions, either individually or by reference to the rubric file (`rubrics/harness-build.md`), so that the Planner knows which stage each sprint addresses. (c) The `playbook_stage` field is documented with its exact valid values (the seven stage names from `harness-build.md`) and the instruction that this field is ONLY emitted when `project_type == harness-build`. A non-harness-build project's `sprints.json` must not include `playbook_stage`. (d) The harness-build mode instructions direct the Planner to map each sprint to exactly one `playbook_stage` value — not skip the field, not assign multiple stages per sprint entry (though a sprint may span adjacent stages with a primary stage declared). (e) The mode detection mechanism is explicit: the instructions describe a specific signal the Planner reads (e.g., \"if the user's prompt mentions agent runtime harness, agentic loop, or the harness-build playbook\" or \"if the config.json contains `project_type: harness-build`\") rather than relying on the Planner to infer silently.",
+      "grader_type": "llm-judge",
+      "weight": 18,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s10-c11",
+      "criterion": "Backward compatibility: non-harness-build default path is semantically preserved [weight: 12%]: Read the full updated `plugins/trine-eval/agents/planner.md`. PASS requires: (a) The non-harness-build default path (the original project-type-agnostic instructions) is semantically identical to the pre-sprint version: the same four artifact requirements for `spec.md` (Product Vision, Feature List, User Interaction Patterns, Technical Constraints, Success Criteria), the same sprints.json schema example (with `number`, `title`, `features`, `estimated_complexity`, `dependencies` — and no `playbook_stage`), and the same five-step Process list (Read project files, Analyze prompt, Write spec.md, Write sprints.json, Report summary). (b) The harness-build extension is additive — it is clearly demarcated as a conditional branch that applies only when `project_type` is `harness-build`. The default path instructions do not reference harness-build concepts (playbook stages, playbook traps, rubric dimensions) unless under an explicit conditional guard. (c) The Rules section (currently 7 rules: Stay at the product level, Order sprints, Each sprint completable in one context window, Read existing code first, Be ambitious about scope, estimated_complexity enum, dependencies array) is either preserved verbatim or extended with harness-build-specific rules clearly separated from the core rules. (d) A reader who skips the harness-build mode section would find a planner.md that reads identically to the pre-sprint file for all non-harness-build use cases.",
+      "grader_type": "llm-judge",
+      "weight": 12,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s10-sn1",
+      "criterion": "Should NOT alter the default-path project-type-agnostic content of planner.md (backward compat — CRITICAL, per A6): The five original Process steps must be present verbatim (not paraphrased), the original Rules section's six rules must remain (not fewer), and the default `sprints.json` example block must NOT contain a `playbook_stage` field. Verify: `grep -c '^1\\. Read existing project files' plugins/trine-eval/agents/planner.md` assert >= 1 (Process step 1 present verbatim). `grep -c '^2\\. Analyze the user' plugins/trine-eval/agents/planner.md` assert >= 1 (Process step 2 present verbatim). `grep -c '^5\\. Report a brief summary' plugins/trine-eval/agents/planner.md` assert >= 1 (Process step 5 present verbatim). `grep -c '^\\- \\*\\*Stay at the product level\\.' plugins/trine-eval/agents/planner.md` assert >= 1 (first Rule verbatim anchor present). `grep -c '^\\- \\*\\*estimated_complexity\\*\\*' plugins/trine-eval/agents/planner.md` assert >= 1 (complexity enum rule present — confirms Rules section was not truncated). Pre-sprint baselines: all five greps return 1. A post-sprint failure on any of these five checks is a backward-compat regression and blocks the sprint.",
+      "grader_type": "behavioral",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "grep -c '^1\\. Read existing project files' plugins/trine-eval/agents/planner.md",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s10-sn2",
+      "criterion": "Should NOT modify any prior sprint's approved markdown contract: The content of `.harness/contracts/sprint-07.md`, `sprint-08.md`, and `sprint-09.md` must be byte-for-byte identical to their content at HEAD before this sprint's implementation begins. Verify: `git diff HEAD -- .harness/contracts/sprint-07.md`, `git diff HEAD -- .harness/contracts/sprint-08.md`, `git diff HEAD -- .harness/contracts/sprint-09.md`. All three commands must produce empty output (no diff). PASS when all three diffs are empty.",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "git diff HEAD -- .harness/contracts/sprint-07.md",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s10-sn3",
+      "criterion": "Should NOT regress Sprint 6 JIT annotations in harness-kickoff SKILL.md: The six `<!-- Context scope at this step: ... -->` comment blocks added in Sprint 6 must remain intact. Verify: `grep -c '<!-- Context scope at this step:' plugins/trine-eval/skills/harness-kickoff/SKILL.md` assert count >= 6. (Pre-sprint baseline: 6 — Steps 1, 2, 2b, 3, 4, and 5.)",
+      "grader_type": "behavioral",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "grep -c '<!-- Context scope at this step:' plugins/trine-eval/skills/harness-kickoff/SKILL.md",
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s10-sn4",
+      "criterion": "Should NOT create an `examples/` directory at the repo root: Phase 2's ephemeral constraint prohibits committing permanent example fixtures. Verify: `test -d \"examples\"` must return non-zero exit (ABSENT). (Pre-sprint baseline: ABSENT — confirmed.)",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "test -d \"examples\"",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s10-sn5",
+      "criterion": "Should NOT remove or alter the core fields in `.harness/config.json`: The fields `project_type`, `rubric`, `max_retries`, and `governance.enabled` must retain their current values. Verify: `jq '.project_type == \"eval-harness\" and .rubric == \"eval-harness\" and .max_retries == 3 and .governance.enabled == true' .harness/config.json` must output `true`. (Pre-sprint baseline: all four fields confirmed at those values.)",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "jq '.project_type == \"eval-harness\" and .rubric == \"eval-harness\" and .max_retries == 3 and .governance.enabled == true' .harness/config.json",
+      "rubric_dimension": "grading_architecture"
+    }
+  ]
+}

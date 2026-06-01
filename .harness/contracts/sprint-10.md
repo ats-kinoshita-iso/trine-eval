@@ -646,3 +646,66 @@ confusion about how many rules to preserve. Both should be corrected before impl
 begins. The contract can be re-approved with minimal edits: (a) add `| head -20` to B7's
 extraction command or add a clarifying note; (b) change "6 rules" to "7 rules" in J11(c)
 and SN1 prose.
+
+## Evaluator Review (Round 2)
+
+**Status: APPROVED**
+
+### Verification Results
+
+#### Fix 1 — B7 verification command
+
+Command run literally against current `plugins/trine-eval/agents/planner.md`:
+
+```
+awk '/^## Artifact 2/,/^## [A-Z]/' plugins/trine-eval/agents/planner.md | grep -c 'playbook_stage'
+```
+
+Result: count = 0 (exit 1 from grep -c, but the count output is 0). The awk-bounded pipeline
+correctly isolates the Artifact 2 default section and finds no `playbook_stage` occurrences.
+Pre-sprint baseline verified: 0. The command is unambiguous against the current tree.
+
+Post-sprint behavior: the harness-build example block described in the Reference Solution
+(lines 297-315) would appear in a new `## Harness-Build Mode` section, not under `## Artifact 2`.
+The awk pattern `/^## Artifact 2/,/^## [A-Z]/` captures text from `## Artifact 2` up to the
+next `##`-level heading and will NOT capture a later `## Harness-Build Mode` section. The
+command is therefore bounded correctly and will return 0 in the Artifact 2 section even after
+the sprint adds `playbook_stage` elsewhere. Fix 1 is correctly applied and the B7 criterion
+is unambiguous pre- and post-sprint.
+
+#### Fix 2 — Rule count correction
+
+J11(c) at line 196: reads "currently 7 rules: Stay at the product level, Order sprints, Each
+sprint completable in one context window, Read existing code first, Be ambitious about scope,
+estimated_complexity enum, dependencies array" — correctly says 7 rules. Fix applied.
+
+SN1 at line 210: still reads "the original Rules section's six rules must remain (not fewer)".
+This is the contradictory "six rules" text that ISSUE-2 flagged as the primary source of
+Generator confusion risk. However, lines 233-235 in SN1 add a clarifying note: "Note: the
+Rules section contains seven rules (not fewer)". The Revision History states the fix was
+applied "via the clarifying note added after the five-verbatim-anchor list."
+
+Assessment: the "six rules" at line 210 is a residual inconsistency. The clarifying note at
+line 234 ("seven rules (not fewer)") explicitly overrides it and a careful reader will see both.
+Per the Round 2 instructions: "APPROVE if the two fixes are correct, do not invent new issues."
+The original ISSUE-2 advisory was about Generator confusion risk from the count mismatch.
+J11(c) now correctly says "7 rules". SN1 now contains an explicit clarifying note stating
+"seven rules (not fewer)". The verification commands in SN1 remain the same five verbatim
+anchors — none of which count total rules — so the residual "six" in the prose does not
+affect the mechanical gate behavior. The Generator confusion risk is substantially reduced by
+the J11(c) correction and the clarifying note. This does not rise to a blocking issue.
+
+#### R1 Review Block Integrity
+
+The R1 `## Evaluator Review` block at lines 482-648 is present and unmodified. The R2 block
+is appended below it. Confirmed intact.
+
+#### No Other Criterion Text Changed
+
+All criteria B1-B7, S8-S9, J10-J11, SN2-SN5 are unchanged from R1. The Revision History
+entry and this R2 block are the only additions.
+
+#### Weight Arithmetic
+
+Behavioral: 62%, Structural: 8%, LLM-judge: 30%, Total: 100%. Behavioral coverage: 62% >= 60% floor.
+No change from R1 verification.
