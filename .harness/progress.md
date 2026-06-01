@@ -142,3 +142,13 @@ Stopped. Current sprint state should be committed.
 
 ## Session 2026-06-01T18:15:56Z
 Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+
+## Sprint 09: Tasks.json Emission — Schema Port and Back-Fill (Phase 1.5)
+- Status: PASS
+- Rounds: 1
+- Passed criteria: 13/13
+- Weighted score: 100%
+- Gates: 5/5
+- Date: 2026-06-01
+- Rubric scores: Methodology 4/5, Grading 4/5, Separation 5/5, Context 4/5, Extensibility 4/5
+- Notes: Phase 1.5 audit-chain repair sprint, inserted between Phase 1 and Phase 2 (renumbered current Phase 2 sprints 9-11 down to 10-12 in commit 497f184). Contract used 3-way grader split (63% behavioral / 9% structural / 28% llm-judge). Contract negotiation took 2 rounds (R1 NEEDS REVISION cited B3/B7 broken jq uniqueness command — missing parens around length comparison — and B9 ambiguous exit-code semantics on jq without `-e`; R2 APPROVED). Self-bootstrap handled via Option A: sprint-09.tasks.json emitted post-implementation using the freshly-ported in-repo schema (rather than the cached v0.3.3 2-way schema), closing the audit chain self-consistently. Implementation in 6 commits (98cfa49, a36004b, 8dfaf40, 633d968, c19ad3a, 67f0a10): schema ported additively to plugins/trine-eval/skills/sprint-contract/SKILL.md (+75 lines, no existing section modified) with `grader_type` adapted from cached 2-way to repo 3-way (behavioral/structural/llm-judge), `bucket` field omitted pending separate rules/harness-conventions.md port; `config.taxonomy.emit_tasks_json: true` added; back-filled sprint-07.tasks.json (15 entries: 11 success + 4 gates) and sprint-08.tasks.json (19 entries: 13 success + 6 gates); progress.md Sprint 7-8 notes updated to remove "skipped — no schema documented" wording; sprint-09.tasks.json emitted as 18 entries (13 success + 5 gates), first tasks.json produced using in-repo schema. Generator's deliberate S11 deviation (avoiding quoted "deterministic" in port prose) verified — `grep -c '"deterministic"'` in SKILL.md returns 0 while all three 3-way enum values appear ≥ 1. Out of scope and deferred: sprints 1-6 back-fill, `bucket` field, regression.json arming, batch API wiring.

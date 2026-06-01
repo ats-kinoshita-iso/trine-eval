@@ -1,5 +1,5 @@
 {
-  "current_sprint": 9,
+  "current_sprint": 10,
   "sprints": [
     {
       "number": 1,
@@ -101,7 +101,33 @@
         "structural_pct": 12,
         "llm_judge_pct": 22
       }
+    },
+    {
+      "number": 9,
+      "title": "Tasks.json emission: schema port and back-fill (Phase 1.5)",
+      "status": "pass",
+      "rounds": 1,
+      "criteria_passed": 13,
+      "criteria_total": 13,
+      "weighted_score": 100,
+      "phase": "1.5",
+      "rubric_scores": {
+        "methodology_completeness": 4,
+        "grading_architecture": 4,
+        "generator_evaluator_separation": 5,
+        "context_engineering": 4,
+        "extensibility_aci": 4
+      },
+      "should_not_gates": {
+        "passed": 5,
+        "total": 5
+      },
+      "grader_split": {
+        "behavioral_pct": 63,
+        "structural_pct": 9,
+        "llm_judge_pct": 28
+      }
     }
   ],
-  "last_updated": "2026-06-01T12:05:48-04:00"
+  "last_updated": "2026-06-01T14:54:55-04:00"
 }
