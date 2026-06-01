@@ -1,0 +1,167 @@
+{
+  "sprint": 9,
+  "tasks": [
+    {
+      "task_id": "s09-c1",
+      "criterion": "sprint-07.tasks.json parses as valid JSON and contains exactly 15 entries: Run `jq 'empty' .harness/contracts/sprint-07.tasks.json` and assert exit code 0 (valid JSON). Then run `jq '.tasks | length' .harness/contracts/sprint-07.tasks.json` and assert output equals `15`. PASS when both conditions hold (exit 0 for `jq empty`, output `15` for length check).",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "jq 'empty' .harness/contracts/sprint-07.tasks.json && jq '.tasks | length' .harness/contracts/sprint-07.tasks.json",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s09-c2",
+      "criterion": "sprint-07.tasks.json: every entry carries all 7 required fields: Run: `jq '[.tasks[] | select(has(\"task_id\") and has(\"criterion\") and has(\"grader_type\") and has(\"weight\") and has(\"is_gate\") and has(\"verification_command\") and has(\"rubric_dimension\"))] | length' .harness/contracts/sprint-07.tasks.json` and assert the output equals the total entry count (15). PASS when the filtered count equals 15 — no entry is missing any of the 7 required fields.",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "jq '[.tasks[] | select(has(\"task_id\") and has(\"criterion\") and has(\"grader_type\") and has(\"weight\") and has(\"is_gate\") and has(\"verification_command\") and has(\"rubric_dimension\"))] | length' .harness/contracts/sprint-07.tasks.json",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s09-c3",
+      "criterion": "sprint-07.tasks.json: task_id uniqueness, is_gate semantics, and weight sum: Run `jq '([.tasks[].task_id] | length) == ([.tasks[].task_id] | unique | length)' .harness/contracts/sprint-07.tasks.json` and assert output is `true` (all task_ids are unique). Then run `jq '[.tasks[] | select(.is_gate == false) | .weight] | add' .harness/contracts/sprint-07.tasks.json` and assert output equals `100` (non-gate criteria weights sum to 100). Then run `jq '[.tasks[] | select(.is_gate == true) | .weight] | add' .harness/contracts/sprint-07.tasks.json` and assert output equals `0` (gate criteria each have weight 0; sum is 0). PASS when all three assertions hold.",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "jq '([.tasks[].task_id] | length) == ([.tasks[].task_id] | unique | length)' .harness/contracts/sprint-07.tasks.json && jq '[.tasks[] | select(.is_gate == false) | .weight] | add' .harness/contracts/sprint-07.tasks.json && jq '[.tasks[] | select(.is_gate == true) | .weight] | add' .harness/contracts/sprint-07.tasks.json",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s09-c4",
+      "criterion": "sprint-07.tasks.json: grader_type enum is 3-way: Run: `jq '[.tasks[].grader_type] | unique | .[]' .harness/contracts/sprint-07.tasks.json` and assert every printed value is one of `\"behavioral\"`, `\"structural\"`, or `\"llm-judge\"`. No value may be `\"deterministic\"` or any other string. PASS when the unique set is a non-empty subset of `{\"behavioral\", \"structural\", \"llm-judge\"}`.",
+      "grader_type": "behavioral",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": "jq '[.tasks[].grader_type] | unique | .[]' .harness/contracts/sprint-07.tasks.json",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s09-c5",
+      "criterion": "sprint-08.tasks.json parses as valid JSON and contains exactly 19 entries: Run `jq 'empty' .harness/contracts/sprint-08.tasks.json` and assert exit code 0. Then run `jq '.tasks | length' .harness/contracts/sprint-08.tasks.json` and assert output equals `19`. PASS when both conditions hold.",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "jq 'empty' .harness/contracts/sprint-08.tasks.json && jq '.tasks | length' .harness/contracts/sprint-08.tasks.json",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s09-c6",
+      "criterion": "sprint-08.tasks.json: every entry carries all 7 required fields: Run: `jq '[.tasks[] | select(has(\"task_id\") and has(\"criterion\") and has(\"grader_type\") and has(\"weight\") and has(\"is_gate\") and has(\"verification_command\") and has(\"rubric_dimension\"))] | length' .harness/contracts/sprint-08.tasks.json` and assert the output equals 19 (total entry count). PASS when the filtered count equals 19.",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "jq '[.tasks[] | select(has(\"task_id\") and has(\"criterion\") and has(\"grader_type\") and has(\"weight\") and has(\"is_gate\") and has(\"verification_command\") and has(\"rubric_dimension\"))] | length' .harness/contracts/sprint-08.tasks.json",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s09-c7",
+      "criterion": "sprint-08.tasks.json: task_id uniqueness, is_gate semantics, and weight sum: Run `jq '([.tasks[].task_id] | length) == ([.tasks[].task_id] | unique | length)' .harness/contracts/sprint-08.tasks.json` and assert `true`. Run `jq '[.tasks[] | select(.is_gate == false) | .weight] | add' .harness/contracts/sprint-08.tasks.json` and assert `100`. Run `jq '[.tasks[] | select(.is_gate == true) | .weight] | add' .harness/contracts/sprint-08.tasks.json` and assert `0`. PASS when all three assertions hold.",
+      "grader_type": "behavioral",
+      "weight": 7,
+      "is_gate": false,
+      "verification_command": "jq '([.tasks[].task_id] | length) == ([.tasks[].task_id] | unique | length)' .harness/contracts/sprint-08.tasks.json && jq '[.tasks[] | select(.is_gate == false) | .weight] | add' .harness/contracts/sprint-08.tasks.json && jq '[.tasks[] | select(.is_gate == true) | .weight] | add' .harness/contracts/sprint-08.tasks.json",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s09-c8",
+      "criterion": "sprint-08.tasks.json: grader_type enum is 3-way: Run: `jq '[.tasks[].grader_type] | unique | .[]' .harness/contracts/sprint-08.tasks.json` and assert every printed value is one of `\"behavioral\"`, `\"structural\"`, or `\"llm-judge\"`. No value may be `\"deterministic\"`. PASS when the unique set is a non-empty subset of `{\"behavioral\", \"structural\", \"llm-judge\"}`.",
+      "grader_type": "behavioral",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": "jq '[.tasks[].grader_type] | unique | .[]' .harness/contracts/sprint-08.tasks.json",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s09-c9",
+      "criterion": "config.json carries `taxonomy.emit_tasks_json: true`: Run `jq -e '.taxonomy.emit_tasks_json == true' .harness/config.json` and assert exit code 0 and output `true`. The `-e` flag causes jq to exit non-zero when the expression evaluates to `false` or `null`, so exit 0 unambiguously means the field is literally `true` (not `null`). PASS when the command exits 0 and outputs `true`. Pre-sprint baseline: field absent, outputs `false` with exit code 1 — not a no-op.",
+      "grader_type": "behavioral",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "jq -e '.taxonomy.emit_tasks_json == true' .harness/config.json",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s09-c10",
+      "criterion": "sprint-contract/SKILL.md contains the new `## Task Taxonomy` section heading: Run: `grep -c '^## Task Taxonomy' plugins/trine-eval/skills/sprint-contract/SKILL.md` and assert count >= 1. Pre-sprint baseline is 0; the port must add this heading. PASS when count >= 1 (section is present).",
+      "grader_type": "structural",
+      "weight": 5,
+      "is_gate": false,
+      "verification_command": "grep -c '^## Task Taxonomy' plugins/trine-eval/skills/sprint-contract/SKILL.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s09-c11",
+      "criterion": "sprint-contract/SKILL.md contains the 3-way `grader_type` enum: Run: `grep -c '\"behavioral\"' plugins/trine-eval/skills/sprint-contract/SKILL.md` and assert count >= 1 AND run: `grep -c '\"structural\"' plugins/trine-eval/skills/sprint-contract/SKILL.md` assert count >= 1 AND run: `grep -c '\"llm-judge\"' plugins/trine-eval/skills/sprint-contract/SKILL.md` assert count >= 1 AND run: `grep -c '\"deterministic\"' plugins/trine-eval/skills/sprint-contract/SKILL.md` assert count == 0 (the cached 2-way `deterministic` term must NOT appear in the ported section). Pre-sprint baseline: `behavioral`=0, `structural`=0, `llm-judge`=0, `deterministic`=0. PASS when all four conditions hold (three additions present, one absence confirmed).",
+      "grader_type": "structural",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "grep -c '\"behavioral\"' plugins/trine-eval/skills/sprint-contract/SKILL.md && grep -c '\"structural\"' plugins/trine-eval/skills/sprint-contract/SKILL.md && grep -c '\"llm-judge\"' plugins/trine-eval/skills/sprint-contract/SKILL.md",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s09-c12",
+      "criterion": "Schema port quality: the `## Task Taxonomy` section documents all 7 fields, when-to-emit timing, and the self-bootstrap handling: Read `plugins/trine-eval/skills/sprint-contract/SKILL.md`'s new `## Task Taxonomy` section. PASS requires all of the following: (a) The section documents when to emit (after Evaluator writes `Status: APPROVED`, before IMPLEMENTATION mode begins) and references `config.taxonomy.emit_tasks_json` as the guard. (b) Field semantics are documented for all 7 required fields: `task_id`, `criterion`, `grader_type`, `weight`, `is_gate`, `verification_command`, `rubric_dimension`. (c) The `grader_type` enum is unambiguously stated as the 3-way set `\"behavioral\" | \"structural\" | \"llm-judge\"` — the cached term `\"deterministic\"` does not appear in the enum definition. (d) The `bucket` field is omitted, and the omission is documented with a brief rationale (e.g., \"omitted pending port of `rules/harness-conventions.md`\" or equivalent). (e) A JSON example is provided with at least one entry showing the 3-way `grader_type` value (either `\"behavioral\"` or `\"structural\"` — not `\"deterministic\"`). (f) A self-bootstrap note explains that sprint-09's own `tasks.json` is emitted post-implementation (after the schema lands in-repo), not at Step 1d — to avoid using the schema to document itself before it exists in-repo.",
+      "grader_type": "llm-judge",
+      "weight": 15,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s09-c13",
+      "criterion": "Back-fill transcription fidelity: spot-check 4 entries across sprint-07 and sprint-08 tasks.json files: Read `.harness/contracts/sprint-07.tasks.json` and `.harness/contracts/sprint-08.tasks.json` alongside the source markdown contracts. Spot-check at least 2 entries from each file: PASS requires for each spot-checked entry: (a) The `criterion` field verbatim-matches the corresponding criterion text in the markdown (no paraphrasing, no truncation). (b) The `weight` field matches the `[weight: N%]` integer in the markdown (for success criteria) or is `0` for Should-NOT gates. (c) The `is_gate` field is `true` for entries transcribed from the Should-NOT section and `false` for entries from the Success Criteria section. (d) The `verification_command` field is non-null for behavioral/structural entries and is a plausible shell command (not the word `null` as a string); it is `null` (JSON null) for llm-judge entries. (e) The `rubric_dimension` value is one of the 5 valid eval-harness rubric dimensions: `methodology_completeness`, `grading_architecture`, `generator_evaluator_separation`, `context_engineering`, `extensibility_aci`.",
+      "grader_type": "llm-judge",
+      "weight": 13,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s09-sn1",
+      "criterion": "Should NOT remove or rename any of the 7 existing named sections in sprint-contract/SKILL.md: The sections \"Negotiation Protocol\", \"Weighted Criteria\", \"Grader Types\", \"Negative (Should-NOT) Criteria\", \"Reference Solutions\", \"Guidelines for Good Criteria\", and \"No-Op Detection\" must all remain present. Verify by running each of the following and asserting each returns >= 1: `grep -c \"^## Negotiation Protocol\" plugins/trine-eval/skills/sprint-contract/SKILL.md` `grep -c \"^## Weighted Criteria\" plugins/trine-eval/skills/sprint-contract/SKILL.md` `grep -c \"^## Grader Types\" plugins/trine-eval/skills/sprint-contract/SKILL.md` `grep -c \"^## Negative (Should-NOT) Criteria\" plugins/trine-eval/skills/sprint-contract/SKILL.md` `grep -c \"^## Reference Solutions\" plugins/trine-eval/skills/sprint-contract/SKILL.md` `grep -c \"^## Guidelines for Good Criteria\" plugins/trine-eval/skills/sprint-contract/SKILL.md` `grep -c \"^## No-Op Detection\" plugins/trine-eval/skills/sprint-contract/SKILL.md`",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "grep -c '^## Negotiation Protocol' plugins/trine-eval/skills/sprint-contract/SKILL.md && grep -c '^## Weighted Criteria' plugins/trine-eval/skills/sprint-contract/SKILL.md && grep -c '^## Grader Types' plugins/trine-eval/skills/sprint-contract/SKILL.md && grep -c '^## Reference Solutions' plugins/trine-eval/skills/sprint-contract/SKILL.md && grep -c '^## Guidelines for Good Criteria' plugins/trine-eval/skills/sprint-contract/SKILL.md && grep -c '^## No-Op Detection' plugins/trine-eval/skills/sprint-contract/SKILL.md",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s09-sn2",
+      "criterion": "Should NOT modify any prior sprint's approved markdown contract: The content of `.harness/contracts/sprint-07.md` and `.harness/contracts/sprint-08.md` must be byte-for-byte identical to their content at HEAD before this sprint's implementation begins. Verify: `git diff HEAD -- .harness/contracts/sprint-07.md` and `git diff HEAD -- .harness/contracts/sprint-08.md` — both commands must produce empty output (no diff). The back-fill produces NEW sibling `.tasks.json` files; the markdown source contracts are read-only.",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "git diff HEAD -- .harness/contracts/sprint-07.md && git diff HEAD -- .harness/contracts/sprint-08.md",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s09-sn3",
+      "criterion": "Should NOT regress Sprint 6 JIT annotations in harness-kickoff SKILL.md: The six `<!-- Context scope at this step: ... -->` comment blocks added in Sprint 6 must remain intact. Verify: `grep -c '<!-- Context scope at this step:' plugins/trine-eval/skills/harness-kickoff/SKILL.md` assert count >= 6. (Pre-sprint baseline: 6 — Steps 1, 2, 2b, 3, 4, and 5.)",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "grep -c '<!-- Context scope at this step:' plugins/trine-eval/skills/harness-kickoff/SKILL.md",
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s09-sn4",
+      "criterion": "Should NOT create an `examples/` directory at the repo root: Phase 2's ephemeral constraint prohibits committing permanent example fixtures. Verify: `test -d \"examples\"` must return non-zero exit (ABSENT). (Pre-sprint baseline: ABSENT — confirmed.)",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "test -d \"examples\"",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s09-sn5",
+      "criterion": "Should NOT remove or alter the existing fields in `.harness/config.json`: The fields `project_type`, `rubric`, `max_retries`, and `governance.enabled` must retain their current values after the `taxonomy` block is added. Verify: `jq '.project_type == \"eval-harness\" and .rubric == \"eval-harness\" and .max_retries == 3 and .governance.enabled == true' .harness/config.json` must output `true`. PASS when output is `true` and exit code is 0.",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "jq '.project_type == \"eval-harness\" and .rubric == \"eval-harness\" and .max_retries == 3 and .governance.enabled == true' .harness/config.json",
+      "rubric_dimension": "methodology_completeness"
+    }
+  ]
+}
