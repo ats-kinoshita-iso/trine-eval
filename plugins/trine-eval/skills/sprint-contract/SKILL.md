@@ -66,6 +66,81 @@ Reference solutions provide known-working outputs for criteria where grader cali
 
 **Purpose:** Reference solutions calibrate grader accuracy. They give the evaluator a concrete example of what PASS looks like, reducing the chance of false-fail or false-pass judgments.
 
+## Task Taxonomy: sprint-NN.tasks.json
+
+After the contract is approved (Status: APPROVED from the Evaluator review), emit a sibling
+`.harness/contracts/sprint-{NN}.tasks.json` file alongside the markdown contract. This is the
+**machine-readable source of record** for the sprint's criteria — it feeds the regression gate
+(Step 0.5), the Batch API submission grouping (Step 3d), and the harness-summary
+saturation-graduation step that promotes always-passing criteria into a regression suite.
+
+**When to emit:** right after the Evaluator writes `**Status: APPROVED**` and before the
+Generator enters IMPLEMENTATION mode. Guarded by `config.taxonomy.emit_tasks_json`
+(default `true`).
+
+**Schema:** one entry per criterion in the approved contract — both Success Criteria and
+Should-NOT gate criteria.
+
+```json
+{
+  "sprint": 9,
+  "tasks": [
+    {
+      "task_id": "s09-c1",
+      "criterion": "<verbatim criterion text from the contract>",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "jq '.tasks | length' .harness/contracts/sprint-09.tasks.json",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s09-sn1",
+      "criterion": "<Should-NOT criterion text>",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "grep -c '^## Negotiation Protocol' plugins/trine-eval/skills/sprint-contract/SKILL.md",
+      "rubric_dimension": "grading_architecture"
+    }
+  ]
+}
+```
+
+**Field semantics:**
+
+- `task_id` — Stable identifier: `s<NN>-c<N>` for success criteria (numbered from 1),
+  `s<NN>-sn<N>` for Should-NOT gates. Stability matters because regression gates and
+  transcript correlation key off this id across trials.
+- `criterion` — Verbatim criterion text from the markdown contract (no paraphrasing).
+  This is what the Evaluator and downstream tools read.
+- `grader_type` — `"behavioral"`, `"structural"`, or `"llm-judge"`, matching the tag in
+  the markdown contract. The cached v0.3.3 schema used a 2-way `"deterministic" | "llm-judge"`
+  enum; this repo adopted the 3-way split in commit 408e8a2. The term `"deterministic"` is
+  not used.
+- `weight` — The percentage weight from the markdown contract. Gate (Should-NOT) criteria
+  use `0` — they are binary, not weighted.
+- `is_gate` — `true` for Should-NOT gates, `false` for scored success criteria.
+- `verification_command` — For behavioral and structural criteria, a runnable shell command
+  whose exit code or stdout determines PASS/FAIL. For llm-judge criteria, `null`. The
+  regression gate executes these commands directly.
+- `rubric_dimension` — Which rubric dimension this criterion informs. Valid values for this
+  project: `methodology_completeness`, `grading_architecture`, `generator_evaluator_separation`,
+  `context_engineering`, `extensibility_aci`. Used by harness-summary for per-dimension
+  rollups.
+
+**Note on `bucket` field:** The cached v0.3.3 schema includes a `bucket` field (integer 1–3)
+referencing `rules/harness-conventions.md`. That rules file is not present in this repo. The
+`bucket` field is **omitted** from this ported schema pending a separate port of
+`rules/harness-conventions.md`. The harness-summary skill treats missing-`bucket` as `1`
+(the most conservative reading) for all entries that lack the field.
+
+**Self-bootstrap note:** Sprint 09 is the sprint that ports this schema into the in-repo
+SKILL.md. Sprint 09's own `tasks.json` is therefore emitted *after* the schema port lands
+(during or after IMPLEMENTATION mode), not at Step 1d. This avoids using the schema to
+describe itself before it exists in-repo. This is a one-time exception for the porting
+sprint itself; from Sprint 10 onward, `tasks.json` emission resumes at Step 1d as normal.
+
 ## Guidelines for Good Criteria
 
 **Good criterion:** "GET /api/users returns 200 with a JSON array. Each user object contains id (number), name (string), and email (string)."
