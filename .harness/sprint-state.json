@@ -1,5 +1,5 @@
 {
-  "current_sprint": 6,
+  "current_sprint": 7,
   "sprints": [
     {
       "number": 1,
@@ -45,7 +45,16 @@
       "criteria_passed": 12,
       "criteria_total": 12,
       "weighted_score": 100
+    },
+    {
+      "number": 6,
+      "title": "JIT context retrieval patterns",
+      "status": "pass",
+      "rounds": 1,
+      "criteria_passed": 11,
+      "criteria_total": 11,
+      "weighted_score": 100
     }
   ],
-  "last_updated": "2026-04-28T13:31:00-04:00"
+  "last_updated": "2026-06-01T10:12:21-04:00"
 }

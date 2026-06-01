@@ -1,0 +1,27 @@
+{
+  "version": "1.0",
+  "schema_note": "Canonical feature inventory. Level-5 only modifications. Each feature has {id, title, phase, status, sprint, slug, must_should_nice}.",
+  "last_updated": "2026-06-01T04:10:00Z",
+  "features": [
+    {"id": "F01", "title": "Grading hierarchy enforcement", "phase": 1, "status": "implemented", "sprint": 1, "slug": "grading-hierarchy-enforcement", "must_should_nice": "must"},
+    {"id": "F02", "title": "Negative test cases in contracts", "phase": 1, "status": "implemented", "sprint": 1, "slug": "negative-test-cases", "must_should_nice": "must"},
+    {"id": "F03", "title": "Reference solutions in contracts", "phase": 1, "status": "implemented", "sprint": 1, "slug": "reference-solutions", "must_should_nice": "must"},
+    {"id": "F04", "title": "Weighted criteria", "phase": 1, "status": "implemented", "sprint": 1, "slug": "weighted-criteria", "must_should_nice": "must"},
+    {"id": "F05", "title": "Environment isolation guidance", "phase": 1, "status": "implemented", "sprint": 2, "slug": "environment-isolation-guidance", "must_should_nice": "must"},
+    {"id": "F06", "title": "Pass@k metrics", "phase": 1, "status": "implemented", "sprint": 3, "slug": "pass-at-k-metrics", "must_should_nice": "must"},
+    {"id": "F07", "title": "Pass^k metrics", "phase": 1, "status": "implemented", "sprint": 3, "slug": "pass-to-the-k-metrics", "must_should_nice": "must"},
+    {"id": "F08", "title": "Saturation graduation", "phase": 1, "status": "implemented", "sprint": 3, "slug": "saturation-graduation", "must_should_nice": "must"},
+    {"id": "F09", "title": "Plugin manifest accuracy", "phase": 1, "status": "implemented", "sprint": 1, "slug": "plugin-manifest-fix", "must_should_nice": "must"},
+    {"id": "F10", "title": "Structured JSON state", "phase": 1, "status": "implemented", "sprint": 4, "slug": "structured-json-state", "must_should_nice": "should"},
+    {"id": "F11", "title": "Per-dimension isolated judging", "phase": 1, "status": "implemented", "sprint": 2, "slug": "per-dimension-isolated-judging", "must_should_nice": "should"},
+    {"id": "F12", "title": "Compaction guidance", "phase": 1, "status": "implemented", "sprint": 4, "slug": "compaction-guidance", "must_should_nice": "should"},
+    {"id": "F13", "title": "Expanded hooks", "phase": 1, "status": "implemented", "sprint": 4, "slug": "expanded-hooks", "must_should_nice": "should"},
+    {"id": "F14", "title": "Human calibration pathway", "phase": 1, "status": "implemented", "sprint": 5, "slug": "human-calibration-pathway", "must_should_nice": "nice"},
+    {"id": "F15", "title": "ACI self-optimization", "phase": 1, "status": "implemented", "sprint": 5, "slug": "aci-self-optimization", "must_should_nice": "nice"},
+    {"id": "F16", "title": "Bootstrap from failures", "phase": 1, "status": "implemented", "sprint": 5, "slug": "bootstrap-from-failures", "must_should_nice": "nice"},
+    {"id": "F09b", "title": "JIT context retrieval patterns", "phase": 1, "status": "implemented", "sprint": 6, "slug": "jit-context-retrieval-documentation", "must_should_nice": "must"},
+    {"id": "F17", "title": "harness-build rubric", "phase": 2, "status": "planned", "sprint": 7, "slug": "harness-build-rubric", "must_should_nice": "must"},
+    {"id": "F18", "title": "Playbook traps catalog", "phase": 2, "status": "planned", "sprint": 8, "slug": "playbook-traps-template", "must_should_nice": "must"},
+    {"id": "F19", "title": "Harness-build Planner mode", "phase": 2, "status": "planned", "sprint": 9, "slug": "planner-harness-build-mode", "must_should_nice": "must"}
+  ]
+}

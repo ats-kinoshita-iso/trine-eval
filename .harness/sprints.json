@@ -22,7 +22,9 @@
         "evaluator-calibration-enhancement"
       ],
       "estimated_complexity": "medium",
-      "dependencies": [1]
+      "dependencies": [
+        1
+      ]
     },
     {
       "number": 3,
@@ -34,7 +36,10 @@
         "eval-summary-upgrade"
       ],
       "estimated_complexity": "medium",
-      "dependencies": [1, 2]
+      "dependencies": [
+        1,
+        2
+      ]
     },
     {
       "number": 4,
@@ -46,7 +51,9 @@
         "session-resumption-improvements"
       ],
       "estimated_complexity": "medium",
-      "dependencies": [1]
+      "dependencies": [
+        1
+      ]
     },
     {
       "number": 5,
@@ -57,7 +64,12 @@
         "aci-self-optimization"
       ],
       "estimated_complexity": "high",
-      "dependencies": [1, 2, 3, 4]
+      "dependencies": [
+        1,
+        2,
+        3,
+        4
+      ]
     },
     {
       "number": 6,
@@ -69,7 +81,102 @@
         "lazy-loading-guidance"
       ],
       "estimated_complexity": "medium",
-      "dependencies": [1, 4]
+      "dependencies": [
+        1,
+        4
+      ]
+    },
+    {
+      "number": 7,
+      "title": "harness-build rubric (Phase 2)",
+      "phase": 2,
+      "features": [
+        "harness-build-rubric",
+        "rubric-registration",
+        "kickoff-project-type"
+      ],
+      "estimated_complexity": "medium",
+      "dependencies": [],
+      "protects_prior": [
+        "plugins/trine-eval/skills/harness-kickoff/SKILL.md (JIT annotations from S6)",
+        "plugins/trine-eval/skills/eval-rubric/SKILL.md (existing 5 rubric entries)"
+      ],
+      "notes": "Hard thresholds UNCONDITIONAL per Architect A3. Contract MUST include Should-NOT gates protecting Sprint 6 JIT context annotations and the existing 5-rubric Available Rubrics list in eval-rubric/SKILL.md."
+    },
+    {
+      "number": 8,
+      "title": "Bootstrap failure catalog from playbook traps (Phase 2)",
+      "phase": 2,
+      "features": [
+        "playbook-traps-template",
+        "templates-by-rubric-layout",
+        "bootstrap-skill-update"
+      ],
+      "estimated_complexity": "medium",
+      "dependencies": [
+        7
+      ],
+      "protects_prior": [
+        "plugins/trine-eval/skills/bootstrap-failures/SKILL.md (existing catalog convention)"
+      ],
+      "notes": "Template layout: plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json (Architect A4). SKILL.md update must specify how kickoff merges per-rubric templates into project failure-catalog.json."
+    },
+    {
+      "number": 9,
+      "title": "Planner template for agent-harness builds (Phase 2)",
+      "phase": 2,
+      "features": [
+        "planner-harness-build-mode",
+        "stage-aligned-decomposition",
+        "playbook-stage-traceability"
+      ],
+      "estimated_complexity": "medium",
+      "dependencies": [
+        7,
+        8
+      ],
+      "protects_prior": [
+        "plugins/trine-eval/agents/planner.md (project-type-agnostic default behavior)"
+      ],
+      "notes": "playbook_stage field on sprints.json entries is SCOPED to harness-build projects only (A6). Contract MUST include backward-compat Should-NOT gate: running Planner without harness-build mode produces identical output to today (S3a)."
+    },
+    {
+      "number": 10,
+      "title": "End-to-end ephemeral dogfood validation (Phase 2)",
+      "phase": 2,
+      "features": [
+        "ephemeral-kickoff-validation",
+        "calibration-findings"
+      ],
+      "estimated_complexity": "medium",
+      "dependencies": [
+        7,
+        8,
+        9
+      ],
+      "protects_prior": [],
+      "notes": "EPHEMERAL: kickoff against a tmp directory, capture output, discard. No examples/ committed. Findings persist as .harness/dogfood-findings.md only. Single round; if PASS, document; if FAIL, document as calibration signal. Should-NOT: no examples/ directory created in this repo."
+    },
+    {
+      "number": 11,
+      "title": "Positioning and rubric decision guidance (Phase 2)",
+      "phase": 2,
+      "features": [
+        "rubric-decision-guide",
+        "kickoff-rubric-router",
+        "documentation-pass"
+      ],
+      "estimated_complexity": "low",
+      "dependencies": [
+        7,
+        9,
+        10
+      ],
+      "protects_prior": [
+        "CLAUDE.md (existing skill list)",
+        "plugins/trine-eval/.claude-plugin/plugin.json (existing description)"
+      ],
+      "notes": "Adds plugins/trine-eval/skills/eval-rubric/rubrics/README.md with meta-vs-runtime decision guide. eval-harness names the meta layer; harness-build names the runtime layer; the README explains when to pick which."
     }
   ]
 }
