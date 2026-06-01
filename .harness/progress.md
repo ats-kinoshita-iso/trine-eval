@@ -112,3 +112,18 @@ Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
 - Rubric scores: Methodology 4/5, Grading 4/5, Separation 5/5, Context 4/5, Extensibility 4/5
 - Notes: First Phase 2 sprint. Contract used 3-way grader split (22% behavioral / 38% structural / 40% llm-judge); Technical Notes justify <60% behavioral on static-artifact grounds. Contract negotiation took 2 rounds (R1 NEEDS REVISION cited S6 broken grep, SN1 baseline count, B1/B2 labeling advisory; R2 APPROVED). `tasks.json` emission skipped — no schema documented in sprint-contract SKILL; consistent with sprints 01-06 baseline. Implementation in commit 27ed27e. New rubric: `plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md` (7 dimensions, 3 UNCONDITIONAL hard thresholds: loop termination & bounds, sandboxing, governance placement). Registry updated; kickoff routes `harness-build` project_type via new Step 2 routing table.
 
+## Session 2026-06-01T10:46:47-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-01T14:46:47Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+
+## Sprint 08: Bootstrap Failure Catalog from Playbook Traps (Phase 2)
+- Status: PASS
+- Rounds: 1
+- Passed criteria: 13/13
+- Weighted score: 100%
+- Gates: 6/6
+- Date: 2026-06-01
+- Rubric scores: Methodology 4/5, Grading 4/5, Separation 4/5, Context 4/5, Extensibility 4/5
+- Notes: Second Phase 2 sprint. Contract used 3-way grader split (66% behavioral / 12% structural / 22% llm-judge); the 66% behavioral floor was achieved by recognizing `jq`-against-JSON as execution-verified — Evaluator R1 caught the labeling inconsistency that initially under-reported coverage at 52%. Contract negotiation took 2 rounds (R1 NEEDS REVISION cited broken `jq '[.failures[0:3].source_ref]'` secondary command and the 52% behavioral mislabel; R2 APPROVED). `tasks.json` emission skipped — `sprint-contract/SKILL.md` still has no schema documented (consistent with sprints 01-07). Implementation in commits 1cff436 (`feat(sprint-08): add harness-build playbook traps catalog template`) and 7d5b882 (`feat(sprint-08): document templates/by-rubric merge protocol in bootstrap-failures SKILL`). New artifact: `plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json` with 13 playbook-trap-derived entries (Control Plane: 3, Tool Registry & Sandboxing: 3, Governance: 2, Projection & Planning: 2, Skills & Instruction Execution: 1, Observation & Monitoring: 1, External Affordances: 1 — gate dimensions concentrated per Technical Notes target). HB001 carries explicit numeric loop bounds. SKILL.md updated with 47-line `## Templates by Rubric` section documenting the additive-merge-by-id rule (no overwrite of user-authored entries).
