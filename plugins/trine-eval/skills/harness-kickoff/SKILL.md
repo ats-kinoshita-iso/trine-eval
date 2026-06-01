@@ -20,7 +20,7 @@ Check if `.harness/config.json` already exists. If it does, read it and confirm 
 If no config exists, determine the project type by:
 1. Reading only the necessary project manifest files: `CLAUDE.md`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, or similar
 2. Looking at existing source code structure (read only top-level files — defer deep reads)
-3. If the type is ambiguous, ask the user to choose: `web-app`, `rag-system`, `cli-tool`, or `api-service`
+3. If the type is ambiguous, ask the user to choose: `web-app`, `rag-system`, `cli-tool`, `api-service`, or `harness-build` (for agent runtime harnesses evaluated against the playbook stages)
 
 ## Step 2: Create .harness/ Directory
 
@@ -38,11 +38,20 @@ Create the following structure:
 ├── progress.md
 ```
 
-Write `config.json` with detected project type and defaults:
+Write `config.json` with detected project type and defaults.
+
+Use the following project_type → rubric mapping to fill the `"rubric"` field:
+- `web-app` → `"rubric": "web-app"`
+- `rag-system` → `"rubric": "rag-system"`
+- `cli-tool` → `"rubric": "cli-tool"`
+- `api-service` → `"rubric": "api-service"`
+- `eval-harness` → `"rubric": "eval-harness"`
+- `harness-build` → `"rubric": "harness-build"`
+
 ```json
 {
   "project_type": "<detected>",
-  "rubric": "<matching rubric name>",
+  "rubric": "<matching rubric name — see routing table above>",
   "max_retries": 3,
   "pass_threshold": {
     "per_dimension_minimum": 2,
