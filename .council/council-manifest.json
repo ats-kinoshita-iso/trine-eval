@@ -1,0 +1,33 @@
+{
+  "council_id": "COUNCIL-0001",
+  "project_name": "trine-eval",
+  "trigger_type": "kickoff",
+  "status": "assembled",
+  "agents": [
+    {
+      "name": "orchestrator",
+      "role": "coordinator",
+      "level": 4,
+      "agent_file": "agents/orchestrator.md"
+    },
+    {
+      "name": "architect",
+      "role": "coherence-reviewer",
+      "level": 2,
+      "agent_file": "agents/architect.md"
+    },
+    {
+      "name": "scope-guardian",
+      "role": "scope-integrity",
+      "level": 2,
+      "agent_file": "agents/scope-guardian.md"
+    },
+    {
+      "name": "henkaten-detector",
+      "role": "change-point-classifier",
+      "level": 1,
+      "agent_file": "agents/henkaten-detector.md"
+    }
+  ],
+  "created_at": "2026-06-01T04:03:57Z"
+}

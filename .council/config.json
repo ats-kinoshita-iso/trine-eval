@@ -1,0 +1,21 @@
+{
+  "project_name": "trine-eval",
+  "project_type": "claude-plugin",
+  "council_agents": [
+    "orchestrator",
+    "architect",
+    "scope-guardian",
+    "henkaten-detector"
+  ],
+  "autonomy_levels": {
+    "default": 4
+  },
+  "review_frequency": "every-sprint",
+  "henkaten_taxonomy_version": "2.0",
+  "andon_takt_seconds": 600,
+  "dynamic_autonomy_thresholds": {
+    "andon_stop_distinct_originators_required": 2,
+    "andon_stop_consecutive_count": 3,
+    "consecutive_sprint_fails_for_floor_drop": 2
+  }
+}
