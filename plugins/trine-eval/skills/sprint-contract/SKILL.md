@@ -36,12 +36,15 @@ Every success criterion carries a percentage weight reflecting its importance to
 
 ## Grader Types
 
-Each criterion should be tagged with its grader type:
+Each criterion must be tagged with one of three grader types:
 
-- **Deterministic** — Can be verified by running a command, checking a file, parsing output, or comparing strings. Preferred whenever possible because it is fast, cheap, reproducible, and eliminates grader disagreement.
-- **LLM-as-judge** — Requires reading comprehension, subjective assessment, or nuanced evaluation that no simple command can capture. Use when deterministic verification is not feasible.
+- **Behavioral** — Verified by *running* the artifact (invoking a skill, triggering a hook, executing a binary, calling a function) and observing the output, state change, or side effect. The strongest form of evidence: it proves the feature works, not just that the code exists.
+- **Structural** — Verified by inspecting an artifact at rest (grep, jq, schema check, file existence, frontmatter field). Use for cheap pre-flight checks that gate a behavioral criterion, or for genuinely static artifacts (documentation, config schemas with no runtime).
+- **LLM-as-judge** — Requires reading comprehension, subjective assessment, or nuanced evaluation that no command can capture. Use when neither behavioral nor structural verification is feasible.
 
-The evaluator attempts deterministic verification first for every criterion. It falls back to LLM judgment only when the criterion genuinely requires subjective assessment.
+**Behavioral coverage rule:** Behavioral criteria must hold **≥ 60% of total weight** across all success criteria. If a sprint genuinely has no behavioral surface (e.g., it produces only static documentation), state the reason in the contract's `## Technical Notes` so the Evaluator can verify the exception during contract review.
+
+The evaluator attempts code-based verification first for every criterion (behavioral and structural both qualify). It falls back to LLM judgment only when the criterion genuinely requires subjective assessment. Crucially, the evidence standard differs by tag: behavioral criteria require execution evidence (command + observed result); structural criteria accept artifact inspection; reading-the-source to confirm a behavior is documented does NOT satisfy a behavioral criterion.
 
 ## Negative (Should-NOT) Criteria
 
@@ -80,4 +83,4 @@ Each criterion should describe:
 
 ## No-Op Detection
 
-Before finalizing a contract, run each deterministic criterion's verification command against the current codebase. If a criterion already passes (the grep count meets the threshold, the file already exists, etc.), it is a **no-op** — it provides zero signal about whether the sprint's implementation was successful. Revise no-op criteria by raising the threshold, narrowing the search scope, or replacing with a criterion that tests new content specifically.
+Before finalizing a contract, run each behavioral and structural criterion's verification command against the current codebase. If a criterion already passes (the grep count meets the threshold, the file already exists, the artifact already produces the expected output, etc.), it is a **no-op** — it provides zero signal about whether the sprint's implementation was successful. Revise no-op criteria by raising the threshold, narrowing the search scope, choosing a different observable result, or replacing with a criterion that tests new content specifically. No-op structural criteria are especially dangerous because they pass even when nothing was built.

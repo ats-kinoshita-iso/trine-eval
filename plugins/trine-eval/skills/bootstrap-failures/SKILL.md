@@ -40,7 +40,7 @@ For each failure case, create an eval task entry in `.harness/bootstrap/failure-
       "reference_solution": "Optional: known-working output or approach",
       "rubric_dimension": "Which rubric dimension this maps to",
       "severity": "critical | high | medium | low",
-      "grader_type": "deterministic | llm-judge"
+      "grader_type": "behavioral | structural | llm-judge"
     }
   ]
 }
@@ -52,7 +52,7 @@ For each failure case, create an eval task entry in `.harness/bootstrap/failure-
 2. **Define unambiguous success criteria** — use the same standard as sprint contract criteria (action, expected result, verification method)
 3. **Include a reference solution** if the fix is known — this calibrates the grader
 4. **Tag with rubric dimension** — map each failure to the quality dimension it tests (functionality, robustness, etc.)
-5. **Assign grader type** — deterministic if the criterion can be verified by running a command; llm-judge if it requires reading comprehension
+5. **Assign grader type** — `behavioral` if the criterion is verified by invoking the artifact and observing the result (preferred); `structural` if it is verified by inspecting an artifact at rest (grep, jq, schema check); `llm-judge` if it requires reading comprehension or subjective assessment. Default to behavioral whenever the artifact can be executed.
 6. **Prioritize by severity** — critical and high-severity failures should become sprint criteria before medium and low
 
 ## Target Volume

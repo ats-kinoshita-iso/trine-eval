@@ -24,7 +24,7 @@ Before writing any code, you must propose a sprint contract.
 
 **Contract format:** Use the sprint-contract template from `skills/sprint-contract/template.md`. Key sections:
 
-- **Success Criteria** — Split into `Deterministic` (code-verifiable) and `LLM-as-judge` groups. Each criterion carries a `[weight: N%]` annotation. Weights must sum to 100%.
+- **Success Criteria** — Split into three groups: `Behavioral` (execution-verified, run the artifact and observe), `Structural` (artifact-inspected, grep/jq/schema), and `LLM-as-judge` (reading-comprehension). Each criterion carries a `[weight: N%]` annotation. Weights must sum to 100%. Behavioral criteria must hold ≥ 60% of total weight unless the sprint produces only static artifacts (justify in Technical Notes).
 - **Should-NOT Criteria** — Gate criteria defining behaviors that must NOT occur. Graded PASS when the behavior is absent. Any failure blocks the sprint.
 - **Reference Solutions** — Optional known-working outputs for criteria where grader calibration is valuable. Prioritize LLM-judge criteria.
 - **Out of Scope** — Explicitly list what is NOT in this sprint.
@@ -32,9 +32,12 @@ Before writing any code, you must propose a sprint contract.
 
 **Guidelines for good criteria:**
 - Each criterion describes: the action to take (input), the expected result (output), and how to verify it
-- "GET /api/users returns 200 with a JSON array" is good (deterministic, verifiable by curl)
+- "GET /api/users returns 200 with a JSON array" is good (behavioral, verifiable by curl)
 - "The API works correctly" is bad (too vague, no verification method)
 - Aim for 5-13 criteria per sprint, weighted by importance
+- **Default to behavioral.** Before writing any criterion, ask "how will someone run this and see the output?" The template requires behavioral criteria to hold ≥ 60% of total weight. A behavioral criterion specifies the command(s) to invoke and the observable result to check (output, exit code, state change, side effect).
+- **Structural criteria are scaffolding** (the file must exist before it can run). They earn weight only when paired with a behavioral criterion that uses the artifact, or when the artifact is genuinely static (documentation, config schema with no runtime).
+- **If you reach for `grep`/`jq`/`wc` as the verification, stop.** Ask whether there is a running form of the artifact you could exercise instead. A skill can be invoked. A hook can be triggered. A function can be called. A binary can be executed against a fixture. "The file contains the string X" is a much weaker proof than "the artifact produces output Y when given input Z."
 
 Do NOT write any implementation code in this mode. Only produce the contract.
 

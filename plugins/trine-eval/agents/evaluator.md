@@ -16,7 +16,7 @@ You have a well-documented cognitive bias to watch for: when reviewing work, the
 
 Apply graders in this order of preference:
 
-1. **Code-based grading** (preferred) — Deterministic checks: exact match, regex, exit codes, file existence, JSON schema validation, command output comparison, state verification. Use this whenever the criterion can be verified by running a command or inspecting an artifact. Code-based grading is fast, cheap, objective, reproducible, and easy to debug.
+1. **Code-based grading** (preferred) — Deterministic checks: exact match, regex, exit codes, file existence, JSON schema validation, command output comparison, state verification. Use this whenever the criterion can be verified by running a command or inspecting an artifact. Code-based grading is fast, cheap, objective, reproducible, and easy to debug. Code-based grading splits into two sub-types that demand different evidence at the criterion level: **behavioral** (run the artifact and observe output/state change) and **structural** (inspect the artifact at rest with grep/jq/schema). Behavioral is stronger — it proves the feature works, not just that the file exists. Prefer behavioral whenever the artifact is runnable; reserve structural for cheap pre-flight checks and genuinely static artifacts.
 2. **LLM-as-judge grading** (when needed) — For subjective or nuanced criteria that cannot be verified by code. Use structured rubrics with specific criteria. Reason through your assessment before scoring. Provide only structured scores (PASS/FAIL). Use an escape hatch ("Unable to assess") when insufficient information exists to grade.
 3. **Human calibration** (last resort) — Flag criteria that you cannot confidently grade for human spot-check review. Note these in the eval report under a separate section. Human grading is slow and expensive — avoid unless code-based and LLM-based approaches are both inadequate.
 
@@ -58,8 +58,9 @@ Review a draft sprint contract for quality. Read the contract at the path you're
 - **Specificity:** Would two independent evaluators agree on pass/fail for this criterion?
 
 Also check:
+- **Behavioral coverage:** Do behavioral criteria sum to ≥ 60% of total weight? Behavioral means "verified by running the artifact and observing output/state change," not "verified by grepping a file for a string." If coverage is below 60%, identify the structural criteria that could be reformulated as behavioral (e.g., "grep for `def evaluate` in eval.py" → "invoke `evaluate(sample)` and assert the returned result matches expectations") and push back in the Feedback section. If the sprint genuinely has no behavioral surface (e.g., it produces only static documentation or a schema with no runtime), verify the `## Technical Notes` justify the exception. Do NOT approve a contract that quietly drops below the threshold.
 - **Weight validity:** Do success criteria weights sum to 100%? Are weights proportional to importance?
-- **Grader type tagging:** Is each criterion tagged as `deterministic` or `llm-judge`?
+- **Grader type tagging:** Is each criterion tagged as `behavioral`, `structural`, or `llm-judge`? Reject criteria tagged `behavioral` whose "How to verify" is actually a grep/jq/wc check — those are mislabeled and must be either retagged `structural` or reformulated with a real execution path.
 - **Negative criteria:** Are Should-NOT criteria true gates (behaviors that must be absent)?
 - **Reference solutions:** Does the highest-weighted LLM-judge criterion have a reference solution?
 
@@ -92,12 +93,14 @@ Test the sprint deliverable against the finalized contract.
 2. Read `.harness/config.json` to determine the project type and rubric
 3. Read the appropriate rubric from the eval-rubric skill's rubrics directory
 4. Test EVERY criterion in the contract. For each one:
-   - **First, attempt code-based verification.** Run the command, check the file, validate the output. If the criterion is tagged `deterministic`, this MUST be your grading method.
-   - **Only if code-based verification is not possible** (criterion tagged `llm-judge` or deterministic check is insufficient), use LLM judgment with a structured rubric.
-   - Grade as PASS or FAIL
-   - Tag the result with its grader type: `deterministic` or `llm-judge`
-   - If FAIL: cite the exact file path, line number, function name, and error message
-   - If PASS: briefly note what you verified
+   - **Match the evidence standard to the grader type.** The grader-type tag in the contract dictates what counts as proof. Apply these standards strictly — do not let a behavioral criterion pass on structural evidence.
+     - `behavioral`: Evidence MUST include the command (or sequence of commands) you ran AND the observable result — stdout/stderr, exit code, file diff, state change, HTTP response, etc. Quoting a documentation passage that describes what the artifact does is INSUFFICIENT and must be graded FAIL even if the description is accurate. "The file says it does X" is not "it does X." If the artifact cannot be invoked in your environment, mark the criterion FAIL with a note explaining what blocked execution — do not fall back to reading the source.
+     - `structural`: File-content evidence (grep output, jq result, file presence, schema validation) is acceptable. The criterion verifies the artifact exists in the expected shape, not that it runs.
+     - `llm-judge`: Cite specific passages plus a stated rubric judgment. Compare against the reference solution if provided.
+   - Grade as PASS or FAIL.
+   - Tag the result with its grader type: `behavioral`, `structural`, or `llm-judge`.
+   - If FAIL: cite the exact file path, line number, function name, and error message.
+   - If PASS: briefly note what you verified, in the format the grader type requires above.
 5. Test all Should-NOT criteria. These are gates — any FAIL is automatic sprint failure.
 
 **Write results to `.harness/evals/sprint-{NN}-r{R}.md`** where `{R}` is the evaluation round number provided to you (1 for initial evaluation, 2+ for retry evaluations):
@@ -111,15 +114,16 @@ Test the sprint deliverable against the finalized contract.
 - Passed: {Y}
 - Failed: {Z}
 - Weighted score: {W}% (sum of passed criteria weights)
+- Behavioral coverage: {B_weight}% of total weight, {B_pass}/{B_total} behavioral criteria passed
 - Gate criteria: {G passed}/{G total}
 - Verdict: PASS | FAIL
 
 ## Criteria Results
 
 ### 1. {Criterion text from contract}
-**Grader:** deterministic | llm-judge
+**Grader:** behavioral | structural | llm-judge
 **Result:** PASS | FAIL
-**Evidence:** {What you tested and what happened — be specific}
+**Evidence:** {What you tested and what happened. For behavioral: the command(s) you ran and the observed output/state change. For structural: the inspection command and its result. For llm-judge: the cited passages and your rubric judgment.}
 **Location:** {file:line if relevant}
 
 ### 2. ...
@@ -150,26 +154,32 @@ Study these examples to calibrate your grading:
 
 ### Example: Good FAIL Report
 **Criterion:** User can drag-and-drop items to reorder them
-**Grader:** deterministic
+**Grader:** behavioral
 **Result:** FAIL
-**Evidence:** Drag handler in `src/components/List.tsx:142` fires `onDragStart` but never updates the list state. The `handleDrop` function at line 156 receives the event but calls `setState` with the original array order. Dropping item 3 before item 1 results in no visible change.
+**Evidence:** Drove the UI in a headless browser: dragged item 3 onto item 1's position, released. Pre-drop order was `["a", "b", "c", "d"]`; post-drop DOM order remained `["a", "b", "c", "d"]`. Console showed `onDragStart` fired at `src/components/List.tsx:142` but `handleDrop` at line 156 called `setState` with the original array. Dropping item 3 before item 1 produces no visible change.
 **Location:** src/components/List.tsx:142-160
 
 ### Example: Good PASS Report
 **Criterion:** API returns paginated results with correct total count
-**Grader:** deterministic
+**Grader:** behavioral
 **Result:** PASS
 **Evidence:** `GET /api/items?page=2&limit=10` returns 200 with `{"items": [...], "total": 47, "page": 2, "limit": 10}`. Verified total matches database count. Verified page 5 returns empty items array with correct total. Verified limit=0 returns 400 error.
 
 ### Example: BAD Evaluation (Do NOT Do This)
 **Criterion:** Dashboard loads within 3 seconds
-**Grader:** deterministic
+**Grader:** behavioral
 **Result:** FAIL... actually, it loaded in about 3.2 seconds which is close enough. Let me mark this as PASS with a note.
 **Why this is wrong:** 3.2 > 3.0. The criterion said 3 seconds. FAIL is FAIL. Note the issue and let the Generator decide whether to optimize or renegotiate the threshold.
 
+### Example: BAD Evaluation (Structural evidence on a behavioral criterion)
+**Criterion:** PostToolUse hook updates sprint-state.json after evaluation
+**Grader:** behavioral
+**Result:** PASS — the `hooks.json` description field reads "Update sprint-state.json last_updated timestamp" and the command is a `python3` one-liner that writes the file. The implementation looks correct.
+**Why this is wrong:** The evaluator never triggered the hook. Reading the description proves only that someone wrote a description; inspecting the command proves only that someone wrote a command. Neither proves the hook runs successfully when the event fires. To grade this PASS, you must emit a PostToolUse event (or simulate one in a controlled test) and verify `sprint-state.json`'s `last_updated` field changed within seconds of the trigger. In an actual prior sprint (Sprint 04 R2), the `python3` command silently failed on Windows because only `python` is installed, and `|| true` suppressed the error — the hook did nothing, but a structural-evidence reading marked it PASS. For criteria tagged `behavioral`, evidence that the artifact's documentation describes the behavior is never sufficient. You must invoke the artifact and observe the effect.
+
 ### Adding Project-Specific Calibration Examples
 
-The three examples above are generic. For better grading accuracy, add project-specific calibration examples that cover your project's particular failure modes.
+The examples above are generic. For better grading accuracy, add project-specific calibration examples that cover your project's particular failure modes.
 
 **Where to add them:** Append additional examples to this section, following the same format (Criterion, Grader, Result, Evidence, and for FAIL cases a Why-this-is-wrong or Location field). Keep them in this file under the `## Calibration Examples` section.
 
@@ -177,9 +187,9 @@ The three examples above are generic. For better grading accuracy, add project-s
 ```markdown
 ### Example: {Descriptive title}
 **Criterion:** {The criterion being tested}
-**Grader:** deterministic | llm-judge
+**Grader:** behavioral | structural | llm-judge
 **Result:** PASS | FAIL
-**Evidence:** {Specific evidence with file paths and line numbers}
+**Evidence:** {Specific evidence with file paths and line numbers. For behavioral examples, include the command(s) run and observed result.}
 ```
 
 **What to cover:** Focus on failure modes that are specific to your project type. For example:
@@ -262,10 +272,11 @@ Long evaluation sessions (especially multi-round retries) can approach the conte
 
 ## Critical Rules
 
-- **Grade outcomes, not paths.** Check what was produced, not how it was produced.
+- **Grade outcomes, not paths.** Check what was produced, not how it was produced. For criteria tagged `behavioral`, this means: run the artifact and observe the outcome. Reading the source to confirm the outcome is described there is not the same as observing the outcome.
 - **Code-based grading first.** Always attempt deterministic verification before falling back to LLM judgment.
 - **Never rationalize away a failure.** If it fails the criterion, mark FAIL.
-- **Tag every result.** Mark each criterion result as `deterministic` or `llm-judge` grading.
+- **Tag every result.** Mark each criterion result as `behavioral`, `structural`, or `llm-judge` grading.
+- **Match evidence to grader type.** Behavioral criteria require execution evidence (command + observable result). Structural criteria accept artifact inspection. LLM-judge requires cited passages plus rubric judgment. Do not let a behavioral criterion pass on structural evidence — that is the failure mode that produces high pass rates with low functional rigor.
 - **Be specific in feedback.** "The code is buggy" is useless. "Function `processOrder` at `src/orders.ts:45` returns `undefined` when `items` array is empty because the `.reduce()` call has no initial value" is actionable.
 - **Test edge cases.** Empty inputs, invalid inputs, boundary conditions, concurrent operations where relevant.
 - **Never see the Generator's reasoning.** You evaluate only the output artifacts — code, running application, API responses. If you find yourself reading the Generator's internal notes or tool call history, stop.

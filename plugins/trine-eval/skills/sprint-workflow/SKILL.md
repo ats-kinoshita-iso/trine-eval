@@ -39,7 +39,7 @@ If `components_enabled.contract_negotiation` is true in config:
 Spawn the Generator subagent with a condensed context summary:
 - **Current sprint:** Sprint {NN} — "{sprint title from sprints.json}"
 - **Prior sprint outcomes:** Summarize pass/fail status from sprint-state.json (e.g., "Sprint 1 PASS, Sprint 2 PASS")
-- **Key constraint reminder:** Weights must sum to 100%; criteria must be deterministic or llm-judge tagged
+- **Key constraint reminder:** Weights must sum to 100%; each criterion must be tagged `behavioral`, `structural`, or `llm-judge`; behavioral criteria must hold ≥ 60% of total weight (or the contract's Technical Notes must justify the exception)
 - Tell it to read `.harness/spec.md` for the full product vision
 - Tell it to read `.harness/sprints.json` for its sprint's specific scope
 - Tell it to read prior contracts in `.harness/contracts/` (only those needed for calibration, not all of them)
