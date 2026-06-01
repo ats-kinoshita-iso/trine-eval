@@ -115,9 +115,9 @@ Should-NOT gate criteria.
 - `criterion` — Verbatim criterion text from the markdown contract (no paraphrasing).
   This is what the Evaluator and downstream tools read.
 - `grader_type` — `"behavioral"`, `"structural"`, or `"llm-judge"`, matching the tag in
-  the markdown contract. The cached v0.3.3 schema used a 2-way `"deterministic" | "llm-judge"`
-  enum; this repo adopted the 3-way split in commit 408e8a2. The term `"deterministic"` is
-  not used.
+  the markdown contract. The cached v0.3.3 schema used a 2-way deterministic/llm-judge
+  enum; this repo adopted the 3-way split in commit 408e8a2. The legacy deterministic
+  term is not used — use `"behavioral"` or `"structural"` instead.
 - `weight` — The percentage weight from the markdown contract. Gate (Should-NOT) criteria
   use `0` — they are binary, not weighted.
 - `is_gate` — `true` for Should-NOT gates, `false` for scored success criteria.
