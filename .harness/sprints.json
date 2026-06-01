@@ -123,6 +123,34 @@
     },
     {
       "number": 9,
+      "title": "Tasks.json emission: schema port and back-fill (Phase 1.5)",
+      "phase": "1.5",
+      "features": [
+        "tasks-json-schema-port",
+        "tasks-json-grader-type-3way-adaptation",
+        "config-taxonomy-knob",
+        "tasks-json-backfill-recent"
+      ],
+      "estimated_complexity": "low",
+      "dependencies": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "protects_prior": [
+        "plugins/trine-eval/skills/sprint-contract/SKILL.md (87-line Phase 1 baseline — port is additive)",
+        ".harness/contracts/sprint-*.md (all approved markdown contracts — no modification)",
+        ".harness/config.json (existing fields untouched; only taxonomy block added)"
+      ],
+      "notes": "Closes audit-chain gap. Sprints 5-8 ran without tasks.json emission because the schema lived only in cached/published v0.3.3, not in the in-repo source. This sprint ports the schema (adapting grader_type from 2-way to 3-way to match the repo's methodology in commit 408e8a2) and back-fills sprints 7-8. Sprints 1-6 back-fill is explicitly OUT of scope (deferred follow-up). The `bucket` field is omitted from the ported schema pending a separate port of rules/harness-conventions.md. Inserted between Phase 1 and Phase 2 sprints because audit-chain integrity is methodology-foundational."
+    },
+    {
+      "number": 10,
       "title": "Planner template for agent-harness builds (Phase 2)",
       "phase": 2,
       "features": [
@@ -138,10 +166,10 @@
       "protects_prior": [
         "plugins/trine-eval/agents/planner.md (project-type-agnostic default behavior)"
       ],
-      "notes": "playbook_stage field on sprints.json entries is SCOPED to harness-build projects only (A6). Contract MUST include backward-compat Should-NOT gate: running Planner without harness-build mode produces identical output to today (S3a)."
+      "notes": "playbook_stage field on sprints.json entries is SCOPED to harness-build projects only (A6). Contract MUST include backward-compat Should-NOT gate: running Planner without harness-build mode produces identical output to today (S3a). Renumbered from Sprint 9 when Sprint 9 (tasks.json port) was inserted."
     },
     {
-      "number": 10,
+      "number": 11,
       "title": "End-to-end ephemeral dogfood validation (Phase 2)",
       "phase": 2,
       "features": [
@@ -152,13 +180,13 @@
       "dependencies": [
         7,
         8,
-        9
+        10
       ],
       "protects_prior": [],
-      "notes": "EPHEMERAL: kickoff against a tmp directory, capture output, discard. No examples/ committed. Findings persist as .harness/dogfood-findings.md only. Single round; if PASS, document; if FAIL, document as calibration signal. Should-NOT: no examples/ directory created in this repo."
+      "notes": "EPHEMERAL: kickoff against a tmp directory, capture output, discard. No examples/ committed. Findings persist as .harness/dogfood-findings.md only. Single round; if PASS, document; if FAIL, document as calibration signal. Should-NOT: no examples/ directory created in this repo. Renumbered from Sprint 10 when Sprint 9 (tasks.json port) was inserted; dependency on prior Planner sprint updated from 9 to 10."
     },
     {
-      "number": 11,
+      "number": 12,
       "title": "Positioning and rubric decision guidance (Phase 2)",
       "phase": 2,
       "features": [
@@ -169,14 +197,14 @@
       "estimated_complexity": "low",
       "dependencies": [
         7,
-        9,
-        10
+        10,
+        11
       ],
       "protects_prior": [
         "CLAUDE.md (existing skill list)",
         "plugins/trine-eval/.claude-plugin/plugin.json (existing description)"
       ],
-      "notes": "Adds plugins/trine-eval/skills/eval-rubric/rubrics/README.md with meta-vs-runtime decision guide. eval-harness names the meta layer; harness-build names the runtime layer; the README explains when to pick which."
+      "notes": "Adds plugins/trine-eval/skills/eval-rubric/rubrics/README.md with meta-vs-runtime decision guide. eval-harness names the meta layer; harness-build names the runtime layer; the README explains when to pick which. Renumbered from Sprint 11 when Sprint 9 (tasks.json port) was inserted; Planner dependency 9→10, dogfood dependency 10→11."
     }
   ]
 }

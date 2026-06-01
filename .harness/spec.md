@@ -10,15 +10,29 @@ to fully implement Anthropic's published eval-driven development methodology
 (January–March 2026 guidance), closing 15 identified gaps against the playbook.
 (Sprints 1–6, complete.)
 
+**Phase 1.5 — Methodology Audit-Chain Repair.** Close a documented gap where
+the `tasks.json` emission step described in `harness-sprint/SKILL.md` (Step 1d)
+never produced output because its schema lived only in the published v0.3.3
+plugin cache, not in the in-repo source `plugins/trine-eval/skills/sprint-contract/SKILL.md`.
+Ports the schema from cache, adapts `grader_type` from the cached 2-way enum
+to the repo's 3-way split (`behavioral` | `structural` | `llm-judge`, per
+commit 408e8a2), back-fills `sprint-07.tasks.json` and `sprint-08.tasks.json`
+from the existing approved markdown contracts. (Sprint 9, planned. Inserted
+between Phase 1 and Phase 2 because audit-chain integrity is
+methodology-foundational; sprints 1-6 back-fill is deferred follow-up.)
+
 **Phase 2 — Agent-Harness Domain Support.** Extend trine-eval to drive
 development of *agent runtime harnesses* (per "A Playbook for Building Agent
 Harnesses"). Adds a new rubric, a Planner template tuned to the playbook's
 dependency order, and a seed catalog of failure cases derived from the
-playbook's documented traps. (Sprints 7–11, planned.)
+playbook's documented traps. (Sprints 7-8 complete; sprints 10-12 planned —
+renumbered from 9-11 when Sprint 9 [Phase 1.5] was inserted.)
 
-The two phases share the harness's foundation (agents, skills, workflow) but
+The three phases share the harness's foundation (agents, skills, workflow) but
 extend it along orthogonal axes: Phase 1 strengthens the eval methodology;
-Phase 2 broadens the project-type coverage.
+Phase 1.5 repairs the audit chain that connects contract → tasks.json →
+regression gate → saturation graduation; Phase 2 broadens the project-type
+coverage.
 
 ---
 
@@ -60,6 +74,80 @@ Phase 2 broadens the project-type coverage.
 5. eval-summary computes pass@k, pass^k, and saturation metrics
 6. Plugin manifest and all cross-references are accurate
 7. The eval-harness rubric scores Context Engineering at 5/5 — all five rubric requirements present: structured JSON state, prose/data format distinction, compaction guidance, sub-agent isolation with condensed summaries, and JIT context retrieval patterns documented
+
+---
+
+## Phase 1.5: Methodology Audit-Chain Repair
+
+### Phase 1.5 Vision
+
+The harness-sprint workflow defines a Step 1d `tasks.json` emission: after a
+contract is APPROVED, the Generator transcribes the markdown contract into
+`.harness/contracts/sprint-NN.tasks.json`. This JSON file is the
+machine-readable source of record for three downstream consumers — the Step
+0.5 regression gate, the Step 3d Batch API submission grouping, and the
+harness-summary saturation-graduation step that promotes always-passing
+criteria into a regression suite.
+
+Sprints 5-8 of this self-upgrade project ran without `tasks.json` emission
+because the schema the workflow references (`sprint-contract/SKILL.md` lines
+90-132) is missing from the in-repo source — the schema lives only in the
+published `v0.3.3` plugin cache. Phase 1.5 closes the divergence.
+
+### Phase 1.5 Feature List
+
+#### Phase 1.5 Must-have
+
+A. **Tasks.json schema port** — Bring the `## Task Taxonomy: sprint-NN.tasks.json`
+   section from cached `v0.3.3` `sprint-contract/SKILL.md` into the in-repo
+   source. Additive port; the existing 87-line baseline is preserved.
+
+B. **Grader-type 3-way adaptation** — The cached schema uses `grader_type:
+   "deterministic" | "llm-judge"` (2-way). The repo adopted the 3-way split
+   in commit `408e8a2`. The ported schema's `grader_type` enum is rewritten
+   to `"behavioral" | "structural" | "llm-judge"` to match the methodology.
+
+C. **Config taxonomy knob** — Add `config.taxonomy.emit_tasks_json: true`
+   to `.harness/config.json`. Makes the gate the workflow expects explicit
+   (today it implicitly defaults to true because the field is absent).
+
+D. **Back-fill recent sprints** — Produce `.harness/contracts/sprint-07.tasks.json`
+   (15 entries: 11 success + 4 Should-NOT) and `.harness/contracts/sprint-08.tasks.json`
+   (19 entries: 13 success + 6 Should-NOT) by mechanical transcription from
+   the approved markdown contracts. Sprints 1-6 back-fill is OUT of scope
+   (deferred follow-up).
+
+### Phase 1.5 Success Criteria
+
+11. The in-repo `sprint-contract/SKILL.md` has a `## Task Taxonomy` section
+    documenting the JSON shape, when to emit, and field semantics for all
+    seven required fields (`task_id`, `criterion`, `grader_type`, `weight`,
+    `is_gate`, `verification_command`, `rubric_dimension`).
+12. The ported schema's `grader_type` enum is the 3-way set
+    `{behavioral, structural, llm-judge}`, not the cached 2-way set.
+13. `.harness/contracts/sprint-07.tasks.json` and `sprint-08.tasks.json`
+    parse as valid JSON, contain the expected entry count (15 and 19), and
+    each entry carries all required fields with `task_id` unique within its
+    file.
+14. `.harness/config.json` carries `taxonomy.emit_tasks_json: true`.
+15. No prior sprint's markdown contract is modified by the back-fill.
+
+### Phase 1.5 Explicit Non-Goals
+
+- The `bucket` field (which the cached schema references via `rules/harness-conventions.md`)
+  is OMITTED from the ported schema. A separate sprint can port the rules
+  file and reintroduce `bucket` when needed.
+- Back-fill for sprints 1-6 is NOT in scope. Those contracts predate the
+  3-way grader split; back-filling them requires per-criterion classification
+  decisions that Phase 1.5 deliberately defers.
+- Arming the Step 0.5 regression gate (creating `.harness/regression/regression.json`)
+  is NOT in scope. The gate activates when harness-summary first graduates a
+  criterion via saturation analysis — separate trigger.
+- Wiring `tasks.json` into Batch API submission is NOT in scope. Batch mode
+  is not yet activated.
+- Porting the cached Authoring Checklist, Subagent-Driven Behavioral
+  Verification, or the trap-category enumeration is NOT in scope (separate
+  methodology sprint).
 
 ---
 
@@ -120,4 +208,4 @@ Applies to both phases:
 - Skills must stay under 500 lines per SKILL.md
 - No external dependencies — the harness runs purely through Claude Code's built-in tools
 
-**Phase 2 additional constraint:** No permanent example fixtures committed to the repo. Phase 2 Sprint 10 validates the harness-build rubric against an ephemeral tmp-directory harness; findings persist as a single markdown report (`.harness/dogfood-findings.md`), not as committed source code.
+**Phase 2 additional constraint:** No permanent example fixtures committed to the repo. Phase 2 Sprint 11 (renumbered from Sprint 10 after the Phase 1.5 insertion) validates the harness-build rubric against an ephemeral tmp-directory harness; findings persist as a single markdown report (`.harness/dogfood-findings.md`), not as committed source code.
