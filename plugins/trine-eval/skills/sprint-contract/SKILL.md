@@ -159,3 +159,42 @@ Each criterion should describe:
 ## No-Op Detection
 
 Before finalizing a contract, run each behavioral and structural criterion's verification command against the current codebase. If a criterion already passes (the grep count meets the threshold, the file already exists, the artifact already produces the expected output, etc.), it is a **no-op** — it provides zero signal about whether the sprint's implementation was successful. Revise no-op criteria by raising the threshold, narrowing the search scope, choosing a different observable result, or replacing with a criterion that tests new content specifically. No-op structural criteria are especially dangerous because they pass even when nothing was built.
+
+## SN2 Carve-Out: Renumbering-Only Edits to Approved Contracts
+
+**Scope.** This amendment (introduced in Sprint 13 under the SN2 carve-out) permits
+renumbering-only edits to approved markdown contracts when a plan amendment has inserted a
+new sprint that shifted all subsequent sprint numbers. These edits are the narrowest possible
+post-approval change and carry a mandatory audit trail.
+
+**Permitted edits under the carve-out:**
+
+- Renumbering Sprint N references in approved markdown contracts (e.g., "Sprint 9" →
+  "Sprint 10") where the original number was correct at contract-approval time but became
+  stale because a plan amendment inserted a new sprint at a lower number.
+- Adding a `## Revision History` block to the amended contract file, citing the
+  plan-amendment commit and the date of renumbering.
+
+**Forbidden edits — not permitted even under the carve-out:**
+
+- Any change to criterion text, weights, grader type tags, Should-NOT gate text, or
+  reference solutions.
+- Adding, removing, or reordering criteria.
+- Changing prose outside of sprint-number literals in scope (i.e., "Sprint N" renumberings).
+- Applying the carve-out without a `## Revision History` block in the amended file. The
+  Revision History block is the carve-out's required metadata — omitting it voids the
+  carve-out protection and makes the edit indistinguishable from an unauthorized change.
+
+**How to apply the carve-out.** When a plan-amendment commit authorizes renumbering:
+
+1. Identify every occurrence of the stale sprint number in the approved contract file —
+   not just the Out of Scope section but the full document (criterion text, Technical Notes,
+   Evaluator Review sections, everywhere).
+2. Replace each stale "Sprint N" literal with the corrected number.
+3. Add or update the `## Revision History` block at the top of the contract file, citing:
+   - The plan-amendment commit hash (or "Sprint NN plan amendment" if the commit is not yet
+     final at renumbering time)
+   - The date of renumbering
+   - A one-line description of the change (e.g., "Renumber Sprint 9→10, 10→11, 11→12 per
+     DEC-0010 plan amendment")
+4. No other changes to the file are permitted.
