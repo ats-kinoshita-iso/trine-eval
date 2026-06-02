@@ -1,0 +1,167 @@
+{
+  "sprint": 12,
+  "tasks": [
+    {
+      "task_id": "s12-c1",
+      "criterion": "README is loadable by eval-rubric skill and routes eval-harness-vs-harness-build correctly [weight: 14%]: Simulate the rubric-router path in the updated `harness-kickoff/SKILL.md`: (a) Read the updated `harness-kickoff/SKILL.md`. (b) Locate the Step 1 ambiguity branch for the case where the user's project could be either `eval-harness` or `harness-build`. (c) Confirm the branch text refers the user to `plugins/trine-eval/skills/eval-rubric/rubrics/README.md` (or a relative path equivalent). (d) Read `plugins/trine-eval/skills/eval-rubric/rubrics/README.md`. (e) Confirm the README contains a section that explains the meta-vs-runtime distinction. PASSes when the evaluator can locate the ambiguity branch, the README reference is present, and the README's meta-vs-runtime explanation allows an informed choice.",
+      "grader_type": "behavioral",
+      "weight": 14,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s12-c2",
+      "criterion": "README file exists at correct path [weight: 8%]: Run `test -f \"plugins/trine-eval/skills/eval-rubric/rubrics/README.md\"` and assert exit 0. Pre-sprint baseline: ABSENT. Post-sprint: PRESENT.",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "test -f \"plugins/trine-eval/skills/eval-rubric/rubrics/README.md\"",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s12-c3",
+      "criterion": "README contains the meta-vs-runtime distinction heading [weight: 8%]: Run `grep -ci 'meta.*layer\\|runtime.*layer\\|meta.*vs.*runtime\\|eval-harness.*meta\\|meta.*eval-harness\\|harness-build.*runtime\\|runtime.*harness-build' plugins/trine-eval/skills/eval-rubric/rubrics/README.md` and assert count >= 1. Pre-sprint baseline: 0. Post-sprint: >= 1.",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -ci 'meta.*layer\\|runtime.*layer\\|meta.*vs.*runtime\\|eval-harness.*meta\\|meta.*eval-harness\\|harness-build.*runtime\\|runtime.*harness-build' plugins/trine-eval/skills/eval-rubric/rubrics/README.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s12-c4",
+      "criterion": "README indexes all six rubric files [weight: 8%]: Run the following 6 greps and assert each returns count >= 1: `grep -c 'web-app' README.md`, `grep -c 'rag-system' README.md`, `grep -c 'cli-tool' README.md`, `grep -c 'api-service' README.md`, `grep -c 'eval-harness' README.md`, `grep -c 'harness-build' README.md`. Pre-sprint baseline: all 0 (file absent). Post-sprint: all 6 >= 1.",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -c 'eval-harness' plugins/trine-eval/skills/eval-rubric/rubrics/README.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s12-c5",
+      "criterion": "harness-kickoff SKILL.md contains a reference to rubrics/README.md [weight: 8%]: Run `grep -c 'rubrics/README' plugins/trine-eval/skills/harness-kickoff/SKILL.md` and assert count >= 1. Pre-sprint baseline: 0. Post-sprint: >= 1.",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -c 'rubrics/README' plugins/trine-eval/skills/harness-kickoff/SKILL.md",
+      "rubric_dimension": "extensibility_aci"
+    },
+    {
+      "task_id": "s12-c6",
+      "criterion": "plugin.json description mentions both eval-harness and harness-build positioning [weight: 8%]: Run `grep -c 'eval-harness' plugins/trine-eval/.claude-plugin/plugin.json` assert >= 1 AND `grep -c 'harness-build' plugins/trine-eval/.claude-plugin/plugin.json` assert >= 1. Pre-sprint baseline: 0 for both. Post-sprint: both >= 1.",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -c 'eval-harness' plugins/trine-eval/.claude-plugin/plugin.json",
+      "rubric_dimension": "extensibility_aci"
+    },
+    {
+      "task_id": "s12-c7",
+      "criterion": "README contains a \"when to pick\" section for each of eval-harness and harness-build [weight: 6%]: Run `grep -ci 'when to.*pick\\|pick.*when\\|when to use\\|use.*when\\|choose.*when\\|when.*choose' plugins/trine-eval/skills/eval-rubric/rubrics/README.md` and assert count >= 2. Pre-sprint baseline: file absent. Post-sprint: >= 2.",
+      "grader_type": "structural",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": "grep -ci 'when to.*pick\\|pick.*when\\|when to use\\|use.*when\\|choose.*when\\|when.*choose' plugins/trine-eval/skills/eval-rubric/rubrics/README.md",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s12-c8",
+      "criterion": "eval-rubric SKILL.md Available Rubrics list still has exactly 6 entries [weight: 4%]: Run `grep -c \"^- \\`\" plugins/trine-eval/skills/eval-rubric/SKILL.md` and assert count == 6. Pre-sprint baseline: 6 (confirmed). Post-sprint: still 6.",
+      "grader_type": "structural",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "grep -c \"^- \\`\" plugins/trine-eval/skills/eval-rubric/SKILL.md",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s12-c9",
+      "criterion": "README quality: meta-vs-runtime decision guide is clear, complete, and actionable [weight: 22%]: Read the full README.md. PASS requires: (a) Meta-vs-runtime distinction explicit (eval-harness = meta layer grading eval methodology; harness-build = runtime layer grading agent runtime harness per playbook). (b) Each of six rubrics has a 'when to pick this' description. (c) Index of rubric files by name with filename. (d) Disambiguation depth: a user with overlap-zone project (agent harness with eval loop) can decide which rubric applies. (e) No ambiguous/wrong guidance.",
+      "grader_type": "llm-judge",
+      "weight": 22,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s12-c10",
+      "criterion": "kickoff router clarification: eval-harness-vs-harness-build decision branch is legible [weight: 8%]: Read updated `harness-kickoff/SKILL.md`. PASS requires: (a) Step 1's ambiguity text extended (or nearby note) explaining eval-harness-vs-harness-build choice in overlap zone with pointer to rubrics/README.md. (b) Existing 6-entry routing table preserved verbatim. (c) JIT context scope comments remain (>= 6). (d) `eval-harness` type mentioned alongside `harness-build` in Step 1 ambiguity note.",
+      "grader_type": "llm-judge",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "extensibility_aci"
+    },
+    {
+      "task_id": "s12-c11",
+      "criterion": "documentation-pass quality: plugin.json and CLAUDE.md are consistent with the new positioning [weight: 6%]: Read plugin.json and CLAUDE.md. PASS requires: (a) plugin.json description accurately describes both eval-harness (meta) and harness-build (runtime) positioning, under ~200 chars, consistent with README framing. (b) CLAUDE.md three skill bullets (`/harness-kickoff`, `/harness-sprint`, `/harness-summary`) present and unchanged in content; additions permitted. (c) Any new text in CLAUDE.md consistent with README terminology.",
+      "grader_type": "llm-judge",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s12-sn1",
+      "criterion": "Should NOT modify any existing rubric files (api-service.md, cli-tool.md, eval-harness.md, harness-build.md, rag-system.md, web-app.md). Verify all 6 `git diff HEAD --` commands produce empty output. Pre-sprint baseline: all empty.",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "git diff HEAD -- plugins/trine-eval/skills/eval-rubric/rubrics/api-service.md plugins/trine-eval/skills/eval-rubric/rubrics/cli-tool.md plugins/trine-eval/skills/eval-rubric/rubrics/eval-harness.md plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md plugins/trine-eval/skills/eval-rubric/rubrics/rag-system.md plugins/trine-eval/skills/eval-rubric/rubrics/web-app.md",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s12-sn2",
+      "criterion": "Should NOT modify any prior sprint's approved markdown contract (sprint-01 through sprint-11). Verify `git diff HEAD --` for sprint-07.md through sprint-11.md all empty. Pre-sprint baseline: all empty.",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "git diff HEAD -- .harness/contracts/sprint-07.md .harness/contracts/sprint-08.md .harness/contracts/sprint-09.md .harness/contracts/sprint-10.md .harness/contracts/sprint-11.md",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s12-sn3",
+      "criterion": "Should NOT regress the 6 JIT context scope annotations in harness-kickoff SKILL.md. Verify `grep -c '<!-- Context scope at this step:' plugins/trine-eval/skills/harness-kickoff/SKILL.md` assert count >= 6. Pre-sprint baseline: 6.",
+      "grader_type": "behavioral",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "grep -c '<!-- Context scope at this step:' plugins/trine-eval/skills/harness-kickoff/SKILL.md",
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s12-sn4",
+      "criterion": "Should NOT remove or alter core fields in .harness/config.json (project_type, rubric, max_retries, governance.enabled). Verify `jq '.project_type == \"eval-harness\" and .rubric == \"eval-harness\" and .max_retries == 3 and .governance.enabled == true' .harness/config.json` outputs `true`. Pre-sprint baseline: true.",
+      "grader_type": "behavioral",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "jq '.project_type == \"eval-harness\" and .rubric == \"eval-harness\" and .max_retries == 3 and .governance.enabled == true' .harness/config.json",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s12-sn5",
+      "criterion": "Should NOT remove or alter the three skill bullets in CLAUDE.md. Verify `grep -c '/harness-kickoff' CLAUDE.md`, `grep -c '/harness-sprint' CLAUDE.md`, `grep -c '/harness-summary' CLAUDE.md` each return count >= 1. Pre-sprint baseline: 1 each.",
+      "grader_type": "behavioral",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "grep -c '/harness-kickoff' CLAUDE.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s12-sn6",
+      "criterion": "Should NOT change name or version fields in plugin.json (only description may change). Verify `jq '.name == \"trine-eval\" and .version == \"0.2.0\"' plugins/trine-eval/.claude-plugin/plugin.json` outputs `true`. Pre-sprint baseline: true.",
+      "grader_type": "behavioral",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "jq '.name == \"trine-eval\" and .version == \"0.2.0\"' plugins/trine-eval/.claude-plugin/plugin.json",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s12-sn7",
+      "criterion": "Should NOT alter any of the 6 routing table rows in harness-kickoff SKILL.md. Verify each row individually with `grep -c '\\`<project_type>\\` → \\`\"rubric\": \"<rubric>\"\\`' SKILL.md` for all 6 rows (web-app, rag-system, cli-tool, api-service, eval-harness, harness-build). All 6 must return count >= 1. Pre-sprint baseline: 1 each.",
+      "grader_type": "behavioral",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "grep -c '`harness-build` → `\"rubric\": \"harness-build\"`' plugins/trine-eval/skills/harness-kickoff/SKILL.md",
+      "rubric_dimension": "generator_evaluator_separation"
+    }
+  ]
+}
