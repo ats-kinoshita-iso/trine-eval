@@ -1,7 +1,7 @@
 {
   "name": "trine-eval",
   "version": "0.2.0",
-  "description": "trine-eval: Modular three-agent eval-driven development harness implementing Anthropic's Planner-Generator-Evaluator architecture",
+  "description": "trine-eval: Planner-Generator-Evaluator harness for eval-driven development across web/RAG/CLI/API projects, eval-harness methodology audits (meta layer), and harness-build agent-runtime conformance (runtime layer)",
   "skills": ["skills/"],
   "agents": ["agents/"],
   "hooks": "hooks/hooks.json"
