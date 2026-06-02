@@ -1,0 +1,149 @@
+{
+  "sprint": 11,
+  "tasks": [
+    {
+      "task_id": "s11-b1",
+      "criterion": "Kickoff harness-build detection trace matches planner harness-build mode [weight: 16%]: Simulate the kickoff run by reading `.harness/dogfood-findings.md`: (a) Locate the section documenting the kickoff prompt used. (b) Locate the section documenting the resulting `spec.md` shape — verify the report quotes a product vision, feature list, and at least one success criterion from the produced spec. (c) Locate the section documenting the resulting `sprints.json` shape — verify the report quotes at least one sprint entry with a `playbook_stage` field whose value is one of the seven valid stage names from `rubrics/harness-build.md` (Control Plane & Agentic Loop, Tool Registry & Sandboxing, Projection & Planning, Skills & Instruction Execution, Observation & Monitoring, External Affordances, Governance & Human Oversight). (d) Verify the report's behavioral observations section notes that the planner produced a stage-aligned sprint decomposition consistent with the harness-build mode in `plugins/trine-eval/agents/planner.md`. The criterion PASSes when the evaluator can construct, from the dogfood-findings.md report alone, a representative `sprints.json` fragment with at least two sprint entries with valid `playbook_stage` values in dependency order. The evaluator must quote the relevant sections from the report as evidence.",
+      "grader_type": "behavioral",
+      "weight": 16,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s11-b2",
+      "criterion": "dogfood-findings.md contains the ephemeral tmp directory path [weight: 8%]: Run `grep -c 'TEMP\\|tmp\\|/tmp\\|dogfood-' .harness/dogfood-findings.md` and assert count >= 1. The report must record the tmp directory path or name used for the ephemeral kickoff run. Pre-sprint baseline: file absent (count would be 0 or error). Post-sprint: >= 1. PASS when count >= 1.",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -c 'TEMP\\|tmp\\|/tmp\\|dogfood-' .harness/dogfood-findings.md",
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s11-b3",
+      "criterion": "dogfood-findings.md contains the kickoff prompt used [weight: 8%]: Run `grep -ci 'kickoff prompt\\|harness.build prompt\\|prompt used\\|prompt:' .harness/dogfood-findings.md` and assert count >= 1. The report must document the exact prompt passed to `/harness-kickoff`. Pre-sprint baseline: file absent. Post-sprint: >= 1. PASS when count >= 1.",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -ci 'kickoff prompt\\|harness.build prompt\\|prompt used\\|prompt:' .harness/dogfood-findings.md",
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s11-b4",
+      "criterion": "dogfood-findings.md contains per-dimension rubric scoring [weight: 10%]: Run the following 7 greps, each against `.harness/dogfood-findings.md`, and assert each returns count >= 1: `grep -c 'Control Plane' .harness/dogfood-findings.md`, `grep -c 'Tool Registry' .harness/dogfood-findings.md`, `grep -c 'Projection' .harness/dogfood-findings.md`, `grep -c 'Skills.*Instruction\\|Instruction.*Skills' .harness/dogfood-findings.md`, `grep -c 'Observation.*Monitoring\\|Monitoring.*Observation' .harness/dogfood-findings.md`, `grep -c 'External Affordances' .harness/dogfood-findings.md`, `grep -c 'Governance' .harness/dogfood-findings.md`. Pre-sprint baseline: file absent (all 0). Post-sprint: all 7 >= 1. PASS when all 7 conditions hold. This confirms the report scores the ephemeral fixture against all seven harness-build rubric dimensions.",
+      "grader_type": "behavioral",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "grep -c 'Control Plane' .harness/dogfood-findings.md",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s11-b5",
+      "criterion": "dogfood-findings.md references the HB001 loop-termination trap [weight: 10%]: Run `grep -ci 'HB001\\|loop termination\\|max_steps\\|loop.bound\\|loop bound' .harness/dogfood-findings.md` and assert count >= 1. The report must document whether the ephemeral fixture demonstrates loop-termination coverage — either positively (the produced spec or sprints.json includes a max_steps or loop-bound criterion derived from the HB001 trap entry) or as a PARTIAL/FAIL calibration signal (the trap criterion was not exercised, which itself is a finding). Pre-sprint baseline: file absent. Post-sprint: >= 1. PASS when count >= 1.",
+      "grader_type": "behavioral",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "grep -ci 'HB001\\|loop termination\\|max_steps\\|loop.bound\\|loop bound' .harness/dogfood-findings.md",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s11-b6",
+      "criterion": "dogfood-findings.md contains a calibration verdict [weight: 10%]: Run `grep -ci 'PASS\\|PARTIAL\\|FAIL\\|calibration verdict\\|verdict' .harness/dogfood-findings.md` and assert count >= 1. Additionally run `grep -ci '^## Calibration\\|^## Verdict\\|Calibration Verdict\\|calibration verdict' .harness/dogfood-findings.md` and assert count >= 1. The report must declare a top-level PASS, PARTIAL, or FAIL verdict. Pre-sprint baseline: file absent. Post-sprint: both counts >= 1. PASS when both conditions hold.",
+      "grader_type": "behavioral",
+      "weight": 10,
+      "is_gate": false,
+      "verification_command": "grep -ci 'PASS\\|PARTIAL\\|FAIL\\|calibration verdict\\|verdict' .harness/dogfood-findings.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s11-s7",
+      "criterion": "dogfood-findings.md exists at the correct path [weight: 4%]: Run `test -f \".harness/dogfood-findings.md\"` and assert exit 0 (file exists). The file must be committed to the repo at exactly this path. Pre-sprint baseline: ABSENT (file does not exist). Post-sprint: PRESENT. PASS when exit 0.",
+      "grader_type": "structural",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "test -f \".harness/dogfood-findings.md\"",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s11-s8",
+      "criterion": "dogfood-findings.md contains all required sections [weight: 6%]: Run the following 5 greps and assert each returns count >= 1: `grep -c '^## ' .harness/dogfood-findings.md`, `grep -ci 'tmp\\|ephemeral\\|temp' .harness/dogfood-findings.md`, `grep -ci 'spec\\.md\\|sprints\\.json' .harness/dogfood-findings.md`, `grep -ci 'behavioral observation\\|observations' .harness/dogfood-findings.md`, `grep -ci 'rubric\\|dimension\\|score' .harness/dogfood-findings.md`. Pre-sprint baseline: file absent (all 0). Post-sprint: all 5 >= 1. The report must have at least one `##`-level section heading, reference the tmp/ephemeral context, reference the produced spec.md and sprints.json, include behavioral observations, and include rubric scoring. PASS when all 5 conditions hold.",
+      "grader_type": "structural",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": "grep -c '^## ' .harness/dogfood-findings.md",
+      "rubric_dimension": "extensibility_aci"
+    },
+    {
+      "task_id": "s11-s9",
+      "criterion": "No examples/ directory exists at repo root [weight: 4%]: Run `test -d \"examples\"` and assert non-zero exit (ABSENT). This is also a Should-NOT gate (SN1) — this criterion overlaps with SN1 and adds scoring weight for the positive artifact check. Pre-sprint baseline: ABSENT (confirmed). PASS when `test -d \"examples\"` returns non-zero exit.",
+      "grader_type": "structural",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "test -d \"examples\"",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s11-j10",
+      "criterion": "Report quality: findings are complete, structured, and evidence-grounded [weight: 20%]: Read the full `.harness/dogfood-findings.md`. PASS requires ALL of the following: (a) Sectioning: The report contains clearly delineated sections for at minimum: (1) tmp directory path used, (2) kickoff prompt used, (3) resulting spec.md shape (quoted excerpts — NOT the full file), (4) resulting sprints.json shape (quoted excerpts showing at least one `playbook_stage` field), (5) behavioral observations, (6) per-dimension rubric scoring against all 7 harness-build dimensions, and (7) calibration verdict. (b) Evidence standard: The spec.md and sprints.json sections quote actual excerpts from the ephemeral run output — not paraphrases or synthetic examples. The quotes are clearly delimited (code blocks or blockquotes). The evaluator must be able to read those excerpts and determine whether the produced artifacts align with the harness-build planner mode. (c) Rubric scoring specificity: Each of the 7 rubric dimensions is scored with at least a numeric score (e.g., '3/5') OR a qualitative rating (e.g., 'PASS', 'PARTIAL', 'FAIL') AND a one-sentence justification citing specific evidence from the ephemeral fixture (not a generic statement). Dimensions that cannot be assessed because the fixture is minimal must be explicitly noted as 'Not assessable — minimal fixture' rather than left blank. (d) Calibration verdict: The report declares a top-level verdict (PASS / PARTIAL / FAIL) and — if PARTIAL or FAIL — names at least one specific issue with a proposed remediation or note that it is documented as a calibration signal. (e) HB001 loop-termination coverage: The report explicitly addresses whether the ephemeral fixture exercised the loop-termination trap (HB001 from `plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json`): either confirming the fixture includes a numeric `max_steps` bound or similar, or noting its absence as a calibration finding. A report that does not address HB001 at all fails this sub-condition. (f) No committed examples: The report explicitly notes that the tmp directory was discarded and that no `examples/` directory was created in the repo. This is the ephemeral constraint declaration.",
+      "grader_type": "llm-judge",
+      "weight": 20,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s11-j11",
+      "criterion": "Kickoff routing correctness: planner produced harness-build-aligned output [weight: 4%]: Read the behavioral observations section and the sprints.json excerpt in `.harness/dogfood-findings.md`. PASS requires: (a) The report confirms the kickoff's planner subagent activated harness-build mode — either by detecting a `harness-build` keyword in the prompt or by the planner reading/writing `project_type: harness-build` to config.json. (b) The sprints.json excerpt shows at least two sprint entries in stage-dependency order (e.g., sprint 1 = Control Plane & Agentic Loop before sprint N = Governance & Human Oversight). (c) The report does not claim kickoff succeeded if the planner failed to produce a stage-aligned decomposition — failures are documented, not masked.",
+      "grader_type": "llm-judge",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s11-sn1",
+      "criterion": "Should NOT create an `examples/` directory at the repo root: Phase 2's ephemeral constraint prohibits committing permanent example fixtures. The dogfood run uses a tmp directory (discarded after the run); no `examples/` directory is committed. Verify: `test -d \"examples\"` returns non-zero exit (ABSENT). Pre-sprint baseline: ABSENT (confirmed by Sprint 10 SN4 gate, also confirmed current).",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "test -d \"examples\"",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s11-sn2",
+      "criterion": "Should NOT modify any prior sprint's approved markdown contract: The content of all prior approved contracts must be byte-for-byte identical to their HEAD state. Verify all of the following produce empty output (no diff): `git diff HEAD -- .harness/contracts/sprint-07.md`, `git diff HEAD -- .harness/contracts/sprint-08.md`, `git diff HEAD -- .harness/contracts/sprint-09.md`, `git diff HEAD -- .harness/contracts/sprint-10.md`. PASS when all four diffs are empty.",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "git diff HEAD -- .harness/contracts/sprint-07.md",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s11-sn3",
+      "criterion": "Should NOT regress Sprint 6 JIT annotations in harness-kickoff SKILL.md: The six `<!-- Context scope at this step: ... -->` comment blocks added in Sprint 6 must remain intact. Verify: `grep -c '<!-- Context scope at this step:' plugins/trine-eval/skills/harness-kickoff/SKILL.md` assert count >= 6. Pre-sprint baseline: 6 (Steps 1, 2, 2b, 3, 4, and 5 — confirmed by Sprint 10 SN3 gate evaluation).",
+      "grader_type": "behavioral",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "grep -c '<!-- Context scope at this step:' plugins/trine-eval/skills/harness-kickoff/SKILL.md",
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s11-sn4",
+      "criterion": "Should NOT remove or alter the core fields in `.harness/config.json`: The fields `project_type`, `rubric`, `max_retries`, and `governance.enabled` must retain their current values. Verify: `jq '.project_type == \"eval-harness\" and .rubric == \"eval-harness\" and .max_retries == 3 and .governance.enabled == true' .harness/config.json` must output `true`. Pre-sprint baseline: all four fields confirmed at those values (Sprint 10 SN5 gate passed; config.json unchanged).",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "jq '.project_type == \"eval-harness\" and .rubric == \"eval-harness\" and .max_retries == 3 and .governance.enabled == true' .harness/config.json",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s11-sn5",
+      "criterion": "Should NOT modify read-only inputs to this sprint's dogfood run: The following files are read-only inputs consumed by the ephemeral kickoff — they must not be modified by this sprint's implementation: `plugins/trine-eval/agents/planner.md`, `plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md`, and `plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json`. Verify: `git diff HEAD -- plugins/trine-eval/agents/planner.md`, `git diff HEAD -- plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md`, `git diff HEAD -- plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json`. All three commands must produce empty output. PASS when all three diffs are empty.",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "git diff HEAD -- plugins/trine-eval/agents/planner.md",
+      "rubric_dimension": "generator_evaluator_separation"
+    }
+  ]
+}
