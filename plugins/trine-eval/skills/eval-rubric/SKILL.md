@@ -29,6 +29,8 @@ The rubric defines:
 - `eval-harness` — Eval-driven development harnesses (methodology completeness, grading architecture, separation)
 - `harness-build` — Agent runtime harnesses (playbook stages, hard thresholds: loop bounds, sandboxing, governance)
 
+See [rubrics/README.md](rubrics/README.md) for the meta-vs-runtime decision guide between `eval-harness` and `harness-build`.
+
 ## Adding Custom Rubrics
 
 Create a new markdown file in `skills/eval-rubric/rubrics/` following the same structure as existing rubrics. Update `.harness/config.json` to reference the new rubric name.
