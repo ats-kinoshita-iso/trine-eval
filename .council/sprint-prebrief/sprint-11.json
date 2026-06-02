@@ -1,0 +1,20 @@
+{
+  "sprint_number": 11,
+  "classified_at": "2026-06-02T11:00:00Z",
+  "classified_by_agent": "orchestrator",
+  "cynefin": "complex",
+  "confidence": 0.4,
+  "rationale": "Sprint 11 (renumbered from Sprint 10 after Phase 1.5 insertion) is the end-to-end ephemeral dogfood validation — Phase 2 Success Criterion 9. The sprint was DESIGNED as a calibration-discovery sprint: run /harness-kickoff with a harness-build prompt against a tmp directory, observe what the planner produces, score against the seven harness-build rubric dimensions, and document whatever happens (PASS or named PARTIAL/FAIL calibration signals). The sprint notes explicitly say 'single round; if PASS, document; if FAIL, document as calibration signal.' Cause-effect was NOT knowable in advance because (a) the Planner subagent's dispatchability from within a /harness-sprint context was an open question, (b) the harness-build mode activation under dual-signal detection had never been exercised end-to-end, and (c) the rubric scoring of an intentionally-minimal fixture against all 7 dimensions including non-gate dimensions was unprecedented. The work shape was 'probe → reflect on result → document calibration signal' rather than 'enumerate solution space and execute.' This is the complex Cynefin domain (probe-sense-respond) rather than complicated (analyze-decide-execute). Confidence is intentionally low (0.4) because the sprint's purpose was specifically to discover what would happen — not to confirm a hypothesis. RETROACTIVE NOTE: this prebrief is written post-sprint per the HK-0003 yokoten retroactive-closure rule. The honest classification is what the orchestrator WOULD have written had the prebrief been authored at sprint entry; the autonomy_floor_observed at sprint entry was 4.",
+  "expected_loop_shape": "probe-campaign",
+  "projection_manifest": [
+    ".harness/spec.md",
+    ".harness/sprints.json",
+    ".harness/sprint-state.json",
+    "plugins/trine-eval/agents/planner.md",
+    "plugins/trine-eval/skills/harness-kickoff/SKILL.md",
+    "plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md",
+    "plugins/trine-eval/skills/bootstrap-failures/templates/by-rubric/harness-build.json",
+    ".council/standard-work.json"
+  ],
+  "autonomy_floor_observed": 4
+}

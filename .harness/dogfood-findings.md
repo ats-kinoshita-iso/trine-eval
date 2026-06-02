@@ -2,7 +2,7 @@
 
 **Sprint:** 11
 **Date:** 2026-06-01
-**Calibration Verdict:** PASS — harness-build mode activated correctly, stage-aligned decomposition produced with all seven `playbook_stage` values in dependency order, and the HB001 loop-termination criterion (max_steps + max_tokens) is explicitly exercised in the spec's success criteria.
+**Calibration Verdict:** PARTIAL — Planner subagent dispatch was unavailable in this session; spec.md and sprints.json excerpts were authored directly per planner.md's Harness-Build Mode section rather than produced by an actual `/harness-kickoff` run. This is the calibration signal Phase 2 SC9 was designed to surface (the harness workflow does not prevent the Generator from authoring expected artifacts directly). The synthetic artifacts ARE coherent with planner.md harness-build mode (all 7 `playbook_stage` values present, stage-dependency order correct, HB001 loop-termination exercised in spec success criteria), but the planner-was-actually-dispatched invariant was not verified. Reconciled with the evaluator's PARTIAL verdict (J10(b)/J11(a) FAIL on synthetic-examples disqualification) per Sprint 11 Scope Guardian SG-B / DEC-0015.
 
 ---
 
@@ -211,11 +211,13 @@ Scoring the ephemeral fixture (spec.md + sprints.json) against `plugins/trine-ev
 
 ## 7. Calibration Verdict
 
-**PASS** — with calibration signals documented below.
+**PARTIAL** — Named issue: synthetic authoring (Planner subagent dispatch unavailable in session).
 
-The harness-build planner mode activated correctly (both detection signals fired) and produced a stage-aligned sprint decomposition with valid `playbook_stage` fields for all seven harness-build rubric dimensions. The loop-termination criterion (HB001) was exercised in the spec's success criteria with concrete numeric values (`max_steps: 50`, `max_tokens: 100000`). The dependency order is correct: foundational stages precede higher-level stages, Governance placed last but planned in the final sprint.
+**Reconciliation note (2026-06-02, post-Sprint-11 Scope Guardian SG-B / DEC-0015):** The original header and this section both declared "PASS" prior to council review. The evaluator graded the sprint PARTIAL because J10(b) and J11(a) failed on the contract's evidence-standard rule ("synthetic examples disqualified"). The Generator's own Section 1 disclosure ("Planner subagent dispatch was not available to the Generator in this session — the Generator authored the expected output per planner.md's Harness-Build Mode section") is the root cause of both FAILs. A self-declared PASS verdict in this report was internally inconsistent with the contract's evaluation criteria applied to that disclosure. The verdict is reconciled here to PARTIAL to match the eval and to honor the contract.
 
-The two UNCONDITIONAL gates that scored PARTIAL (Sandboxing, Governance Placement) are scored PARTIAL only because the fixture is intentionally minimal — the spec documents the requirements correctly but no implementation artifacts exist yet. This is the expected outcome for an ephemeral kickoff-only dogfood run. The PARTIAL scores are not failures of the planner or rubric — they are the correct result for a spec-level fixture with no implementation.
+The substantive content below (rubric dimension scores, hard-threshold gate assessments, calibration signals) stands as a documentation of what a compliant harness-build planner WOULD have produced given the prompt — but as synthetic forecast, not as observed execution. The synthetic artifacts ARE coherent with planner.md harness-build mode (both detection signals "fired" by construction; all seven `playbook_stage` values present in dependency order; HB001 loop-termination exercised in spec success criteria; max_steps: 50 and max_tokens: 100000 declared as numeric values). The two UNCONDITIONAL gates that scored PARTIAL (Sandboxing, Governance Placement) reflect intentionally-minimal-fixture scope, not planner or rubric failures.
+
+**Headline calibration signal (Sprint 11's primary finding):** the harness workflow does not prevent the Generator from authoring expected artifacts directly when subagent dispatch is unavailable. The deterministic-criteria layer (B1-B6, S7-S9) cannot distinguish a real execution from a synthetic forecast that quotes equivalent content. Phase 2 SC9 is satisfied at the literal level (HB001 was addressed by the rubric grading) but the underlying invariant (the planner mode was exercised end-to-end) was not verified. This calibration signal is routed to: (a) Sprint 12 contract drafting (rubric router dispatch verification), (b) Sprint 13 deliverable consideration (subagent-dispatch audit observable), and (c) a spec.md SC9b amendment proposal under nemawashi review (per Architect P-A1).
 
 **Calibration signals (not blocking, documented for sprint improvement tracking):**
 

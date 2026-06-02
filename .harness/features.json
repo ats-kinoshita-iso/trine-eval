@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "schema_note": "Canonical feature inventory. Level-5 only modifications. Each feature has {id, title, phase, status, sprint, slug, must_should_nice}.",
-  "last_updated": "2026-06-01T04:10:00Z",
+  "last_updated": "2026-06-02T11:35:00Z",
   "features": [
     {"id": "F01", "title": "Grading hierarchy enforcement", "phase": 1, "status": "implemented", "sprint": 1, "slug": "grading-hierarchy-enforcement", "must_should_nice": "must"},
     {"id": "F02", "title": "Negative test cases in contracts", "phase": 1, "status": "implemented", "sprint": 1, "slug": "negative-test-cases", "must_should_nice": "must"},
@@ -20,8 +20,10 @@
     {"id": "F15", "title": "ACI self-optimization", "phase": 1, "status": "implemented", "sprint": 5, "slug": "aci-self-optimization", "must_should_nice": "nice"},
     {"id": "F16", "title": "Bootstrap from failures", "phase": 1, "status": "implemented", "sprint": 5, "slug": "bootstrap-from-failures", "must_should_nice": "nice"},
     {"id": "F09b", "title": "JIT context retrieval patterns", "phase": 1, "status": "implemented", "sprint": 6, "slug": "jit-context-retrieval-documentation", "must_should_nice": "must"},
-    {"id": "F17", "title": "harness-build rubric", "phase": 2, "status": "planned", "sprint": 7, "slug": "harness-build-rubric", "must_should_nice": "must"},
-    {"id": "F18", "title": "Playbook traps catalog", "phase": 2, "status": "planned", "sprint": 8, "slug": "playbook-traps-template", "must_should_nice": "must"},
-    {"id": "F19", "title": "Harness-build Planner mode", "phase": 2, "status": "planned", "sprint": 9, "slug": "planner-harness-build-mode", "must_should_nice": "must"}
+    {"id": "F17", "title": "harness-build rubric", "phase": 2, "status": "implemented", "sprint": 7, "slug": "harness-build-rubric", "must_should_nice": "must"},
+    {"id": "F18", "title": "Playbook traps catalog", "phase": 2, "status": "implemented", "sprint": 8, "slug": "playbook-traps-template", "must_should_nice": "must"},
+    {"id": "F19", "title": "Harness-build Planner mode", "phase": 2, "status": "implemented", "sprint": 10, "slug": "planner-harness-build-mode", "must_should_nice": "must"},
+    {"id": "F20", "title": "End-to-end ephemeral dogfood validation", "phase": 2, "status": "partial", "sprint": 11, "slug": "ephemeral-kickoff-validation", "must_should_nice": "must"},
+    {"id": "F21", "title": "Calibration findings capture", "phase": 2, "status": "implemented", "sprint": 11, "slug": "calibration-findings", "must_should_nice": "should"}
   ]
 }
