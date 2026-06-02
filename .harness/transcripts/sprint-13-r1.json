@@ -1,0 +1,285 @@
+{
+  "sprint": 13,
+  "round": 1,
+  "trial": 1,
+  "messages": [
+    {
+      "role": "user",
+      "content": "Evaluate Sprint 13 contract against all 13 success criteria and 6 gates."
+    },
+    {
+      "role": "assistant",
+      "content": "Read contract, tasks.json, config.json, rubric in parallel. Wrote eval skeleton. Ran all deterministic verification commands in parallel batches. Read sprint-workflow/SKILL.md and sprint-contract/SKILL.md for LLM-judge criteria. Verified git diffs for SN3/SN4/SN5. Compiled final eval with all criteria verdicts."
+    }
+  ],
+  "tool_calls": [
+    {
+      "name": "Read",
+      "arguments_summary": ".harness/contracts/sprint-13.md (limit 100)",
+      "result_summary": "Contract text read, criteria B1-J13 and SN1-SN6 captured",
+      "task_id": "setup"
+    },
+    {
+      "name": "Read",
+      "arguments_summary": ".harness/contracts/sprint-13.tasks.json",
+      "result_summary": "19 tasks read: 13 success criteria + 6 gates",
+      "task_id": "setup"
+    },
+    {
+      "name": "Read",
+      "arguments_summary": ".harness/config.json",
+      "result_summary": "project_type: eval-harness, rubric: eval-harness, governance.enabled: true",
+      "task_id": "setup"
+    },
+    {
+      "name": "Write",
+      "arguments_summary": ".harness/evals/sprint-13-r1.md (skeleton)",
+      "result_summary": "Eval skeleton with pending placeholders written",
+      "task_id": "setup"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "grep -c '## Step 0.5' plugins/trine-eval/skills/sprint-workflow/SKILL.md",
+      "result_summary": "1",
+      "task_id": "s13-c1"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "grep -ci 'regression.*gate|regression\\.json|regression\\.enabled' ...",
+      "result_summary": "14",
+      "task_id": "s13-c1"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "grep -c '### 1d' plugins/trine-eval/skills/sprint-workflow/SKILL.md",
+      "result_summary": "1",
+      "task_id": "s13-c2"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "grep -ci 'emit_tasks_json|tasks\\.json.*emit|APPROVED.*tasks|tasks.*APPROVED' ...",
+      "result_summary": "3",
+      "task_id": "s13-c2"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "grep -c '### 3c' && grep -c '### 3d' && grep -c '### 3e' && grep -c '### 3a' && grep -c '### 3b'",
+      "result_summary": "1 1 1 1 1",
+      "task_id": "s13-c3"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "grep -c '## Operational Notes' && grep -ci 'Evaluator Fallback' && grep -ci 'thinking\\.profile'",
+      "result_summary": "1 1 2",
+      "task_id": "s13-c4"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "grep -ci 'sprint-prebrief|governance\\.review_frequency|warn.*missing|missing.*prebrief'",
+      "result_summary": "4",
+      "task_id": "s13-c5"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "grep -ci 'WARN|warn'",
+      "result_summary": "6",
+      "task_id": "s13-c5"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "grep -ci 'council-autorun|...|auto-trigger|every-sprint'",
+      "result_summary": "4",
+      "task_id": "s13-c6"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "grep -ci 'andon.*stop|andon.*halt|andon-stop'",
+      "result_summary": "2",
+      "task_id": "s13-c6"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "grep -ci 'SN2.*carve-out|...' sprint-contract/SKILL.md && grep -ci 'plan-amendment.*commit|...'",
+      "result_summary": "4 7",
+      "task_id": "s13-c7"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "grep -c 'Sprint 10.*Planner harness-build|...' sprint-07.md x3",
+      "result_summary": "2 2 1",
+      "task_id": "s13-c8"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "grep -c 'Sprint 10.*Planner|Sprint 11.*End-to-end|Sprint 12.*Positioning' sprint-08.md; grep -c '### Artifact 2:' sprint-10.md",
+      "result_summary": "2 4 1 6",
+      "task_id": "s13-c9"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "grep -c '^## Step 0:' through '^## Step 5:'",
+      "result_summary": "1 1 1 1 1 1",
+      "task_id": "s13-c10"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "grep -c '## Task Taxonomy: sprint-NN.tasks.json' && grep -c '\"behavioral\"|...'",
+      "result_summary": "1 4",
+      "task_id": "s13-c11"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "grep -c '<!-- Context scope at this step:' && grep -c 'Lazy Loading' && grep -c 'Session Resumption'",
+      "result_summary": "5 1 1",
+      "task_id": "s13-sn1"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "grep -c '## Task Taxonomy:...' sprint-contract/SKILL.md; grep -c 'grader_type.*...|\"behavioral\"|\"structural\"'",
+      "result_summary": "1 4",
+      "task_id": "s13-sn2"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "git diff HEAD~3 HEAD -- .harness/contracts/sprint-07.md",
+      "result_summary": "Diff shows only Revision History block + Sprint 9/10/11 renumbering",
+      "task_id": "s13-sn3"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "git diff HEAD~3 HEAD -- .harness/contracts/sprint-08.md",
+      "result_summary": "Diff shows only Revision History block + Sprint renumbering throughout",
+      "task_id": "s13-sn3"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "git diff HEAD~3 HEAD -- .harness/contracts/sprint-08.md | grep non-renumbering lines",
+      "result_summary": "empty output \u2014 all changes are sprint number substitutions",
+      "task_id": "s13-sn3"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "git diff HEAD~3 HEAD -- .harness/spec.md",
+      "result_summary": "empty output",
+      "task_id": "s13-sn4"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "git diff HEAD~3 HEAD -- .harness/evals/",
+      "result_summary": "empty output",
+      "task_id": "s13-sn5"
+    },
+    {
+      "name": "Bash",
+      "arguments_summary": "jq '.project_type == \"eval-harness\" and .rubric == \"eval-harness\" and .max_retries == 3 and .governance.enabled == true' .harness/config.json",
+      "result_summary": "true",
+      "task_id": "s13-sn6"
+    },
+    {
+      "name": "Read",
+      "arguments_summary": "plugins/trine-eval/skills/sprint-workflow/SKILL.md (full file)",
+      "result_summary": "521 lines read; J12/J13 assessment performed with line citations",
+      "task_id": "s13-c12"
+    },
+    {
+      "name": "Read",
+      "arguments_summary": "plugins/trine-eval/skills/sprint-contract/SKILL.md (full file)",
+      "result_summary": "SN2 carve-out amendment at lines 163-199, Task Taxonomy at lines 69-143",
+      "task_id": "s13-c13"
+    },
+    {
+      "name": "Read",
+      "arguments_summary": "plugins/trine-eval/skills/eval-rubric/rubrics/eval-harness.md",
+      "result_summary": "5-dimension rubric read for scoring",
+      "task_id": "rubric"
+    }
+  ],
+  "criteria_audit": [
+    {
+      "task_id": "s13-c1",
+      "verified_via_command": true
+    },
+    {
+      "task_id": "s13-c2",
+      "verified_via_command": true
+    },
+    {
+      "task_id": "s13-c3",
+      "verified_via_command": true
+    },
+    {
+      "task_id": "s13-c4",
+      "verified_via_command": true
+    },
+    {
+      "task_id": "s13-c5",
+      "verified_via_command": true
+    },
+    {
+      "task_id": "s13-c6",
+      "verified_via_command": true
+    },
+    {
+      "task_id": "s13-c7",
+      "verified_via_command": true
+    },
+    {
+      "task_id": "s13-c8",
+      "verified_via_command": true
+    },
+    {
+      "task_id": "s13-c9",
+      "verified_via_command": true
+    },
+    {
+      "task_id": "s13-c10",
+      "verified_via_command": true
+    },
+    {
+      "task_id": "s13-c11",
+      "verified_via_command": true
+    },
+    {
+      "task_id": "s13-c12",
+      "verified_via_command": false
+    },
+    {
+      "task_id": "s13-c13",
+      "verified_via_command": false
+    },
+    {
+      "task_id": "s13-sn1",
+      "verified_via_command": true
+    },
+    {
+      "task_id": "s13-sn2",
+      "verified_via_command": true
+    },
+    {
+      "task_id": "s13-sn3",
+      "verified_via_command": true
+    },
+    {
+      "task_id": "s13-sn4",
+      "verified_via_command": true
+    },
+    {
+      "task_id": "s13-sn5",
+      "verified_via_command": true
+    },
+    {
+      "task_id": "s13-sn6",
+      "verified_via_command": true
+    }
+  ],
+  "token_usage": {
+    "input": null,
+    "output": null,
+    "cache_hit": null
+  },
+  "timing": {
+    "ttft_ms": null,
+    "total_ms": null
+  },
+  "thinking_summary": "Wrote eval skeleton first to ensure file lands on disk regardless of budget. Then ran all deterministic verification commands in parallel batches (B1-B6, B7-S11, gate checks). All behavioral and structural criteria passed with strong margins (regression keywords: 14 vs threshold of 3; andon keywords: 2 vs threshold of 1). For LLM-judge criteria, read the full 521-line SKILL.md and assessed each sub-criterion with specific line citations. J12 passed on all 5 sub-criteria with exact line number evidence. J13 passed on all 4 sub-criteria. The only near-miss was SN3 for sprint-08.md: the B4 parenthetical text included a sprint number change that could be read as a criterion text edit, but the carve-out explicitly authorizes full-document renumbering (not just Out of Scope), and the filter grep confirmed no non-number-substitution changes. Flagged for human review as borderline. Final verdict: 13/13 success criteria PASS, 6/6 gates PASS, weighted score 100%."
+}

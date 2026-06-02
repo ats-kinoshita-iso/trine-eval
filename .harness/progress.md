@@ -232,3 +232,23 @@ Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
 - Date: 2026-06-02
 - Rubric scores: Methodology 4/5, Grading 4/5, Separation 4/5, Context 4/5, Extensibility 4/5
 - Notes: Phase 2 final sprint. Contract used 3-way grader split (54% behavioral / 10% structural / 36% llm-judge) under static-artifact carve-out (Sprint 7 precedent). Contract APPROVED round 1, no revision needed. Implementation in 4 commits (bc14823 README; 3ef3f9f harness-kickoff Step 1; 6cae3a5 plugin.json description; e3484cc CLAUDE.md positioning paragraph) plus f30065f for contract+tasks.json. R1 evaluation PASSed 11/11 criteria + 7/7 gates with zero retries. Deliverables: new file `plugins/trine-eval/skills/eval-rubric/rubrics/README.md` (meta-vs-runtime decision guide with 6-rubric index, when-to-pick column, disambiguation/overlap-zone section); harness-kickoff/SKILL.md Step 1 extended to list `eval-harness` in ambiguity prompt and reference `rubrics/README.md`; plugin.json description broadened to mention eval-harness (meta) + harness-build (runtime); CLAUDE.md positioning paragraph added. Phase 2 Success Criterion 10 covered. Sprint 11 synthetic-authoring vulnerability documented and routed to Sprint 13 (HK-0006) since closing it requires runtime dispatch wiring out of scope for a documentation sprint.
+## Session 2026-06-02T07:41:12-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-02T11:41:12Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-06-02T08:25:12-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-02T12:25:12Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+
+## Sprint 13: Workflow-Step Port and Governance Hardening (Phase 1.6)
+- Status: PASS
+- Rounds: 1
+- Passed criteria: 13/13
+- Weighted score: 100%
+- Gates: 6/6
+- Date: 2026-06-02
+- Rubric scores: Methodology 4/5, Grading 4/5, Separation 5/5, Context 5/5, Extensibility 4/5
+- Notes: Phase 1.6 audit-chain repair + governance hardening. 3-way grader split (66% behavioral / 8% structural / 26% llm-judge). Contract APPROVED round 1 with 3 non-blocking advisories. Implementation in 4 commits (4c1da9c contract+tasks.json+features.json; 8950edc sprint-workflow port — Step 0.5/1d/3c-3e/Operational Notes + b1/b2 gates [commit msg narrower than +299-line diff]; dec3680 SN2 carve-out in sprint-contract/SKILL.md; f90a5d7 SN2-authorized renumbering of sprint-07/08 + DEC-0011 awk-anchor fix in sprint-10). Deliverables: (a) sprint-workflow/SKILL.md +299 lines covering Step 0.5 regression gate w/ 4 guard conditions + Windows-bash hazard; Step 1d emission + DEC-0019 features.json advance; Steps 3c/3d/3e (trial-loop, batch API, transcript capture); Operational Notes (Evaluator Fallback + thinking.profile). (b) bidirectional council gates: b1 pre-sprint warn-only check for sprint-prebrief inside Step 0; b2 post-sprint auto-trigger of /henkaten-council:council-autorun in Step 5 respecting andon-stop protocol. (c) SN2 carve-out amendment + applied to sprint-07.md (3-line) and sprint-08.md (7-line including Evaluator advisory #2 fixes) + DEC-0011 awk-anchor fix in sprint-10.md. features.json self-bootstrapped F25-F28 via new Step 1d protocol. Transcript trailer extracted to .harness/transcripts/sprint-13-r1.json. HK-0003 (council bypass) and HK-0004 (in-repo workflow-step gap) structurally closed by construction; HK-0006 (synthetic-authoring detection) remains open per Out of Scope.
