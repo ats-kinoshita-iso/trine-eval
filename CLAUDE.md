@@ -10,6 +10,8 @@ Plugin source is in `plugins/trine-eval/`.
 - `/harness-sprint` — Run one sprint through contract→build→eval cycle
 - `/harness-summary` — Generate cross-sprint evaluation report
 
+The plugin's rubric inventory includes both `eval-harness` (meta layer — grades eval methodology such as contract format, grader hierarchy, and sprint workflow) and `harness-build` (runtime layer — grades agent runtime harnesses for conformance to playbook stages). See `plugins/trine-eval/skills/eval-rubric/rubrics/README.md` for the full decision guide on which rubric to use.
+
 ## Conventions
 
 - Agent communication happens via files in `.harness/` only
