@@ -1,0 +1,54 @@
+{
+  "decision_id": "DEC-0011",
+  "timestamp": "2026-06-01T21:35:00Z",
+  "decision_type": "course-correction-minor",
+  "decision_outcome": "applied",
+  "council_agents_involved": [
+    "orchestrator",
+    "architect",
+    "scope-guardian",
+    "henkaten-detector",
+    "retrospective"
+  ],
+  "evidence_cited": [
+    {
+      "evidence_class": "observed",
+      "verification": "grep -cE 'bidirectional council-check gates|post-sprint auto-trigger|post-Sprint-10 per user authorization' .harness/sprints.json",
+      "summary": "Sprint 13 notes contain the post-Sprint-10 extension language for bidirectional gates"
+    },
+    {
+      "evidence_class": "observed",
+      "verification": "grep -nE 'bidirectional council-check gates|extended post-Sprint-10|post-sprint auto-trigger' .harness/spec.md",
+      "summary": "spec.md Phase 1.6 prose describes both gates and attributes the extension to Architect P-05 / post-Sprint-10 authorization"
+    },
+    {
+      "evidence_class": "observed",
+      "verification": "grep -nE '^(##|###) ' plugins/trine-eval/agents/planner.md",
+      "summary": "planner.md heading inventory: ## Your Task | ### Artifact 1: | ### Artifact 2: | ## Rules | ## Process | ## Harness-Build Mode — no `## Artifact 2` h2 heading exists, confirming SG5 vacuous-gate finding"
+    },
+    {
+      "evidence_class": "observed",
+      "verification": "awk '/^### Artifact 2:/,/^## [A-Z]/' plugins/trine-eval/agents/planner.md | grep -c 'playbook_stage'",
+      "summary": "Architect-proposed corrected anchor returns 0 against current tree — A6 invariant honored by inspection; the corrected gate would PASS"
+    },
+    {
+      "evidence_class": "inferred",
+      "verification": "jq -c 'select(.henka_id == \"HK-0003\") | .status' .council/henka-register.jsonl",
+      "summary": "HK-0003 status transition classified → responded recorded; Sprint 10 ran with full council fan-out (sprint-prebrief + course-corrections + agent reviews) demonstrating per-sprint cadence resumed"
+    }
+  ],
+  "applied_automatically": false,
+  "user_approval_required": true,
+  "user_approval_status": "approved",
+  "affected_files": [
+    ".council/henka-register.jsonl",
+    ".council/course-corrections/after-sprint-10.md"
+  ],
+  "linked_henka_id": "HK-0005",
+  "sprint_context": 10,
+  "autonomy_level_used": 4,
+  "effective_autonomy_at_decision": 4,
+  "reversibility": "reversible",
+  "nemawashi_walkthrough_version": null,
+  "description": "Composite audit-chain entry for the post-Sprint-10 council fan-out. Three interlocking actions ratified under the single-prompt L4 path (user-approved batch: 'Audit chain only'): (a) Emit HK-0005 capturing the 71ce8e7 plan amendment as a Method/scope-change/active/actionable henkaten record per Henkaten Detector HK-CAND-01; the 71ce8e7 commit extended Sprint 13 deliverable (b) from a singular pre-sprint council-check gate to bidirectional gates (b1 pre-sprint + b2 post-sprint auto-trigger). The change was user-authorized in-session 2026-06-01 ('go ahead with option 1'). HK-0005 closes Scope Guardian SG7 (missing DEC for the b1→b1+b2 expansion). (b) Promote HK-0003 (Sprints 7-9 council bypass) status from classified to responded — Sprint 10 ran with the full fan-out, demonstrating per-sprint cadence resumed; structural closure pathway is institutionalized via DEC-0010 (Sprint 13 plan) + this DEC. Promotion to resolved deferred until Sprint 13 lands and ≥2 subsequent sprints exhibit the auto-trigger working. (c) Resolve Scope Guardian's andon `alert` (SG5: B7 verification command in sprint-10.md uses awk anchor `/^## Artifact 2/` which matches no heading because planner.md has `### Artifact 2:` as h3, not h2 — the gate is vacuously passing). Architect concurred in swarm follow-up; Sprint 10 PASS verdict stands (A6 invariant honored by inspection per prior A2 finding). Fix routed to Sprint 13 as a new deliverable (d) under SN2 carve-out: one-line awk anchor correction to sprint-10.md changing `/^## Artifact 2/` → `/^### Artifact 2:/` with boundary `/^## [A-Z]\\|^### [A-Z]/`. Process improvement captured in retrospective LP1: future R2 fix verifications must run the literal command, not reason about it. All three actions are reversible: HK-0005 / HK-0003 edits via git revert on .council/henka-register.jsonl; Sprint 13 B7 fix has not yet been applied. Spot-check failure rate 0/4 across the fan-out (well under 20% Halt Condition 5 threshold)."
+}

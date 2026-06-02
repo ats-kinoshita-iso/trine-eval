@@ -1,0 +1,53 @@
+{
+  "henka_id": "HK-0005",
+  "sprint_context": 10,
+  "fourM_axis": "Method",
+  "category": "scope-change",
+  "change_origin": "active",
+  "impact_level": "actionable",
+  "description": "Post-Sprint-10 in-session plan amendment (commit 71ce8e7) extended Sprint 13's `council-check-gate` feature into a bidirectional `council-check-gates` feature set, adding a Step-5 post-sprint auto-trigger that invokes /henkaten-council:council-autorun automatically when config.governance.review_frequency is 'every-sprint'. The amendment edits .harness/sprints.json (Sprint 13 entry features array + notes block) and .harness/spec.md (Phase 1.6 section). User-authorized in-session 2026-06-01 ('go ahead with option 1'). Lives outside Sprint 10's declared scope but is the structural closure mechanism for HK-0003 — auto-trigger removes manual-cadence drift by construction. Response-type log-only because the change is already ratified via DEC-0011 in the same session.",
+  "affected_artifacts": [
+    ".harness/sprints.json",
+    ".harness/spec.md"
+  ],
+  "response_type": "log-only",
+  "evidence": [
+    {
+      "claim": "Sprint 10's declared sole deliverable is plugins/trine-eval/agents/planner.md; Out-of-Scope explicitly excludes touching prior contracts and forbids hook/config/SKILL.md changes outside planner.md.",
+      "evidence_class": "observed",
+      "confidence": "high",
+      "verification": "grep -nE 'sole deliverable|Modifying any prior sprint|Adding new hooks' .harness/contracts/sprint-10.md",
+      "source_file": ".harness/contracts/sprint-10.md"
+    },
+    {
+      "claim": "Sprint 13's notes block now contains the post-Sprint-10 extension language describing the bidirectional gates (b1 pre-sprint + b2 post-sprint auto-trigger).",
+      "evidence_class": "observed",
+      "confidence": "high",
+      "verification": "grep -cE 'bidirectional council-check gates|post-sprint auto-trigger|post-Sprint-10 per user authorization' .harness/sprints.json",
+      "source_file": ".harness/sprints.json"
+    },
+    {
+      "claim": "Phase 1.6 prose in spec.md was rewritten to declare the bidirectional gates and attribute the extension to 'Architect P-05, extended post-Sprint-10'.",
+      "evidence_class": "observed",
+      "confidence": "high",
+      "verification": "grep -nE 'bidirectional council-check gates|extended post-Sprint-10|post-sprint auto-trigger' .harness/spec.md",
+      "source_file": ".harness/spec.md"
+    },
+    {
+      "claim": "Change is fully reversible (git revert 71ce8e7) and impacts only a forward-looking sprint plan (Sprint 13 has not begun); no executed work is invalidated.",
+      "evidence_class": "observed",
+      "confidence": "high",
+      "verification": "jq -c '.sprints[9]' .harness/sprint-state.json",
+      "source_file": ".harness/sprint-state.json"
+    },
+    {
+      "claim": "Active origin: user explicitly approved the option in-session before the commit, mirroring the DEC-0010 pre-Sprint-10 fan-out pattern.",
+      "evidence_class": "inferred",
+      "confidence": "high"
+    }
+  ],
+  "status": "responded",
+  "detected_at": "2026-06-01T21:30:00Z",
+  "detected_by_agent": "henkaten-detector",
+  "resolution_summary": "Ratified via DEC-0011 (composite audit-chain entry) on 2026-06-01. The extension is the structural closure mechanism for HK-0003: Sprint 13 deliverable (b2) auto-triggers the council fan-out post-sprint, removing the manual-cadence dependency that allowed Sprints 7-9 bypass. Linked to HK-0003 transition (classified → responded) in the same DEC entry."
+}
