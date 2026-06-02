@@ -17,12 +17,19 @@ that the Sprint-9 ported schema in `sprint-contract/SKILL.md` references; the
 actual runtime loads cached v0.3.3 SKILL.md which has the steps, so it's a
 documentation gap not an execution risk; and (b) HK-0003 — Sprints 7-9 ran
 without the per-sprint council fan-out documented in `.council/config.json`
-as `review_frequency: every-sprint`. Adds a pre-sprint council-check gate to
-workflow Step 0 (Architect P-05) and a formal SN2 carve-out for renumbering-only
-edits to approved contracts (Scope Guardian #5a + C-10), applied by fixing
-stale Sprint 9/10/11 references in `sprint-07.md` / `sprint-08.md`. (Sprint 13,
-planned. Appended after Phase 2 completes so Phase 2 sprints 10-12 finish
-without further plan perturbation.)
+as `review_frequency: every-sprint`. Adds **bidirectional council-check gates**
+to the workflow when governance is enabled (Architect P-05, extended
+post-Sprint-10): a pre-sprint gate at Step 0 that warns when
+`.council/sprint-prebrief/sprint-NN.json` is missing, and a post-sprint
+auto-trigger at Step 5 completion that invokes `/henkaten-council:council-autorun`
+for the sprint just completed before returning to the user. The auto-trigger
+closes the HK-0003 manual-invocation gap by construction while respecting the
+existing andon-stop protocol — an andon halt or autonomy-floor breach surfaces
+to the user before further sprints are offered. Also adds a formal SN2
+carve-out for renumbering-only edits to approved contracts (Scope Guardian
+#5a + C-10), applied by fixing stale Sprint 9/10/11 references in
+`sprint-07.md` / `sprint-08.md`. (Sprint 13, planned. Appended after Phase 2
+completes so Phase 2 sprints 10-12 finish without further plan perturbation.)
 
 **Phase 1.5 — Methodology Audit-Chain Repair.** Close a documented gap where
 the `tasks.json` emission step described in `harness-sprint/SKILL.md` (Step 1d)

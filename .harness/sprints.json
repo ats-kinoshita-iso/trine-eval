@@ -212,7 +212,7 @@
       "phase": "1.6",
       "features": [
         "workflow-step-port",
-        "council-check-gate",
+        "council-check-gates",
         "sn2-renumbering-carveout",
         "stale-sprint-refs-cleanup"
       ],
@@ -229,7 +229,7 @@
         ".harness/contracts/sprint-0[1-8].md (only renumbering-only edits permitted under new SN2 carve-out)",
         ".harness/spec.md (existing Phase 1/1.5/2 sections)"
       ],
-      "notes": "Phase 1.6 audit-chain repair + governance hardening sprint. Closes HK-0003 (Sprints 7-9 council bypass) and HK-0004 (in-repo workflow-step gap). Three deliverables: (a) Port Steps 0.5/1d/3d/3a-3e and Operational Notes from cached v0.3.3 harness-sprint/SKILL.md into in-repo sprint-workflow/SKILL.md (closes HK-0004 dangling references at sprint-contract/SKILL.md:74,140,142). (b) Add pre-sprint council-check gate to workflow Step 0: if config.governance.enabled, check for .council/sprint-prebrief/sprint-NN.json; warn if missing (Architect P-05). (c) Formal SN2 carve-out: amend sprint-contract methodology to permit renumbering-only edits to approved markdown contracts, with mandatory Revision History block citing the plan-amendment commit. Apply the carve-out by fixing stale Sprint 9/10/11 references in sprint-07.md and sprint-08.md per Scope Guardian #5a. Authorized by user ratification of post-Sprint-9 council fan-out (DEC-0010, DEC-0011, DEC-0012). Inserted at end (Sprint 13) so Phase 2 (Sprints 10-12) completes without further plan perturbation."
+      "notes": "Phase 1.6 audit-chain repair + governance hardening sprint. Closes HK-0003 (Sprints 7-9 council bypass) and HK-0004 (in-repo workflow-step gap). Three deliverables: (a) Port Steps 0.5/1d/3d/3a-3e and Operational Notes from cached v0.3.3 harness-sprint/SKILL.md into in-repo sprint-workflow/SKILL.md (closes HK-0004 dangling references at sprint-contract/SKILL.md:74,140,142). (b) Add bidirectional council-check gates to the workflow when config.governance.enabled is true (Architect P-05, extended post-Sprint-10 per user authorization 2026-06-01): (b1) Pre-sprint gate at Step 0 — if config.governance.review_frequency is set, check for .council/sprint-prebrief/sprint-NN.json and warn if missing. (b2) Post-sprint auto-trigger at Step 5 completion — if config.governance.review_frequency is \"every-sprint\", the workflow's final action is to invoke /henkaten-council:council-autorun for the sprint just completed before returning to the user, closing the HK-0003 manual-invocation gap by construction. The auto-trigger respects the existing council-autorun andon-stop protocol; an andon halt or autonomy-floor breach surfaces to the user before further sprints are offered. (c) Formal SN2 carve-out: amend sprint-contract methodology to permit renumbering-only edits to approved markdown contracts, with mandatory Revision History block citing the plan-amendment commit. Apply the carve-out by fixing stale Sprint 9/10/11 references in sprint-07.md and sprint-08.md per Scope Guardian #5a. Authorized by user ratification of post-Sprint-9 council fan-out (DEC-0010, DEC-0011, DEC-0012) and post-Sprint-10 user request to make the per-sprint cadence automatic (this commit). Inserted at end (Sprint 13) so Phase 2 (Sprints 10-12) completes without further plan perturbation."
     }
   ]
 }
