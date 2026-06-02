@@ -1,8 +1,54 @@
 {
-  "version": "1.0",
-  "project_type": "claude-plugin",
-  "last_updated": "2026-06-01T04:03:57Z",
-  "procedures": [],
-  "known_henkaten_patterns": [],
-  "yokoten_entries": []
+  "version": "1.1.0",
+  "procedures": [
+    {
+      "procedure_id": "PROC-001",
+      "name": "Generator pre-flight verification-command checklist",
+      "description": "Before submitting a draft contract for Evaluator R1 review, the Generator executes every non-null `verification_command` in the draft literally against the pre-sprint repo state and records actual exit codes and stdout under a Technical Notes `Pre-flight verification` subsection. Closes the Evaluator-catches-contract-bug pattern observed across Sprints 8, 9, 10.",
+      "steps": [
+        "For each criterion in the draft contract with a non-null verification_command, execute the command literally against the current pre-sprint repo state.",
+        "Record the actual exit code and stdout for each command in a `Pre-flight verification` subsection of the contract's Technical Notes.",
+        "For each command whose actual output disagrees with the contract's claimed pre-sprint baseline, either (a) fix the command, (b) update the baseline claim, or (c) explain the divergence in Technical Notes.",
+        "Sanity-check each criterion: 'does this command actually verify what the criterion text says it does?' Reject any criterion where the answer is no.",
+        "Run this procedure BEFORE writing the final contract draft and submitting for Evaluator R1 review."
+      ],
+      "applicable_to": [
+        "contract drafting",
+        "CONTRACT_PROPOSAL",
+        "CONTRACT_REVISION"
+      ]
+    },
+    {
+      "procedure_id": "PROC-002",
+      "name": "Behavioral-coverage floor justification standard",
+      "description": "When the contract's computed behavioral coverage is within 5 percentage points of the 60% floor (i.e., 60-65%), the Technical Notes block MUST include a `Coverage Justification` subsection. Addresses the downward trend toward floor (Sprints 8/9/10 = 66/63/62) observed in cycle 2.",
+      "steps": [
+        "When behavioral coverage is in the 60-65% band, the Technical Notes block MUST include a `Coverage Justification` subsection answering three questions: (a) Is the sprint's natural behavioral surface limited (non-runnable static artifact)? (b) Has any criterion been reclassified from structural or llm-judge to behavioral to lift coverage, and if so what deterministic execution signal supports the reclassification? (c) Does any criterion use a pre-sprint baseline equal to its post-sprint expected value (preservation check), and if so how is the non-no-op claim defended?",
+        "When reclassification happens within a single contract revision cycle (R1 -> R2), the Revision History MUST include a one-paragraph rationale citing the deterministic execution signal.",
+        "The Evaluator's R1 review template SHOULD include an explicit check for this subsection when coverage is within the band."
+      ],
+      "applicable_to": [
+        "contract drafting when behavioral coverage in [60%, 65%]",
+        "contract revision when reclassifying criteria across grader_type boundaries"
+      ]
+    },
+    {
+      "procedure_id": "PROC-003",
+      "name": "R2 reviewer literal-execution protocol",
+      "description": "When R1 NEEDS REVISION cites a defect in a verification command and the Generator's R2 submission claims a fix, the R2 reviewer MUST execute the literal corrected command against the pre-sprint artifact. Closes the Sprint 10 R2 transcription error pattern (SG5 vacuous-gate finding).",
+      "steps": [
+        "When R1 NEEDS REVISION cites a defect in a verification command, and the Generator's R2 submission claims a fix, execute the literal corrected command against the pre-sprint artifact.",
+        "The R2 review block MUST contain a `Verification Results` section with one literal-command quote per resolved issue, capturing exit code and observed output verbatim.",
+        "Reasoning about whether a new pattern *should* match -- without execution -- is explicitly insufficient.",
+        "When the literal-command count returns 0 from an extraction-bounded command (e.g., `awk '...' | grep -c '...'`), additionally verify the bounding extraction itself matched the intended section (non-empty awk output).",
+        "If R2 verification yields a non-expected result, flag the contract NEEDS REVISION (round 3) rather than APPROVED and record the actual observed output."
+      ],
+      "applicable_to": [
+        "CONTRACT_REVIEW (R2)"
+      ]
+    }
+  ],
+  "updated_at": "2026-06-01T22:00:00Z",
+  "updated_by": "council-retro pdca (DEC-0012 ratified)",
+  "ratified_decision_id": "DEC-0012"
 }

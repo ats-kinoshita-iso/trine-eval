@@ -1,0 +1,50 @@
+{
+  "decision_id": "DEC-0012",
+  "timestamp": "2026-06-01T22:00:00Z",
+  "decision_type": "course-correction-major",
+  "decision_outcome": "applied",
+  "council_agents_involved": [
+    "orchestrator",
+    "retrospective",
+    "architect",
+    "scope-guardian",
+    "henkaten-detector"
+  ],
+  "evidence_cited": [
+    {
+      "evidence_class": "observed",
+      "verification": "jq '.procedures | length' .council/standard-work.json",
+      "summary": "3 procedures appended (PROC-001/002/003); schema validation PASS via jsonschema"
+    },
+    {
+      "evidence_class": "observed",
+      "verification": "jq -c 'select(.henka_id == \"HK-0003\") | .yokoten.applicable_to_subsequent_sprints' .council/henka-register.jsonl",
+      "summary": "HK-0003 yokoten block populated with applicable_to_subsequent_sprints=['all'] (matches retrospective recommendation for ratify-once shortcut eligibility)"
+    },
+    {
+      "evidence_class": "observed",
+      "verification": "test -f .council/proposed/archive/DEC-0012.md && test ! -f .council/proposed/DEC-0012.md",
+      "summary": "Position paper moved from .council/proposed/ to .council/proposed/archive/ per Stage 4 archive rule (R5+A4)"
+    },
+    {
+      "evidence_class": "inferred",
+      "verification": "grep -nE '## (Plan|Do|Check|Act)' .council/retrospectives/full-2026-06-01.md",
+      "summary": "Cycle 2 PDCA retrospective produced four-section output (Plan/Do/Check/Act); SW candidates A/B/C/D backed by ≥2 sprints (or 1-sprint strongly-deterministic for C); architect L2 review concurrence"
+    }
+  ],
+  "applied_automatically": false,
+  "user_approval_required": true,
+  "user_approval_status": "approved",
+  "affected_files": [
+    ".council/standard-work.json",
+    ".council/henka-register.jsonl",
+    ".council/proposed/archive/DEC-0012.md"
+  ],
+  "linked_henka_id": "HK-0003",
+  "sprint_context": 10,
+  "autonomy_level_used": 4,
+  "effective_autonomy_at_decision": 4,
+  "reversibility": "reversible",
+  "nemawashi_walkthrough_version": "0",
+  "description": "Cycle-2 PDCA standard-work amendment. Ratified four SW candidates from /henkaten-council:council-retro under the lightweight ratify-once path. Stages 1-3 of nemawashi collapsed via the prior Sprint 10 fan-out alignment (architect, scope-guardian, henkaten-detector all concurred with the underlying findings before this retrospective formalized them) + architect L2 review on the pdca draft ('structurally sound — assemble with minor edits'). Stage 4 ratification via explicit user selection ('Yes — apply DEC-0012'). Applied: (1) PROC-001 — Generator pre-flight verification-command checklist (closes 3-sprint Evaluator-catches-contract-bug pattern across S8/S9/S10). (2) PROC-002 — Behavioral-coverage floor justification standard for contracts within 5 percentage points of the 60% floor (S8=66, S9=63, S10=62 — monotonic descent toward floor). (3) PROC-003 — R2 reviewer literal-execution protocol (closes Sprint 10 R2 vacuous-gate transcription error caught by SG5). (4) Yokoten blocks added to HK-0002 (3-way grader split + ≥60% behavioral floor as universal methodology baseline), HK-0003 (per-sprint cadence reminder — SW-CAND-D content; eligible for ratify-once shortcut per A9 with applicable_to_subsequent_sprints=['all']), and HK-0005 (post-completion plan amendments require same-session DEC entry for audit-chain wholeness). SW-CAND-E (classification reclassification protocol via loop_shapes[]) deferred to next pdca cycle per retrospective recommendation — more invasive than the other four and would benefit from another cycle of evidence. Schema cleanup applied as side effect: dropped four pre-strict-schema fields (project_type, last_updated, known_henkaten_patterns, yokoten_entries) from .council/standard-work.json that were placeholder kickoff fields the current strict schema (additionalProperties: false) rejects. Version bumped 1.0 → 1.1.0 (semver minor for additive procedures). All edits reversible via git revert."
+}
