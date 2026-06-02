@@ -1,5 +1,5 @@
 {
-  "current_sprint": 12,
+  "current_sprint": 13,
   "sprints": [
     {
       "number": 1,
@@ -180,7 +180,34 @@
         "llm_judge_pct": 24
       },
       "notes": "PARTIAL verdict \u00e2\u20ac\u201d single-round per contract. J10/J11 FAILed because Generator authored expected spec.md/sprints.json directly rather than dispatching Planner subagent. All deterministic criteria + 5/5 gates PASS. Calibration signal surfaced as intended by Phase 2 SC9."
+    },
+    {
+      "number": 12,
+      "title": "Positioning and rubric decision guidance (Phase 2)",
+      "status": "pass",
+      "rounds": 1,
+      "criteria_passed": 11,
+      "criteria_total": 11,
+      "weighted_score": 100,
+      "phase": 2,
+      "rubric_scores": {
+        "methodology_completeness": 4,
+        "grading_architecture": 4,
+        "generator_evaluator_separation": 4,
+        "context_engineering": 4,
+        "extensibility_aci": 4
+      },
+      "should_not_gates": {
+        "passed": 7,
+        "total": 7
+      },
+      "grader_split": {
+        "behavioral_pct": 54,
+        "structural_pct": 10,
+        "llm_judge_pct": 36
+      },
+      "notes": "Phase 2 final sprint (positioning + rubric decision guidance). Contract used 3-way grader split (54% behavioral / 10% structural / 36% llm-judge); static-artifact carve-out invoked per sprint-contract SKILL.md (Sprint 7 precedent). Contract APPROVED round 1 (no revision needed); two non-blocking advisories noted (B1 simulation-behavioral classification; missing eval-harness in Step 1 ambiguity list \u2014 corrected by J10(d) at implementation). Implementation in 4 commits (bc14823 README; 3ef3f9f harness-kickoff Step 1 + README pointer; 6cae3a5 plugin.json description; e3484cc CLAUDE.md positioning paragraph) plus f30065f for contract artifacts. R1 evaluation PASSed all 11 criteria + 7/7 gates with zero retries. Deliverables: plugins/trine-eval/skills/eval-rubric/rubrics/README.md (new \u2014 meta-vs-runtime guide with 6-rubric index, when-to-pick, disambiguation/overlap-zone section); harness-kickoff/SKILL.md Step 1 extended to list eval-harness in ambiguity prompt and point to rubrics/README.md; plugin.json description broadened to mention eval-harness (meta) and harness-build (runtime); CLAUDE.md positioning paragraph added (3 skill bullets preserved). Phase 2 Success Criterion 10 covered. Sprint 11 synthetic-authoring vulnerability documented in Technical Notes and routed to Sprint 13 (HK-0006) \u2014 Sprint 12 does not structurally close it without scope creep into runtime wiring."
     }
   ],
-  "last_updated": "2026-06-01T22:52:04-04:00"
+  "last_updated": "2026-06-02T07:40:37-04:00"
 }

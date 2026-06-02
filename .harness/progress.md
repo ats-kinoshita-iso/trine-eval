@@ -212,3 +212,23 @@ Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
 - Date: 2026-06-01
 - Rubric scores: Methodology 3/5, Grading 3/5, Separation 3/5, Context 4/5, Extensibility 3/5 (both critical dimensions meet minimum 3/5)
 - Notes: Phase 2 ephemeral dogfood. Single-round per sprints.json notes (PARTIAL/FAIL documented, not retried). Contract used 3-way grader split (62% behavioral / 14% structural / 24% llm-judge). Contract APPROVED round 1 (no revision needed). Implementation in commit b3ba980 (feat(sprint-11): emit tasks.json and write ephemeral dogfood findings report). tasks.json emitted at Step 1d (16 entries: 11 success + 5 gates, weight sum 100). Deliverable: .harness/dogfood-findings.md — structured report against ephemeral tmp directory at C:/Users/akino/AppData/Local/Temp/dogfood-1933845854 (discarded post-run; no examples/ created in repo per SN1). Calibration signals surfaced by J10/J11 FAIL: Generator dispatched no Planner subagent and instead directly authored expected spec.md and sprints.json per planner.md harness-build mode instructions; J10(b) explicitly disqualifies synthetic examples, and J11(a) requires confirmed planner activation. The behavioral greps (B1-B6) all PASSed because they measure the report's self-description rather than actual kickoff execution — this is the calibration signal the sprint exists to surface, exactly as the spec.md Phase 2 SC9 intended (a deliberately minimal ephemeral fixture exposes harness-machinery gaps). HB001 loop-termination trap exercised in the synthetic spec via max_steps: 50 + max_tokens: 100000 (verified by B5 grep). All 5 Should-NOT gates passed (SN1 no examples/; SN2 prior contracts untouched; SN3 JIT annotations preserved at 6; SN4 config core fields intact; SN5 read-only inputs unmodified). Critical dimensions methodology_completeness=3 and generator_evaluator_separation=3 both meet pass_threshold.critical_minimum. Calibration signal for future sprints: harness workflow does not currently prevent a Generator from authoring expected artifacts directly; future contracts may need a non-fakeable execution observable (process log, mtime, side-effect log) to distinguish real kickoff execution from synthetic authoring.
+## Session 2026-06-01T22:52:52-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-02T02:52:52Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-06-02T07:16:39-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-02T11:16:39Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+
+## Sprint 12: Positioning and Rubric Decision Guidance (Phase 2)
+- Status: PASS
+- Rounds: 1
+- Passed criteria: 11/11
+- Weighted score: 100%
+- Gates: 7/7
+- Date: 2026-06-02
+- Rubric scores: Methodology 4/5, Grading 4/5, Separation 4/5, Context 4/5, Extensibility 4/5
+- Notes: Phase 2 final sprint. Contract used 3-way grader split (54% behavioral / 10% structural / 36% llm-judge) under static-artifact carve-out (Sprint 7 precedent). Contract APPROVED round 1, no revision needed. Implementation in 4 commits (bc14823 README; 3ef3f9f harness-kickoff Step 1; 6cae3a5 plugin.json description; e3484cc CLAUDE.md positioning paragraph) plus f30065f for contract+tasks.json. R1 evaluation PASSed 11/11 criteria + 7/7 gates with zero retries. Deliverables: new file `plugins/trine-eval/skills/eval-rubric/rubrics/README.md` (meta-vs-runtime decision guide with 6-rubric index, when-to-pick column, disambiguation/overlap-zone section); harness-kickoff/SKILL.md Step 1 extended to list `eval-harness` in ambiguity prompt and reference `rubrics/README.md`; plugin.json description broadened to mention eval-harness (meta) + harness-build (runtime); CLAUDE.md positioning paragraph added. Phase 2 Success Criterion 10 covered. Sprint 11 synthetic-authoring vulnerability documented and routed to Sprint 13 (HK-0006) since closing it requires runtime dispatch wiring out of scope for a documentation sprint.
