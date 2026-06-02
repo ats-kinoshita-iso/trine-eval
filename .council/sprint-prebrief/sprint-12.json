@@ -1,0 +1,25 @@
+{
+  "sprint_number": 12,
+  "classified_at": "2026-06-02T11:45:00Z",
+  "classified_by_agent": "orchestrator",
+  "cynefin": "complicated",
+  "confidence": 0.7,
+  "rationale": "Sprint 12 (Positioning and rubric decision guidance, Phase 2 final sprint) delivers three additive documentation/routing features: (1) rubric-decision-guide — plugins/trine-eval/skills/eval-rubric/rubrics/README.md explaining when to use eval-harness (meta) vs harness-build (runtime); (2) kickoff-rubric-router — routing logic in harness-kickoff so the kickoff selects the correct rubric based on project type; (3) documentation-pass — sweep over CLAUDE.md / plugin.json description. Cause-effect is knowable: Sprint 7 delivered the harness-build rubric (referenced in the README guide), Sprint 10 delivered the planner harness-build mode (the kickoff router calls into it), Sprint 11's PARTIAL outcome surfaced a concrete calibration signal (synthetic-authoring vs real-dispatch) that the rubric-router will need to address explicitly. Solution space is enumerable — three distinct documentation/routing artifacts with templated structure. Not 'clear' (more than mechanical — the eval-harness-vs-harness-build decision is a real design judgment surfaced by DEC-0003 watchpoint) and not 'complex' (no novel discovery; the routing logic is informed by Sprint 10 dual-signal detection and Sprint 11 dogfood findings). Confidence 0.7 because the kickoff-rubric-router feature touches plugin source that Sprint 11 left unverified at the dispatch layer (HK-0006 — Generator could not nest-dispatch Planner; the router will be the test of whether the same dispatch path works at the kickoff layer). Architect P-A2 from Sprint 11 fan-out (deferred Batch D) recommends Sprint 12's contract include a behavioral verification step for the rubric-router planner-dispatch path; that recommendation should be folded into contract negotiation. Sprint 13 (Phase 1.6 governance hardening + workflow-step port) follows and closes HK-0003 / HK-0004 structurally.",
+  "expected_loop_shape": "plan-then-execute-loop",
+  "projection_manifest": [
+    ".harness/spec.md",
+    ".harness/sprints.json",
+    ".harness/sprint-state.json",
+    "CLAUDE.md",
+    "plugins/trine-eval/.claude-plugin/plugin.json",
+    "plugins/trine-eval/skills/eval-rubric/SKILL.md",
+    "plugins/trine-eval/skills/eval-rubric/rubrics/eval-harness.md",
+    "plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md",
+    "plugins/trine-eval/skills/harness-kickoff/SKILL.md",
+    "plugins/trine-eval/agents/planner.md",
+    ".harness/dogfood-findings.md",
+    ".council/decision-log.jsonl",
+    ".council/standard-work.json"
+  ],
+  "autonomy_floor_observed": 4
+}
