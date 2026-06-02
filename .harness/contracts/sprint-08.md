@@ -6,6 +6,8 @@
   - Issue 1 (BLOCKING): S9 secondary verification command fixed — changed `jq '[.failures[0:3].source_ref]'` to `jq '[.failures[0:3][].source_ref]'`.
   - Issue 2 (BLOCKING): S7, S8, and S9 reclassified from Structural to Behavioral (renumbered B6, B7, B8); behavioral total raised from 52% to 66%; exception acknowledgment removed; weight breakdown updated to 66%/12%/22%.
   - Issue 3 (ADVISORY): B4 parenthetical corrected to accurately describe Sprint 8's role as a precondition for Phase 2 success criterion #9, not the criterion itself.
+- **Rev 2 (2026-06-02) — SN2 carve-out renumbering (Sprint 13 plan amendment):**
+  Renumber stale sprint references throughout: Sprint 9→10 (Planner harness-build), Sprint 10→11 (Ephemeral dogfood / ephemeral harness fixture), Sprint 11→12 (Positioning). Authorized under the SN2 carve-out in `sprint-contract/SKILL.md`. No criterion text, weights, or gate logic were changed.
 
 ## What I Will Build
 
@@ -65,7 +67,7 @@ entry point exists for the kickoff skill itself).
    loop termination bound in its text. PASS when loop-dimension count >= 1 and at least
    one success_criteria for that dimension references a numeric or terminable bound
    (precondition for Phase 2 success criterion #9: seeding at least one loop-termination catalog
-   entry that Sprint 10 will exercise when grading an ephemeral harness fixture).
+   entry that Sprint 11 will exercise when grading an ephemeral harness fixture).
 
 5. **SKILL.md merge procedure is simulation-traceable for a fresh kickoff** [weight: 10%]:
    Simulate the kickoff merge procedure documented in the updated `bootstrap-failures/SKILL.md`:
@@ -227,11 +229,11 @@ compliance, and `rubric_dimension` matches an exact dimension name from `harness
 
 ## Out of Scope
 
-- **Planner harness-build mode (Sprint 9):** The `playbook_stage` field on sprint entries and
+- **Planner harness-build mode (Sprint 10):** The `playbook_stage` field on sprint entries and
   Planner template tuning for harness-build projects are NOT part of this sprint.
-- **End-to-end ephemeral dogfood validation (Sprint 10):** Kickoff against a tmp fixture and
+- **End-to-end ephemeral dogfood validation (Sprint 11):** Kickoff against a tmp fixture and
   `.harness/dogfood-findings.md` are NOT part of this sprint.
-- **Positioning README and rubric decision guide (Sprint 11):** `rubrics/README.md` explaining
+- **Positioning README and rubric decision guide (Sprint 12):** `rubrics/README.md` explaining
   when to use `eval-harness` vs `harness-build` is NOT part of this sprint.
 - **Changes to the harness-build rubric:** `rubrics/harness-build.md` is not modified by this
   sprint — it was delivered in Sprint 7 and is consumed read-only.
@@ -434,7 +436,7 @@ harness-build rubric grades a deliberately minimal ephemeral harness fixture (no
 termination**."
 
 Sprint 8 creates the *catalog template* that seeds loop-termination entries. It does not
-grade any harness fixture. Spec criterion #9 refers to the end-to-end validation in Sprint 10.
+grade any harness fixture. Spec criterion #9 refers to the end-to-end validation in Sprint 11.
 B4 satisfies a *precondition* for spec #9, not spec #9 itself.
 
 The B4 criterion is sound and well-specified; the parenthetical simply mislabels the traceability.
@@ -447,7 +449,7 @@ This does not affect PASS/FAIL logic.
 to:
 
 > (precondition for Phase 2 success criterion #9: seeding at least one loop-termination catalog
-> entry that Sprint 10 will exercise when grading an ephemeral harness fixture)
+> entry that Sprint 11 will exercise when grading an ephemeral harness fixture)
 
 ---
 
@@ -554,7 +556,7 @@ which is an archival record, not operative contract text). RESOLVED.
 The B4 criterion now ends with:
 
 > (precondition for Phase 2 success criterion #9: seeding at least one loop-termination catalog
-> entry that Sprint 10 will exercise when grading an ephemeral harness fixture)
+> entry that Sprint 11 will exercise when grading an ephemeral harness fixture)
 
 This matches the exact suggested fix from Round 1. The overclaiming language "(Phase 2 success
 criterion #9 — loop termination exercises the UNCONDITIONAL gate)" is gone. RESOLVED.

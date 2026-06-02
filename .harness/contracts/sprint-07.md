@@ -7,6 +7,9 @@
 2. **SN1 incorrect baseline** — Corrected count from 5 to 6 (Steps 1, 2, 2b, 3, 4, 5); tightened threshold from `>= 5` to `>= 6`.
 3. **B1/B2 "behavioral" labeling advisory** — Retained "simulation behavioral" framing (option b); added explicit one-sentence acknowledgment to the Behavioral section header.
 
+**Rev 2 (2026-06-02) — SN2 carve-out renumbering (Sprint 13 plan amendment):**
+Renumber stale Out of Scope sprint references: Sprint 9→10 (Planner harness-build), Sprint 10→11 (Ephemeral dogfood), Sprint 11→12 (Positioning). Authorized under the SN2 carve-out in `sprint-contract/SKILL.md`. No criterion text, weights, or gate logic were changed.
+
 ## What I Will Build
 
 Create `plugins/trine-eval/skills/eval-rubric/rubrics/harness-build.md` — a 7-dimension rubric for evaluating agent runtime harnesses against the "Playbook for Building Agent Harnesses" stages, including three UNCONDITIONAL hard-threshold gates (loop termination & bounds, sandboxing, governance placement). Register the new rubric as the sixth entry in `plugins/trine-eval/skills/eval-rubric/SKILL.md`'s Available Rubrics list. Update `plugins/trine-eval/skills/harness-kickoff/SKILL.md` so that Step 1 recognizes `harness-build` as a valid project type and routes to the new rubric.
@@ -104,9 +107,9 @@ The 7 dimensions should map roughly to the following themes (exact names may dif
 ## Out of Scope
 
 - **Bootstrap failure catalog (Sprint 8):** The `templates/by-rubric/harness-build.json` playbook-traps template is NOT part of this sprint. Sprint 8 delivers that artifact.
-- **Planner harness-build mode (Sprint 9):** The `playbook_stage` field on sprint entries and Planner template tuning for harness-build projects are NOT part of this sprint.
-- **Ephemeral dogfood validation (Sprint 10):** End-to-end kickoff against a tmp fixture and `.harness/dogfood-findings.md` are NOT part of this sprint.
-- **Positioning README and rubric decision guide (Sprint 11):** `plugins/trine-eval/skills/eval-rubric/rubrics/README.md` explaining when to use `eval-harness` vs `harness-build` is NOT part of this sprint.
+- **Planner harness-build mode (Sprint 10):** The `playbook_stage` field on sprint entries and Planner template tuning for harness-build projects are NOT part of this sprint.
+- **Ephemeral dogfood validation (Sprint 11):** End-to-end kickoff against a tmp fixture and `.harness/dogfood-findings.md` are NOT part of this sprint.
+- **Positioning README and rubric decision guide (Sprint 12):** `plugins/trine-eval/skills/eval-rubric/rubrics/README.md` explaining when to use `eval-harness` vs `harness-build` is NOT part of this sprint.
 - **Changes to the eval-harness rubric:** The existing `rubrics/eval-harness.md` file is not modified by this sprint.
 - **New hooks or config schema fields:** No harness-lifecycle hooks or config schema changes are part of this sprint.
 

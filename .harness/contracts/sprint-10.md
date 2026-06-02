@@ -13,6 +13,16 @@ the harness-build example block (which also contains `"number": 1` and correctly
 Updated: B7 criterion text, B7 entry in Technical Notes behavioral classification, and B7
 pre-sprint baseline entry in Technical Notes baselines table.
 
+### DEC-0011 awk-anchor fix (2026-06-02 — SN2 carve-out, Sprint 13 plan amendment)
+
+**Fix — B7 awk anchor corrected:** `planner.md` uses `### Artifact 2:` (h3), not
+`## Artifact 2` (h2). The original awk start pattern `/^## Artifact 2/` never matches,
+causing the extraction to return nothing (trivially 0 — a false pass). Corrected to
+`/^### Artifact 2:/`. The boundary pattern `/^## [A-Z]/` is unchanged; the next h2 heading
+after the h3 block is `## Rules`, which correctly terminates the extraction. Updated in B7
+criterion text, Technical Notes baselines table, and Evaluator Review pre-sprint baseline.
+Authorized under the SN2 carve-out in `sprint-contract/SKILL.md`.
+
 **Fix 2 — Rule count correction (ADVISORY):** Changed "currently 6 rules" to "currently 7 rules"
 in J11(c) and updated SN1 prose from "six rules must remain" to "seven rules" (via the clarifying
 note added after the five-verbatim-anchor list). The planner.md Rules section has 7 bullet-point
@@ -128,11 +138,11 @@ execution-verified verdicts analogous to Sprint 8's jq reclassification).
    Run `grep -c 'playbook_stage' plugins/trine-eval/agents/planner.md` and capture the total
    count (expected >= 2 per B3). Then verify that the playbook_stage field only appears in
    the harness-build-specific section by checking that the default sprints.json example block
-   in the planner.md (the one under `## Artifact 2:` for non-harness-build projects) does NOT
+   in the planner.md (the one under `### Artifact 2:` for non-harness-build projects) does NOT
    contain `playbook_stage`. Verify by extracting only the Artifact 2 section (from its heading
    up to but not including the next `##`-level heading) and counting `playbook_stage` occurrences:
    ```
-   awk '/^## Artifact 2/,/^## [A-Z]/' plugins/trine-eval/agents/planner.md | grep -c 'playbook_stage'
+   awk '/^### Artifact 2:/,/^## [A-Z]/' plugins/trine-eval/agents/planner.md | grep -c 'playbook_stage'
    ```
    assert count = 0. This command is bounded to the Artifact 2 default section and will not
    bleed into the harness-build example block added by this sprint. Pre-sprint baseline: 0
@@ -390,7 +400,7 @@ Under this classification:
   a FAIL, proving non-trivial execution signal). Classified behavioral for the same reason
   Sprint 8's B6 (`jq empty`) was behavioral: a command runs and a FAIL would be detectable.
 - B6: pre-sprint count = 0, post-sprint expected >= 1. → Behavioral.
-- B7: `awk '/^## Artifact 2/,/^## [A-Z]/' | grep -c 'playbook_stage'` runs and produces a
+- B7: `awk '/^### Artifact 2:/,/^## [A-Z]/' | grep -c 'playbook_stage'` runs and produces a
   specific count; FAIL is detectable if `playbook_stage` appears in the Artifact 2 section.
   Pre-sprint: 0 (verified). The awk bound ensures only the default block is inspected,
   avoiding false positives from the harness-build example block added by this sprint.
@@ -417,7 +427,7 @@ Weight breakdown:
 - `grep -c '^1\. Read existing project files'` in planner.md → **1** (exit 0). B5 is a
   preservation check — baseline = expected = 1. Not a no-op because reduction to 0 would fail.
 - `grep -ci 'non.harness.build\|default path\|project_type.*harness.build'` in planner.md → **0** (exit 1). B6 is not a no-op.
-- `awk '/^## Artifact 2/,/^## [A-Z]/' plugins/trine-eval/agents/planner.md | grep -c 'playbook_stage'` → **0** pre-sprint. B7 awk-bounded extraction confirmed at 0.
+- `awk '/^### Artifact 2:/,/^## [A-Z]/' plugins/trine-eval/agents/planner.md | grep -c 'playbook_stage'` → **0** pre-sprint. B7 awk-bounded extraction confirmed at 0.
 - `wc -l` on planner.md → **70** lines (exit 0). S8 threshold of >= 80 is not a no-op.
 - `grep -c 'harness.build.*only\|SCOPED.*harness.build'` in planner.md → **0** (exit 1). S9 is not a no-op.
 - `grep -c '<!-- Context scope at this step:'` in harness-kickoff/SKILL.md → **6** (exit 0). SN3 baseline confirmed.
