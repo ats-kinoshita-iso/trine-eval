@@ -20,7 +20,7 @@ Check if `.harness/config.json` already exists. If it does, read it and confirm 
 If no config exists, determine the project type by:
 1. Reading only the necessary project manifest files: `CLAUDE.md`, `package.json`, `pyproject.toml`, `Cargo.toml`, `go.mod`, or similar
 2. Looking at existing source code structure (read only top-level files — defer deep reads)
-3. If the type is ambiguous, ask the user to choose: `web-app`, `rag-system`, `cli-tool`, `api-service`, or `harness-build` (for agent runtime harnesses evaluated against the playbook stages)
+3. If the type is ambiguous, ask the user to choose: `web-app`, `rag-system`, `cli-tool`, `api-service`, `eval-harness`, or `harness-build` (for agent runtime harnesses evaluated against the playbook stages). For harness-adjacent projects: choose `eval-harness` (meta layer — grading the eval methodology itself) when the primary deliverable is the eval infrastructure such as contract format, grader hierarchy, or sprint workflow; choose `harness-build` (runtime layer — grading the agent control plane) when the primary deliverable is the agentic loop, tool registry, sandboxing, or governance. See `plugins/trine-eval/skills/eval-rubric/rubrics/README.md` for the full decision guide.
 
 ## Step 2: Create .harness/ Directory
 
