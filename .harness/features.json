@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "schema_note": "Canonical feature inventory. Level-5 only modifications. Each feature has {id, title, phase, status, sprint, slug, must_should_nice}.",
-  "last_updated": "2026-06-02T11:55:30Z",
+  "last_updated": "2026-06-02T13:00:00Z",
   "features": [
     {
       "id": "F01",
@@ -226,6 +226,42 @@
       "status": "implemented",
       "sprint": 12,
       "slug": "documentation-pass",
+      "must_should_nice": "should"
+    },
+    {
+      "id": "F25",
+      "title": "Workflow-step port (Steps 0.5/1d/3a-3e + Operational Notes)",
+      "phase": "1.6",
+      "status": "implemented",
+      "sprint": 13,
+      "slug": "workflow-step-port",
+      "must_should_nice": "must"
+    },
+    {
+      "id": "F26",
+      "title": "Bidirectional council-check gates (pre-sprint warn + post-sprint auto-trigger)",
+      "phase": "1.6",
+      "status": "implemented",
+      "sprint": 13,
+      "slug": "council-check-gates",
+      "must_should_nice": "must"
+    },
+    {
+      "id": "F27",
+      "title": "SN2 renumbering carve-out for approved markdown contracts",
+      "phase": "1.6",
+      "status": "implemented",
+      "sprint": 13,
+      "slug": "sn2-renumbering-carveout",
+      "must_should_nice": "must"
+    },
+    {
+      "id": "F28",
+      "title": "Stale Sprint 9/10/11 reference cleanup in sprint-07/08/10",
+      "phase": "1.6",
+      "status": "implemented",
+      "sprint": 13,
+      "slug": "stale-sprint-refs-cleanup",
       "must_should_nice": "should"
     }
   ]

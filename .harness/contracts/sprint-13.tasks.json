@@ -1,0 +1,176 @@
+{
+  "sprint": 13,
+  "tasks": [
+    {
+      "task_id": "s13-c1",
+      "criterion": "Step 0.5 (regression gate) is present in sprint-workflow/SKILL.md [weight: 8%]: Run `grep -c '## Step 0.5' plugins/trine-eval/skills/sprint-workflow/SKILL.md` and assert count >= 1. Then run `grep -ci 'regression.*gate\\|regression\\.json\\|regression\\.enabled' plugins/trine-eval/skills/sprint-workflow/SKILL.md` and assert count >= 3. Pre-sprint baseline: 0/0. Post-sprint: count >= 1 for heading, count >= 3 for key terms. PASS when both conditions hold.",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -c '## Step 0.5' plugins/trine-eval/skills/sprint-workflow/SKILL.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s13-c2",
+      "criterion": "Step 1d (tasks.json emission point) is present in sprint-workflow/SKILL.md [weight: 8%]: Run `grep -c '### 1d' plugins/trine-eval/skills/sprint-workflow/SKILL.md` and assert count >= 1. Then run `grep -ci 'emit_tasks_json\\|tasks\\.json.*emit\\|APPROVED.*tasks\\|tasks.*APPROVED' plugins/trine-eval/skills/sprint-workflow/SKILL.md` and assert count >= 2. Pre-sprint baseline: 0. Post-sprint: both conditions met. PASS when both hold.",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -c '### 1d' plugins/trine-eval/skills/sprint-workflow/SKILL.md",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s13-c3",
+      "criterion": "Steps 3c, 3d, and 3e are present in sprint-workflow/SKILL.md [weight: 8%]: Run grep for `### 3c`, `### 3d`, `### 3e` in plugins/trine-eval/skills/sprint-workflow/SKILL.md and assert each returns count >= 1. Pre-sprint baseline: all three return 0 (the file already has `### 3a` and `### 3b` but not 3c/3d/3e). Post-sprint: all three >= 1. PASS when all three hold. Evaluator should also confirm `### 3a` and `### 3b` remain present (additive integrity).",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -c '### 3c' plugins/trine-eval/skills/sprint-workflow/SKILL.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s13-c4",
+      "criterion": "Operational Notes section is present in sprint-workflow/SKILL.md [weight: 6%]: Run `grep -c '## Operational Notes' plugins/trine-eval/skills/sprint-workflow/SKILL.md` and assert count >= 1. Then run `grep -ci 'Evaluator Fallback' plugins/trine-eval/skills/sprint-workflow/SKILL.md` and `grep -ci 'thinking\\.profile' plugins/trine-eval/skills/sprint-workflow/SKILL.md` and assert each >= 1. Pre-sprint baseline: 0/0/0. Post-sprint: all >= 1. PASS when all three hold.",
+      "grader_type": "behavioral",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": "grep -c '## Operational Notes' plugins/trine-eval/skills/sprint-workflow/SKILL.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s13-c5",
+      "criterion": "Pre-sprint governance warn-only gate (b1) is present in sprint-workflow/SKILL.md [weight: 8%]: Run `grep -ci 'sprint-prebrief\\|governance\\.review_frequency\\|warn.*missing\\|missing.*prebrief' plugins/trine-eval/skills/sprint-workflow/SKILL.md` and assert count >= 2. Then run `grep -ci 'WARN\\|warn' plugins/trine-eval/skills/sprint-workflow/SKILL.md` and assert count >= 1. Pre-sprint baseline: 0/0. Post-sprint: first >= 2, second >= 1. PASS when both hold.",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -ci 'sprint-prebrief\\|governance\\.review_frequency\\|warn.*missing\\|missing.*prebrief' plugins/trine-eval/skills/sprint-workflow/SKILL.md",
+      "rubric_dimension": "extensibility_aci"
+    },
+    {
+      "task_id": "s13-c6",
+      "criterion": "Post-sprint auto-trigger gate (b2) is present in sprint-workflow/SKILL.md [weight: 8%]: Run `grep -ci 'council-autorun\\|henkaten-council.*council-autorun\\|auto-trigger\\|every-sprint' plugins/trine-eval/skills/sprint-workflow/SKILL.md` and assert count >= 2. Then run `grep -ci 'andon.*stop\\|andon.*halt\\|andon-stop' plugins/trine-eval/skills/sprint-workflow/SKILL.md` and assert count >= 1 (auto-trigger must reference andon-stop protocol). Pre-sprint baseline: 0/0. Post-sprint: first >= 2, second >= 1. PASS when both hold.",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -ci 'council-autorun\\|henkaten-council.*council-autorun\\|auto-trigger\\|every-sprint' plugins/trine-eval/skills/sprint-workflow/SKILL.md",
+      "rubric_dimension": "extensibility_aci"
+    },
+    {
+      "task_id": "s13-c7",
+      "criterion": "SN2 carve-out amendment is present in sprint-contract/SKILL.md [weight: 8%]: Run `grep -ci 'SN2.*carve-out\\|carve-out.*SN2\\|renumbering-only\\|renumbering.*edit\\|Revision History.*carve' plugins/trine-eval/skills/sprint-contract/SKILL.md` and assert count >= 1. Then run `grep -ci 'plan-amendment.*commit\\|amendment.*commit\\|Revision History.*block' plugins/trine-eval/skills/sprint-contract/SKILL.md` and assert count >= 1. Pre-sprint baseline: 0/0. Post-sprint: both >= 1. PASS when both hold.",
+      "grader_type": "behavioral",
+      "weight": 8,
+      "is_gate": false,
+      "verification_command": "grep -ci 'SN2.*carve-out\\|carve-out.*SN2\\|renumbering-only\\|renumbering.*edit\\|Revision History.*carve' plugins/trine-eval/skills/sprint-contract/SKILL.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s13-c8",
+      "criterion": "Stale Sprint 9/10/11 references corrected to Sprint 10/11/12 in sprint-07.md [weight: 6%]: Run `grep -c 'Sprint 10.*Planner harness-build\\|Planner harness-build.*Sprint 10' .harness/contracts/sprint-07.md` and assert count >= 1. Run `grep -c 'Sprint 11.*Ephemeral\\|Ephemeral.*Sprint 11' .harness/contracts/sprint-07.md` and assert count >= 1. Run `grep -c 'Sprint 12.*Positioning\\|Positioning.*Sprint 12' .harness/contracts/sprint-07.md` and assert count >= 1. Pre-sprint baseline: 0/0/0 (current file references Sprint 9/10/11). PASS when all three conditions hold.",
+      "grader_type": "behavioral",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": "grep -c 'Sprint 10.*Planner harness-build\\|Planner harness-build.*Sprint 10' .harness/contracts/sprint-07.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s13-c9",
+      "criterion": "Stale references corrected in sprint-08.md and DEC-0011 awk-anchor fixed in sprint-10.md [weight: 6%]: Run `grep -c 'Sprint 10.*Planner harness-build\\|Planner.*Sprint 10' .harness/contracts/sprint-08.md` and assert count >= 1. Run `grep -c 'Sprint 11.*End-to-end\\|End-to-end.*Sprint 11\\|Sprint 11.*ephemeral' .harness/contracts/sprint-08.md` and assert count >= 1. Run `grep -c 'Sprint 12.*Positioning\\|Positioning.*Sprint 12' .harness/contracts/sprint-08.md` and assert count >= 1. Run `grep -c '### Artifact 2:' .harness/contracts/sprint-10.md` and assert count >= 1 (confirms the awk anchor was corrected from `## Artifact 2` to `### Artifact 2:`). Pre-sprint baseline: 0/0/0/0. PASS when all four hold.",
+      "grader_type": "behavioral",
+      "weight": 6,
+      "is_gate": false,
+      "verification_command": "grep -c 'Sprint 10.*Planner harness-build\\|Planner.*Sprint 10' .harness/contracts/sprint-08.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s13-c10",
+      "criterion": "sprint-workflow/SKILL.md existing step headings are preserved unmodified [weight: 4%]: Run grep -c for each of `^## Step 0:`, `^## Step 1:`, `^## Step 2:`, `^## Step 3:`, `^## Step 4:`, `^## Step 5:` against plugins/trine-eval/skills/sprint-workflow/SKILL.md and assert each returns exactly 1. Pre-sprint baseline: all six return 1. Post-sprint: unchanged at 1 each. PASS when all six return exactly 1.",
+      "grader_type": "structural",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "grep -c '^## Step 0:' plugins/trine-eval/skills/sprint-workflow/SKILL.md",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s13-c11",
+      "criterion": "sprint-contract/SKILL.md Task Taxonomy section remains unmodified [weight: 4%]: Run `grep -c '## Task Taxonomy: sprint-NN.tasks.json' plugins/trine-eval/skills/sprint-contract/SKILL.md` and assert count == 1. Run `grep -c '\"behavioral\"\\|\"structural\"\\|\"llm-judge\"' plugins/trine-eval/skills/sprint-contract/SKILL.md` and assert count >= 3 (3-way enum examples intact). Pre-sprint baseline: heading count = 1, enum count >= 3. Post-sprint: same. PASS when both hold.",
+      "grader_type": "structural",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": "grep -c '## Task Taxonomy: sprint-NN.tasks.json' plugins/trine-eval/skills/sprint-contract/SKILL.md",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s13-c12",
+      "criterion": "Ported step text quality: Steps 0.5, 1d, 3a-3e, and Operational Notes are complete, coherent, and additive [weight: 22%]: Read the updated plugins/trine-eval/skills/sprint-workflow/SKILL.md. PASS requires ALL of: (a) Step 0.5 covers 4 guard conditions, verbatim-execution mandate, Windows-bash hazard note, run-file shape, and fail_fast default. (b) Step 1d names the trigger condition (post-APPROVED, pre-IMPLEMENTATION), config guard (taxonomy.emit_tasks_json), schema cross-reference (sprint-contract/SKILL.md), audit-chain consequence, and features.json advancement (DEC-0019). (c) Steps 3c-3e: 3c distinguishes trial loop from retry loop with the `trials` knob and `-tT` file naming; 3d covers batch API trigger conditions and the byte-for-byte file-shape invariant; 3e covers trailer extraction protocol, failure-tolerant posture, and backward compatibility. (d) Operational Notes contains (i) Evaluator Fallback subsection (tool-limitation-only escape valve, Process Note disclosure, 3/5 rubric penalty) and (ii) thinking.profile subsection (default/fast/thorough reserved values and runtime translations). (e) Additive integrity: existing Step 0-5 bodies, JIT annotations, Lazy Loading table, Session Resumption section unchanged.",
+      "grader_type": "llm-judge",
+      "weight": 22,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s13-c13",
+      "criterion": "Council-gate wording quality: b1 and b2 gates are correct, complete, and respect the andon-stop protocol [weight: 4%]: Read the governance-gate additions in plugins/trine-eval/skills/sprint-workflow/SKILL.md. PASS requires ALL of: (a) b1 fires when governance.enabled is true AND governance.review_frequency is set; checks for .council/sprint-prebrief/sprint-{NN}.json; emits WARN if missing; does NOT block; placed within Step 0 before Step 0.5. (b) b2 fires when governance.enabled is true AND governance.review_frequency == 'every-sprint'; invokes /henkaten-council:council-autorun as the final action of Step 5 after progress.md/sprint-state.json/git checkpoint, before user-report; surfaces andon halt or autonomy-floor breach to the user before next-sprint offer. (c) Backward compat: when governance.enabled is false or governance key absent, neither gate fires. (d) No blocking in b1 (warn-only; no fail_fast wording).",
+      "grader_type": "llm-judge",
+      "weight": 4,
+      "is_gate": false,
+      "verification_command": null,
+      "rubric_dimension": "extensibility_aci"
+    },
+    {
+      "task_id": "s13-sn1",
+      "criterion": "Should NOT alter the substantive body of any existing step in sprint-workflow/SKILL.md (Steps 0, 1, 2, 3, 4, 5 and existing subsections): Port is additive only. JIT annotations (`<!-- Context scope at this step: -->`), Lazy Loading table, and Session Resumption section preserved. Verify: `grep -c '<!-- Context scope at this step:' plugins/trine-eval/skills/sprint-workflow/SKILL.md` assert count >= 5 (pre-sprint baseline: 5 at Steps 0, 1, 2, 4, 5). Verify `grep -c 'Lazy Loading' ...` >= 1 and `grep -c 'Session Resumption' ...` >= 1. All three conditions must hold.",
+      "grader_type": "behavioral",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "grep -c '<!-- Context scope at this step:' plugins/trine-eval/skills/sprint-workflow/SKILL.md",
+      "rubric_dimension": "context_engineering"
+    },
+    {
+      "task_id": "s13-sn2",
+      "criterion": "Should NOT modify the Sprint 9 Task Taxonomy section in sprint-contract/SKILL.md: The section is byte-for-byte intact except for the SN2 carve-out amendment (which is an additive separate section). Verify: `grep -c '## Task Taxonomy: sprint-NN.tasks.json' plugins/trine-eval/skills/sprint-contract/SKILL.md` assert count == 1 (heading unchanged). `grep -c 'grader_type.*behavioral.*structural.*llm-judge\\|\"behavioral\"\\|\"structural\"' ...` assert count >= 2 (3-way enum examples intact).",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "grep -c '## Task Taxonomy: sprint-NN.tasks.json' plugins/trine-eval/skills/sprint-contract/SKILL.md",
+      "rubric_dimension": "grading_architecture"
+    },
+    {
+      "task_id": "s13-sn3",
+      "criterion": "Should NOT apply semantic edits to sprint-07.md or sprint-08.md beyond renumbering: SN2 carve-out permits ONLY renumbering Sprint N references (9->10, 10->11, 11->12) and the addition of the required `## Revision History` block. Verify by inspecting `git diff HEAD -- .harness/contracts/sprint-07.md` and `git diff HEAD -- .harness/contracts/sprint-08.md`: the diff must contain ONLY lines where Sprint 9/10/11 is replaced by the corrected number, plus the new Revision History block. Any prose change, criterion text edit, weight change, or new criteria is a FAIL.",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "git diff HEAD -- .harness/contracts/sprint-07.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s13-sn4",
+      "criterion": "Should NOT modify .harness/spec.md: The Phase 1, 1.5, 1.6, and 2 sections are read-only for this sprint. Verify: `git diff HEAD -- .harness/spec.md` produces empty output.",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "git diff HEAD -- .harness/spec.md",
+      "rubric_dimension": "methodology_completeness"
+    },
+    {
+      "task_id": "s13-sn5",
+      "criterion": "Should NOT modify any prior sprint's eval results in .harness/evals/: Eval files are append-only. Verify: `git diff HEAD -- .harness/evals/` produces empty output. Pre-sprint baseline: all eval files committed and unmodified.",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "git diff HEAD -- .harness/evals/",
+      "rubric_dimension": "generator_evaluator_separation"
+    },
+    {
+      "task_id": "s13-sn6",
+      "criterion": "Should NOT remove or alter the core config fields in .harness/config.json (project_type, rubric, max_retries, governance.enabled): Verify `jq '.project_type == \"eval-harness\" and .rubric == \"eval-harness\" and .max_retries == 3 and .governance.enabled == true' .harness/config.json` outputs `true`.",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "jq '.project_type == \"eval-harness\" and .rubric == \"eval-harness\" and .max_retries == 3 and .governance.enabled == true' .harness/config.json",
+      "rubric_dimension": "grading_architecture"
+    }
+  ]
+}
