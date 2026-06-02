@@ -1,35 +1,40 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "procedures": [
     {
       "procedure_id": "PROC-001",
       "name": "Generator pre-flight verification-command checklist",
-      "description": "Before submitting a draft contract for Evaluator R1 review, the Generator executes every non-null `verification_command` in the draft literally against the pre-sprint repo state and records actual exit codes and stdout under a Technical Notes `Pre-flight verification` subsection. Closes the Evaluator-catches-contract-bug pattern observed across Sprints 8, 9, 10.",
+      "description": "Before submitting a draft contract for Evaluator R1 review, the Generator executes every non-null `verification_command` in the draft literally against the pre-sprint repo state and records actual exit codes and stdout under a Technical Notes `Pre-flight verification` subsection. Closes the Evaluator-catches-contract-bug pattern observed across Sprints 8, 9, 10. AMENDED DEC-0028 (Cycle 3): the pre-flight obligation is dual-anchored. The Generator-side step is retained as aspirational; additionally the EVALUATOR, at R1, affirmatively records that it executed each non-null verification_command against pre-sprint state, and flags any contract lacking a `Pre-flight verification` subsection as an advisory. Cycle 3 evidence (S11/S12/S13) showed the defect-prevention outcome was achieved via Evaluator pre-baselining rather than the Generator-side subsection, which was never surfaced.",
       "steps": [
         "For each criterion in the draft contract with a non-null verification_command, execute the command literally against the current pre-sprint repo state.",
         "Record the actual exit code and stdout for each command in a `Pre-flight verification` subsection of the contract's Technical Notes.",
         "For each command whose actual output disagrees with the contract's claimed pre-sprint baseline, either (a) fix the command, (b) update the baseline claim, or (c) explain the divergence in Technical Notes.",
         "Sanity-check each criterion: 'does this command actually verify what the criterion text says it does?' Reject any criterion where the answer is no.",
-        "Run this procedure BEFORE writing the final contract draft and submitting for Evaluator R1 review."
+        "Run this procedure BEFORE writing the final contract draft and submitting for Evaluator R1 review.",
+        "EVALUATOR R1 CHECKLIST (DEC-0028): At R1 review, the Evaluator MUST (a) execute each non-null verification_command in the draft against pre-sprint state and record the actual exit code/output in the R1 review, and (b) flag any contract that lacks a Generator-authored `Pre-flight verification` subsection as a non-blocking advisory. This dual-anchors PROC-001 so the procedure describes the active defect-prevention mechanism, not only the aspirational Generator step."
       ],
       "applicable_to": [
         "contract drafting",
         "CONTRACT_PROPOSAL",
-        "CONTRACT_REVISION"
+        "CONTRACT_REVISION",
+        "CONTRACT_REVIEW (R1) -- Evaluator pre-flight affirmation"
       ]
     },
     {
       "procedure_id": "PROC-002",
       "name": "Behavioral-coverage floor justification standard",
-      "description": "When the contract's computed behavioral coverage is within 5 percentage points of the 60% floor (i.e., 60-65%), the Technical Notes block MUST include a `Coverage Justification` subsection. Addresses the downward trend toward floor (Sprints 8/9/10 = 66/63/62) observed in cycle 2.",
+      "description": "When the contract's computed behavioral coverage is within 5 percentage points of the 60% floor (i.e., 60-65%), the Technical Notes block MUST include a `Coverage Justification` subsection. Addresses the downward trend toward floor (Sprints 8/9/10 = 66/63/62) observed in cycle 2. AMENDED DEC-0028 (Cycle 3): the `Coverage Justification` heading is MANDATORY VERBATIM when coverage is in [60%,65%], and the static-artifact carve-out now has a codified permission test. Actions HK-0009-UPDATE-S12 recommendation (i). Evidence: 6-sprint trend S8=66/S9=63/S10=62/S11=62/S12=54/S13=66; S11 grazed the band with a non-conformant heading, S12 used the carve-out at 54%.",
       "steps": [
         "When behavioral coverage is in the 60-65% band, the Technical Notes block MUST include a `Coverage Justification` subsection answering three questions: (a) Is the sprint's natural behavioral surface limited (non-runnable static artifact)? (b) Has any criterion been reclassified from structural or llm-judge to behavioral to lift coverage, and if so what deterministic execution signal supports the reclassification? (c) Does any criterion use a pre-sprint baseline equal to its post-sprint expected value (preservation check), and if so how is the non-no-op claim defended?",
         "When reclassification happens within a single contract revision cycle (R1 -> R2), the Revision History MUST include a one-paragraph rationale citing the deterministic execution signal.",
-        "The Evaluator's R1 review template SHOULD include an explicit check for this subsection when coverage is within the band."
+        "The Evaluator's R1 review template SHOULD include an explicit check for this subsection when coverage is within the band.",
+        "MANDATORY HEADING (DEC-0028): When behavioral coverage is in [60%,65%], the labelled `Coverage Justification` heading is REQUIRED VERBATIM (not an alternative phrasing such as a generic \"Behavioral coverage\" block). A contract in the band without the exact heading is flagged at R1.",
+        "STATIC-ARTIFACT CARVE-OUT PERMISSION TEST (DEC-0028): The carve-out (behavioral coverage permitted below 60%) is allowed ONLY when all three hold: (a) every deliverable is a non-runnable static artifact with no shell entry point; (b) the Technical Notes state the coverage figure BOTH with and without any \"simulation behavioral\" criterion; (c) a precedent sprint invoking the carve-out is cited (e.g., Sprint 7, Sprint 12). If any condition fails, the carve-out is not permitted and the contract must reach >=60% behavioral."
       ],
       "applicable_to": [
         "contract drafting when behavioral coverage in [60%, 65%]",
-        "contract revision when reclassifying criteria across grader_type boundaries"
+        "contract revision when reclassifying criteria across grader_type boundaries",
+        "contract drafting invoking the static-artifact carve-out below the 60% floor"
       ]
     },
     {
@@ -48,7 +53,7 @@
       ]
     }
   ],
-  "updated_at": "2026-06-01T22:00:00Z",
-  "updated_by": "council-retro pdca (DEC-0012 ratified)",
-  "ratified_decision_id": "DEC-0012"
+  "updated_at": "2026-06-02T14:00:00Z",
+  "updated_by": "council-retro pdca Cycle 3 (DEC-0028 ratified)",
+  "ratified_decision_id": "DEC-0028"
 }
