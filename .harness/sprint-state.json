@@ -1,5 +1,5 @@
 {
-  "current_sprint": 11,
+  "current_sprint": 12,
   "sprints": [
     {
       "number": 1,
@@ -153,7 +153,34 @@
         "structural_pct": 8,
         "llm_judge_pct": 30
       }
+    },
+    {
+      "number": 11,
+      "title": "End-to-end ephemeral dogfood validation (Phase 2)",
+      "status": "partial",
+      "rounds": 1,
+      "criteria_passed": 9,
+      "criteria_total": 11,
+      "weighted_score": 76,
+      "phase": 2,
+      "rubric_scores": {
+        "methodology_completeness": 3,
+        "grading_architecture": 3,
+        "generator_evaluator_separation": 3,
+        "context_engineering": 4,
+        "extensibility_aci": 3
+      },
+      "should_not_gates": {
+        "passed": 5,
+        "total": 5
+      },
+      "grader_split": {
+        "behavioral_pct": 62,
+        "structural_pct": 14,
+        "llm_judge_pct": 24
+      },
+      "notes": "PARTIAL verdict \u00e2\u20ac\u201d single-round per contract. J10/J11 FAILed because Generator authored expected spec.md/sprints.json directly rather than dispatching Planner subagent. All deterministic criteria + 5/5 gates PASS. Calibration signal surfaced as intended by Phase 2 SC9."
     }
   ],
-  "last_updated": "2026-06-01T19:58:52-04:00"
+  "last_updated": "2026-06-01T22:52:04-04:00"
 }

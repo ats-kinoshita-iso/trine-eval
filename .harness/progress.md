@@ -172,3 +172,43 @@ Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
 - Date: 2026-06-01
 - Rubric scores: Methodology 4/5, Grading 4/5, Separation 5/5, Context 4/5, Extensibility 4/5
 - Notes: Third Phase 2 sprint. Contract used 3-way grader split (62% behavioral / 8% structural / 30% llm-judge); behavioral coverage achieved via shell-verifiable `grep` counts whose pre-sprint vs post-sprint expected values differ (Sprint 8 reclassification precedent). Contract negotiation took 2 rounds (R1 NEEDS REVISION cited two issues: B7 ambiguous extraction `grep -A 20 '"number": 1' planner.md` would match BOTH the default sprints.json example block AND the harness-build example block — a correct implementation would FAIL B7 as written; and J11(c)/SN1 mis-counted "6 rules" vs the 7 rules actually present in planner.md). R2 APPROVED after the Generator (a) replaced B7's verification command with `awk '/^## Artifact 2/,/^## [A-Z]/' planner.md | grep -c 'playbook_stage'` to bound extraction to the Artifact 2 default-section block, and (b) corrected J11(c) to "7 rules" with a clarifying note in SN1. Implementation in commit 9a00543 (`feat(sprint-10): add harness-build mode and playbook_stage scoping to planner.md`). planner.md grew 70 → 179 lines: new `## Harness-Build Mode` section appended after the existing project-type-agnostic Process section, documenting dual-signal mode detection (existing config.json `project_type` + prompt-keyword fallback for first-run), the 7 playbook stages in dependency order (Control Plane & Agentic Loop → Tool Registry & Sandboxing → Projection & Planning → Skills & Instruction Execution → Observation & Monitoring → External Affordances → Governance & Human Oversight), and the optional `playbook_stage` field SCOPED to harness-build projects only (A6 prior decision honored — non-harness-build projects MUST NOT emit the field). Backward-compat SN1 gate (CRITICAL per A6) protected via 5 verbatim `grep` anchors — all 5 returned count 1 post-implementation, confirming the default project-type-agnostic path survived byte-for-byte. tasks.json emitted at Step 1d per Sprint-9-ported in-repo schema: 16 entries (11 success + 5 gates), 100% weight sum, all task_ids unique, 3-way `grader_type` enum. R1 evaluation PASSed all 11 criteria + 5/5 gates with zero retries.
+## Session 2026-06-01T19:59:26-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-01T23:59:26Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-06-01T21:22:02-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-02T01:22:02Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-06-01T21:23:14-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-02T01:23:14Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-06-01T21:28:05-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-02T01:28:05Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-06-01T21:45:28-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-02T01:45:28Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-06-01T22:02:23-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-02T02:02:23Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+
+## Sprint 11: End-to-End Ephemeral Dogfood Validation (Phase 2)
+- Status: PARTIAL
+- Rounds: 1 (single-round per contract; PARTIAL is documented as calibration signal, not retried)
+- Passed criteria: 9/11 (B1, B2, B3, B4, B5, B6, S7, S8, S9 PASS; J10, J11 FAIL)
+- Weighted score: 76%
+- Gates: 5/5
+- Date: 2026-06-01
+- Rubric scores: Methodology 3/5, Grading 3/5, Separation 3/5, Context 4/5, Extensibility 3/5 (both critical dimensions meet minimum 3/5)
+- Notes: Phase 2 ephemeral dogfood. Single-round per sprints.json notes (PARTIAL/FAIL documented, not retried). Contract used 3-way grader split (62% behavioral / 14% structural / 24% llm-judge). Contract APPROVED round 1 (no revision needed). Implementation in commit b3ba980 (feat(sprint-11): emit tasks.json and write ephemeral dogfood findings report). tasks.json emitted at Step 1d (16 entries: 11 success + 5 gates, weight sum 100). Deliverable: .harness/dogfood-findings.md — structured report against ephemeral tmp directory at C:/Users/akino/AppData/Local/Temp/dogfood-1933845854 (discarded post-run; no examples/ created in repo per SN1). Calibration signals surfaced by J10/J11 FAIL: Generator dispatched no Planner subagent and instead directly authored expected spec.md and sprints.json per planner.md harness-build mode instructions; J10(b) explicitly disqualifies synthetic examples, and J11(a) requires confirmed planner activation. The behavioral greps (B1-B6) all PASSed because they measure the report's self-description rather than actual kickoff execution — this is the calibration signal the sprint exists to surface, exactly as the spec.md Phase 2 SC9 intended (a deliberately minimal ephemeral fixture exposes harness-machinery gaps). HB001 loop-termination trap exercised in the synthetic spec via max_steps: 50 + max_tokens: 100000 (verified by B5 grep). All 5 Should-NOT gates passed (SN1 no examples/; SN2 prior contracts untouched; SN3 JIT annotations preserved at 6; SN4 config core fields intact; SN5 read-only inputs unmodified). Critical dimensions methodology_completeness=3 and generator_evaluator_separation=3 both meet pass_threshold.critical_minimum. Calibration signal for future sprints: harness workflow does not currently prevent a Generator from authoring expected artifacts directly; future contracts may need a non-fakeable execution observable (process log, mtime, side-effect log) to distinguish real kickoff execution from synthetic authoring.
