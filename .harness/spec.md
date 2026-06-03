@@ -230,3 +230,40 @@ Applies to both phases:
 - No external dependencies — the harness runs purely through Claude Code's built-in tools
 
 **Phase 2 additional constraint:** No permanent example fixtures committed to the repo. Phase 2 Sprint 11 (renumbered from Sprint 10 after the Phase 1.5 insertion) validates the harness-build rubric against an ephemeral tmp-directory harness; findings persist as a single markdown report (`.harness/dogfood-findings.md`), not as committed source code.
+
+
+---
+
+## Phase S: Stabilization & Release Readiness
+
+### Phase S Vision
+
+Phases 1, 1.5, 1.6, and 2 delivered and self-validated the trine-eval upgrade across 13 sprints (12 PASS at 100% weighted, one designed PARTIAL). Phase S is not new product capability — it is the durability, coherence, and methodology-trust work required to take that body of work from "complete on a local branch" to "a clean, pushed, version-coherent, trustworthy baseline" that a subsequent research-driven feature phase can branch from safely. Phase S is sequenced as P0 -> P3 (durability -> product coherence -> methodology trust -> governance plumbing) and is intended to run via `/henkaten-council:council-autorun`, which auto-runs each sprint's full loop and stops only at sprint boundaries, irreversible/outward-facing actions (push, merge), and major course corrections.
+
+Phase S is additive and audit-preserving: no prior sprint contract, eval, decision, or henkaten record is rewritten. The append-only logs are committed, never mutated.
+
+### Phase S Feature List
+
+#### Phase S Must-have
+
+20. **Durability & clean baseline (P0, Sprint 14)** — Commit the uncommitted governance audit trail, prune stale worktree gitlinks, reach an empty `git status`, and push the 48 local-only commits. The push is a human-gated irreversible action.
+21. **Product coherence (P1, Sprint 15)** — Reconcile the version story (in-repo 0.2.0 vs cached 0.3.3) with a version bump; create the missing `marketplace.json` (or document cache-only distribution and correct CLAUDE.md); decide and execute the main-branch merge strategy. Three human-gated decisions.
+22. **Methodology trust (P2, Sprint 16)** — Fix the regression-pipeline exit-code-polarity mismatch so the 2 blocked saturated gates graduate; add exit-code-polarity authoring guidance to `sprint-contract`; extend the Step 0.5 Windows git-bash hazard note; document the `config.trials` consistency-measurement path.
+23. **Governance plumbing reconciliation (P3, Sprint 17)** — Document the validated-shape conventions the council loop relies on and produce an upstream schema proposal for henkaten-council, closing the repeated append-script validation friction without editing plugin-cache files.
+
+### Phase S Success Criteria
+
+11. After Sprint 14, `git status --porcelain` is empty, the `.council/audit-log.jsonl` trail is committed, no stale worktree gitlinks remain tracked, and the branch has been pushed (human-confirmed).
+12. After Sprint 15, `plugins/trine-eval/.claude-plugin/plugin.json` carries a single coherent version > 0.2.0; the repo's marketplace claim matches on-disk reality (a valid `marketplace.json` exists, or CLAUDE.md is corrected to cache-only); the main-branch strategy is executed or explicitly recorded.
+13. After Sprint 16, `.harness/regression/regression.json` holds correctly-polarised gates (config gate uses `jq -e`, examples gate uses `test ! -d`) that PASS via git-bash on the current good state; `sprint-contract` SKILL carries exit-code-polarity authoring guidance; Step 0.5 carries the extended Windows git-bash hazard note.
+14. After Sprint 17, an in-repo governance-conventions notes file and an upstream henkaten-council schema proposal exist; a dry-run council append using the documented conventions validates against the current unmodified schema.
+
+### Phase S Explicit Non-Goals
+
+- **No new product feature work.** HK-0006 (synthetic-authoring runtime detection) and the user's pending research-driven enhancement are the NEXT phase, not Phase S. Phase S only stabilizes the baseline they will build on.
+- **No editing of henkaten-council plugin-cache files.** Sprint 17 produces in-repo documentation + an upstream proposal; the actual schema change is an upstream plugin concern.
+- **No rewriting of any prior sprint's contract, eval, decision, or henkaten record.** Append-only discipline is preserved throughout.
+
+### Phase S Execution Note
+
+Run via `/henkaten-council:council-autorun` from Sprint 14. `config.governance.review_frequency` is `every-sprint`, so the Sprint-13 b2 auto-trigger fires the council fan-out after each sprint. Human input is required only at: each sprint-boundary proceed prompt; the Sprint 14 push and Sprint 15 merge (irreversible -> nemawashi Stage-4 confirm); and the Sprint 15 version/marketplace decisions (human-gates surfaced at runtime). A project `.claude/settings.json` permission allowlist auto-approves routine read-only / harness-internal commands so the autorun does not stop for them; `git push`, `git merge`, `git reset`, `git rebase`, and `rm` remain prompt-gated.

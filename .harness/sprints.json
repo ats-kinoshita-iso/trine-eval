@@ -229,7 +229,94 @@
         ".harness/contracts/sprint-0[1-8].md (only renumbering-only edits permitted under new SN2 carve-out)",
         ".harness/spec.md (existing Phase 1/1.5/2 sections)"
       ],
-      "notes": "Phase 1.6 audit-chain repair + governance hardening sprint. Closes HK-0003 (Sprints 7-9 council bypass) and HK-0004 (in-repo workflow-step gap). Three deliverables: (a) Port Steps 0.5/1d/3d/3a-3e and Operational Notes from cached v0.3.3 harness-sprint/SKILL.md into in-repo sprint-workflow/SKILL.md (closes HK-0004 dangling references at sprint-contract/SKILL.md:74,140,142). (b) Add bidirectional council-check gates to the workflow when config.governance.enabled is true (Architect P-05, extended post-Sprint-10 per user authorization 2026-06-01): (b1) Pre-sprint gate at Step 0 — if config.governance.review_frequency is set, check for .council/sprint-prebrief/sprint-NN.json and warn if missing. (b2) Post-sprint auto-trigger at Step 5 completion — if config.governance.review_frequency is \"every-sprint\", the workflow's final action is to invoke /henkaten-council:council-autorun for the sprint just completed before returning to the user, closing the HK-0003 manual-invocation gap by construction. The auto-trigger respects the existing council-autorun andon-stop protocol; an andon halt or autonomy-floor breach surfaces to the user before further sprints are offered. (c) Formal SN2 carve-out: amend sprint-contract methodology to permit renumbering-only edits to approved markdown contracts, with mandatory Revision History block citing the plan-amendment commit. Apply the carve-out by fixing stale Sprint 9/10/11 references in sprint-07.md and sprint-08.md per Scope Guardian #5a. Authorized by user ratification of post-Sprint-9 council fan-out (DEC-0010, DEC-0011, DEC-0012) and post-Sprint-10 user request to make the per-sprint cadence automatic (this commit). Inserted at end (Sprint 13) so Phase 2 (Sprints 10-12) completes without further plan perturbation."
+      "notes": "Phase 1.6 audit-chain repair + governance hardening sprint. Closes HK-0003 (Sprints 7-9 council bypass) and HK-0004 (in-repo workflow-step gap). Three deliverables: (a) Port Steps 0.5/1d/3d/3a-3e and Operational Notes from cached v0.3.3 harness-sprint/SKILL.md into in-repo sprint-workflow/SKILL.md (closes HK-0004 dangling references at sprint-contract/SKILL.md:74,140,142). (b) Add bidirectional council-check gates to the workflow when config.governance.enabled is true (Architect P-05, extended post-Sprint-10 per user authorization 2026-06-01): (b1) Pre-sprint gate at Step 0 \u2014 if config.governance.review_frequency is set, check for .council/sprint-prebrief/sprint-NN.json and warn if missing. (b2) Post-sprint auto-trigger at Step 5 completion \u2014 if config.governance.review_frequency is \"every-sprint\", the workflow's final action is to invoke /henkaten-council:council-autorun for the sprint just completed before returning to the user, closing the HK-0003 manual-invocation gap by construction. The auto-trigger respects the existing council-autorun andon-stop protocol; an andon halt or autonomy-floor breach surfaces to the user before further sprints are offered. (c) Formal SN2 carve-out: amend sprint-contract methodology to permit renumbering-only edits to approved markdown contracts, with mandatory Revision History block citing the plan-amendment commit. Apply the carve-out by fixing stale Sprint 9/10/11 references in sprint-07.md and sprint-08.md per Scope Guardian #5a. Authorized by user ratification of post-Sprint-9 council fan-out (DEC-0010, DEC-0011, DEC-0012) and post-Sprint-10 user request to make the per-sprint cadence automatic (this commit). Inserted at end (Sprint 13) so Phase 2 (Sprints 10-12) completes without further plan perturbation."
+    },
+    {
+      "number": 14,
+      "title": "Durability & clean baseline (P0)",
+      "phase": "stabilization",
+      "features": [
+        "working-tree-cleanup",
+        "audit-log-commit",
+        "branch-push"
+      ],
+      "estimated_complexity": "low",
+      "dependencies": [
+        13
+      ],
+      "human_gates": [
+        "branch-push (irreversible/outward-facing)"
+      ],
+      "protects_prior": [
+        ".council/audit-log.jsonl (append-only governance trail \u2014 commit, never rewrite)",
+        ".harness/ and .council/ history (all 13 prior sprints + decisions preserved)"
+      ],
+      "notes": "P0 stabilization. Bring the working tree to a clean, durable, pushed baseline before any new feature work. Deliverables: (a) commit the real .council/audit-log.jsonl (~964 uncommitted lines of governance trail); (b) remove the two stale worktree gitlinks (.claude/worktrees/focused-hofstadter-3b9fb5, jolly-perlman-094dc3) via git rm; (c) resolve the settings.local.json / progress.md / sprint-state.json session-noise so `git status --porcelain` is empty; (d) HUMAN GATE \u2014 push meta-eval/self-upgrade (48 commits currently local-only). Gradeable behavioral criteria: `git status --porcelain | wc -l` == 0; audit-log.jsonl tracked & committed; `git ls-files .claude/worktrees | wc -l` == 0. The push itself is NOT a graded criterion \u2014 it is an irreversible Step-5 completion action that council-autorun surfaces for Level-5 confirmation (reversibility table: git push = irreversible -> mandatory nemawashi)."
+    },
+    {
+      "number": 15,
+      "title": "Product coherence: version, marketplace, main-branch (P1)",
+      "phase": "stabilization",
+      "features": [
+        "plugin-version-reconcile",
+        "marketplace-manifest",
+        "main-branch-strategy"
+      ],
+      "estimated_complexity": "medium",
+      "dependencies": [
+        14
+      ],
+      "human_gates": [
+        "target version number (default 0.4.0 to leapfrog cached 0.3.3)",
+        "marketplace intent (publish vs cache-only)",
+        "merge meta-eval/self-upgrade -> main (irreversible/outward-facing)"
+      ],
+      "protects_prior": [
+        "plugins/trine-eval/skills/**, agents/** (Sprint 1-13 content unchanged; only version metadata + manifest added)",
+        "CLAUDE.md (skill list preserved; only the marketplace claim reconciled)"
+      ],
+      "notes": "P1 stabilization. Resolve the version/distribution incoherence: in-repo plugin.json is 0.2.0 while every session ran against cached 0.3.3, and the Sprint 7-13 work is stranded behind the cache. Deliverables: (a) HUMAN GATE \u2014 choose the target version and bump plugins/trine-eval/.claude-plugin/plugin.json (default 0.4.0) so the Sprint 7-13 improvements are publishable; (b) HUMAN GATE \u2014 create .claude-plugin/marketplace.json at repo root referencing the plugin, OR document cache-only distribution and correct the 'plugin marketplace' claim in CLAUDE.md to match reality; (c) HUMAN GATE \u2014 decide and execute the main-branch strategy (merge meta-eval/self-upgrade -> main, or record a deferral) so the next phase does not branch off an unmerged 49-commit feature branch. Gradeable: plugin.json version > 0.2.0 from a single source of truth; if marketplace.json is created it is valid JSON and references trine-eval; CLAUDE.md's marketplace statement is consistent with the on-disk reality. Merge-to-main is an irreversible Step-5 human-gate, not a graded criterion."
+    },
+    {
+      "number": 16,
+      "title": "Methodology trust: regression-pipeline correctness (P2)",
+      "phase": "stabilization",
+      "features": [
+        "regression-exit-code-polarity-fix",
+        "exit-code-authoring-guidance",
+        "windows-bash-hazard-note",
+        "trials-consistency-config"
+      ],
+      "estimated_complexity": "medium",
+      "dependencies": [
+        15
+      ],
+      "human_gates": [],
+      "protects_prior": [
+        ".harness/regression/regression.json (append-only \u2014 the existing s09-sn3 gate is preserved; only new gates appended)",
+        "plugins/trine-eval/skills/sprint-contract/SKILL.md (Task Taxonomy section unchanged; guidance added additively)",
+        "plugins/trine-eval/skills/sprint-workflow/SKILL.md (Step 0.5 hazard note extended, not rewritten)"
+      ],
+      "notes": "P2 stabilization \u2014 the highest-correctness item, hardening the harness BEFORE the research-driven feature phase. Closes the exit-code-semantics mismatch surfaced by the Cycle-3 /harness-summary: tasks.json verification_commands encode PASS in OUTPUT but the Step 0.5 regression runner records PASS on EXIT CODE 0, so 2 of 4 saturated gates were graduation-blocked (jq-without-e is vacuous; test -d is inverted). Deliverables: (a) fix the two blocked gates to correct exit-code polarity at the tasks.json source (config-fields jq gate -> add `-e`; examples/-absence gate -> `test ! -d`), then graduate both into .harness/regression/regression.json (3 gates total); (b) add exit-code-polarity authoring guidance to sprint-contract SKILL (any criterion intended for regression graduation must have an exit-code-faithful PASS condition: prefer grep -q / test ! -d / jq -e); (c) extend the sprint-workflow Step 0.5 Windows-bash hazard note to cover grep/jq gate strings containing single-quotes or <,> (must run via git-bash, not cmd.exe shell=True, which silently returns exit 1 / empty output); (d) document config.trials and designate a future sprint to run trials=3 for the first real pass^k consistency measurement (the whole 13-sprint arc has measured capability but never run-to-run consistency). Gradeable behavioral: regression.json has 3 tasks with unique task_ids; the config gate command contains `-e`; the examples gate command contains `test ! -d`; each graduated gate run via git-bash exits with correct PASS polarity on the current good state; sprint-contract SKILL grep for polarity guidance >= 1; Step 0.5 grep for the git-bash refinement >= 1."
+    },
+    {
+      "number": 17,
+      "title": "Governance plumbing reconciliation (P3)",
+      "phase": "stabilization",
+      "features": [
+        "henka-schema-reconcile",
+        "decision-status-reconcile",
+        "council-usage-conventions-doc"
+      ],
+      "estimated_complexity": "medium",
+      "dependencies": [
+        16
+      ],
+      "human_gates": [],
+      "protects_prior": [
+        ".council/henka-register.jsonl and decision-log.jsonl (append-only; existing records untouched)"
+      ],
+      "notes": "P3 stabilization. Reconcile the governance-script/schema drift hit repeatedly during Cycle 3: henka-record schema rejects the resolution_status and linked_henka_id fields actually used (they were embedded in description as a workaround) and rejects -UPDATE- suffixed HK IDs (forced renumber to HK-0013..0017); decision-log user_approval_status enum lacks a 'deferred' value (forced to 'pending'). SCOPE BOUNDARY: the henkaten-council schemas (schemas/henka-record.schema.json, decision-log-entry.schema.json) and append scripts live in the plugin CACHE (C:\\Users\\akino\\.claude\\plugins\\cache\\henkaten-council\\...), which is managed by the plugin system and overwritten on plugin update -- so this sprint does NOT edit cached plugin files. Deliverables (in-repo + upstream proposal): (a) a .council/ governance-conventions notes file documenting the 4 validated-shape conventions trine-eval relies on (resolution_status / linked_henka_id handling, the -UPDATE-/trail-record HK-ID convention, and the deferred-decision -> pending mapping); (b) an upstream proposal file enumerating the exact schema additions henkaten-council needs (add resolution_status + linked_henka_id properties; widen the henka_id pattern to allow suffixes; add 'deferred' to user_approval_status enum); (c) any in-repo helper/wrapper that makes future appends robust against the current schema. Gradeable: the conventions notes file exists and documents all 4 conventions (grep); the upstream-proposal file exists and enumerates the 3+ schema gaps (grep); a dry-run append using the documented conventions validates against the CURRENT unmodified schema (exit 0). FLAG FOR USER: fully closing P3 may require a henkaten-council plugin update outside this repo."
     }
   ]
 }
