@@ -1,170 +1,135 @@
 # Eval Summary
 
+_Generated 2026-06-02 (Cycle 3 close). Supersedes the stale 5-sprint summary. Covers the full Sprint 1–13 trine-eval self-upgrade arc._
+
 ## Overview
-- Sprints completed: 5
-- Overall pass rate: 100% (53/53 criteria passed on final rounds)
-- First-round pass rate: 96.2% (51/53 criteria passed on first attempt)
-- Overall weighted pass rate: 100% (all sprints reached 100% weighted score)
-- Average rounds per sprint: 1.4
-- Total evaluation rounds: 7
-- Total criteria evaluated: 53 success criteria + 10 gate criteria = 63
+- **Sprints completed:** 13 (Phase 1: S1–6; Phase 1.5: S9; Phase 1.6: S13; Phase 2: S7/8/10/11/12)
+- **Overall pass rate:** 145/147 criteria = **98.6%**
+- **Overall weighted pass rate:** 12/13 sprints at 100%; Sprint 11 at 76% → arithmetic mean **98.2%**
+- **First-round pass rate:** 143/147 = **97.3%** (capability signal — Generator gets it right before retry feedback)
+- **Average rounds per sprint:** 15/13 = **1.15** (only S4 and S5 needed a retry; S6–S13 all single-round)
+- **Edge Case Pass Rate:** N/A (no sprint declared an `## Edge Case Criteria` section — expected for `eval-harness`, which encodes edge concerns in dimension scoring)
+- **Functional Smoke Pass Rate:** N/A (no sprint declared `## Functional Smoke` — no live-API/Docker integration surface in this meta-eval)
 
 ## Consistency Metrics
 
-| Sprint | p (avg) | k (rounds) | pass@k | pass^k | Gap |
-|--------|---------|------------|--------|--------|-----|
-| 01 | 1.000 | 1 | 100.0% | 100.0% | 0.0% |
-| 02 | 1.000 | 1 | 100.0% | 100.0% | 0.0% |
-| 03 | 1.000 | 1 | 100.0% | 100.0% | 0.0% |
-| 04 | 0.950 | 2 | 99.75% | 90.25% | 9.5% |
-| 05 | 0.958 | 2 | 99.83% | 91.84% | 8.0% |
+**Trial configuration:** `config.trials` is absent → **single-trial (k=1)** for every sprint. Statistically valid pass@k / pass^k require ≥2 **trials** at a fixed code state; this project has none, so per-sprint consistency collapses to `pass@1 = pass^1 = p` (the final-round pass rate). The two multi-**round** sprints (S4, S5) are reported with the **deprecated** `pass@rounds` / `pass^rounds` formulation (k = retry rounds), which mixes a fixed-bug signal into the consistency estimate and is shown only for continuity with the prior summary.
 
-- Overall average p: 0.974
-- Overall pass@k: ~99.9% (system is highly capable -- at least one passing round is near-certain)
-- Overall pass^k: ~94.5% (consistency drops moderately for multi-round sprints)
-- Consistency gap (pass@k - pass^k): 5.5% overall; 0% for single-round sprints, 8-9.5% for retried sprints
-- Interpretation: The system is both capable and reasonably consistent. The gap only appears in Sprints 04-05, which had higher complexity and more criteria. Both failures were fixed in exactly 1 retry, indicating the feedback loop is effective.
+| Sprint | p (final) | k (rounds) | pass@k | pass^k | Note |
+|--------|-----------|------------|--------|--------|------|
+| 1 | 1.000 | 1 | 100.0% | 100.0% | single-trial |
+| 2 | 1.000 | 1 | 100.0% | 100.0% | single-trial |
+| 3 | 1.000 | 1 | 100.0% | 100.0% | single-trial |
+| 4 | 0.950 | 2 | 99.75% | 90.25% | _deprecated pass@rounds_ (r1 9/10 → r2 10/10) |
+| 5 | 0.958 | 2 | 99.82% | 91.84% | _deprecated pass@rounds_ (r1 11/12 → r2 12/12) |
+| 6 | 1.000 | 1 | 100.0% | 100.0% | single-trial |
+| 7 | 1.000 | 1 | 100.0% | 100.0% | single-trial |
+| 8 | 1.000 | 1 | 100.0% | 100.0% | single-trial |
+| 9 | 1.000 | 1 | 100.0% | 100.0% | single-trial |
+| 10 | 1.000 | 1 | 100.0% | 100.0% | single-trial |
+| 11 | 0.818 | 1 | 81.8% | 81.8% | single-round PARTIAL (9/11; J10/J11 FAIL) |
+| 12 | 1.000 | 1 | 100.0% | 100.0% | single-trial |
+| 13 | 1.000 | 1 | 100.0% | 100.0% | single-trial |
+
+- **Consistency gap (pass@k − pass^k):** 0% for all single-trial sprints (structural — only one trial exists); 9.5% / 8.0% for the deprecated S4 / S5 round-based figures.
+- **Interpretation:** The harness is highly capable (12/13 sprints at 100% weighted, first-round rate 97.3%). **True consistency is unmeasured** — no sprint ran ≥2 trials, so the system's run-to-run reliability at a fixed code state has never been quantified. The single PARTIAL (S11) was a *designed* calibration probe, not a reliability failure. **Recommendation:** set `config.trials = 3` for at least one future sprint to obtain a genuine pass^k consistency estimate (see Recommendations).
 
 ## Per-Sprint Results
 
-| Sprint | Title | Verdict | Rounds | Criteria | First-Round Rate | Weighted | pass^k | Rubric (weighted) |
-|--------|-------|---------|--------|----------|-----------------|----------|--------|-------------------|
-| 01 | Grading Hierarchy & Contract Structure | PASS | 1 | 13/13 | 100% | 100% | 100% | 3.65/5 (73%) |
-| 02 | Evaluator Separation & Isolation | PASS | 1 | 9/9 | 100% | 100% | 100% | 3.65/5 (73%) |
-| 03 | Metrics, Saturation & Summary | PASS | 1 | 9/9 | 100% | 100% | 100% | 3.95/5 (79%) |
-| 04 | Context Engineering & Structured State | PASS | 2 | 10/10 | 90% | 100% | 90.25% | 3.65/5 (73%) |
-| 05 | Bootstrap, Calibration & ACI | PASS | 2 | 12/12 | 91.7% | 100% | 91.84% | 4.85/5 (97%) |
+| Sprint | Title | Verdict | Rounds | Pass Rate | Weighted | Rubric (M/G/S/C/E) | Gates | Behavioral % | Edge | Smoke |
+|--------|-------|---------|--------|-----------|----------|--------------------|-------|--------------|------|-------|
+| 1 | Grading hierarchy & contract structure | PASS | 1 | 13/13 | 100% | 3/4/5/3/3 | 2/2 | — | N/A | N/A |
+| 2 | Evaluator separation & isolation | PASS | 1 | 9/9 | 100% | 3/4/5/3/3 | 2/2 | — | N/A | N/A |
+| 3 | Metrics, saturation & summary | PASS | 1 | 9/9 | 100% | 4/4/5/3/3 | 2/2 | — | N/A | N/A |
+| 4 | Context engineering & structured state | PASS | 2 | 10/10 | 100% | 3/4/4/4/3 | 2/2 | — | N/A | N/A |
+| 5 | Bootstrap, calibration & ACI | PASS | 2 | 12/12 | 100% | 5/5/5/4/5 | 2/2 | — | N/A | N/A |
+| 6 | JIT context retrieval patterns | PASS | 1 | 11/11 | 100% | 3/4/5/4/3 | 2/2 | — | N/A | N/A |
+| 7 | harness-build rubric (Phase 2) | PASS | 1 | 11/11 | 100% | 4/4/5/4/4 | 4/4 | 22% | N/A | N/A |
+| 8 | Bootstrap failure catalog (Phase 2) | PASS | 1 | 13/13 | 100% | 4/4/4/4/4 | 6/6 | 66% | N/A | N/A |
+| 9 | tasks.json schema port (Phase 1.5) | PASS | 1 | 13/13 | 100% | 4/4/5/4/4 | 5/5 | 63% | N/A | N/A |
+| 10 | Planner harness-build mode (Phase 2) | PASS | 1 | 11/11 | 100% | 4/4/5/4/4 | 5/5 | 62% | N/A | N/A |
+| 11 | Ephemeral dogfood validation (Phase 2) | **PARTIAL** | 1 | 9/11 | 76% | 3/3/3/4/3 | 5/5 | 62% | N/A | N/A |
+| 12 | Positioning & rubric decision guide (Phase 2) | PASS | 1 | 11/11 | 100% | 4/4/4/4/4 | 7/7 | 54%¹ | N/A | N/A |
+| 13 | Workflow-step port & governance (Phase 1.6) | PASS | 1 | 13/13 | 100% | 4/4/5/5/4 | 6/6 | 66% | N/A | N/A |
 
-## Rubric Dimension Trajectory
+¹ Sprint 12 used the static-artifact carve-out (54% behavioral, below the 60% floor). Behavioral % is 3-way-grader-split data and only exists from Sprint 7 onward (the split methodology was ratified mid-arc, DEC-0007).
 
-| Dimension (weight) | S01 | S02 | S03 | S04 | S05 | Trend |
-|---------------------|-----|-----|-----|-----|-----|-------|
-| Methodology (30%) | 3 | 3 | 4 | 3 | 5 | Non-monotonic. S03 gained saturation graduation (3->4), S04 regressed due to evaluator re-counting steps, S05 reached ceiling after completing all 8 steps. |
-| Grading (25%) | 4 | 4 | 4 | 4 | 5 | Stable at 4 through S04, then jumped to 5 after human calibration and pass@k were delivered. |
-| Separation (20%) | 5 | 5 | 5 | 4 | 5 | At ceiling from S01. Brief dip to 4 in S04 (evaluator cited missing project-specific calibration), recovered in S05. |
-| Context (15%) | 3 | 3 | 3 | 4 | 4 | Flat at 3 until S04 delivered JSON state tracking and compaction guidance. Plateaued at 4 -- JIT context retrieval still missing. |
-| Extensibility (10%) | 3 | 3 | 3 | 3.5 | 5 | Gradual improvement. S04 added functional hooks (3->3.5). S05 delivered self-optimization pathway (3.5->5). |
+**Cross-sprint Edge Case Pass Rate:** N/A · **Cross-sprint Functional Smoke Pass Rate:** N/A
 
 ## Trend Analysis
 
-### Pass Rate Trends
-- Sprints 01-03 achieved 100% first-round pass rates with single evaluation rounds.
-- Sprints 04-05 introduced first-round failures (90% and 91.7%), requiring one retry each.
-- The first-round degradation correlates with increasing sprint complexity (10 and 12 criteria vs 9-13 in earlier sprints) and higher proportions of cross-component integration criteria.
-- Final pass rate is 100% across all sprints -- the retry loop is fully effective.
-
-### Retry Efficiency
-- Average rounds: 1.4 (3 single-round, 2 double-round sprints)
-- Both retries fixed exactly 1 criterion in 1 additional round -- 100% retry efficiency.
-- No sprint required more than 2 rounds. The max_retries limit (3) was never approached.
-- Both failed criteria were low-to-moderate weight (12% and 8%), so the weighted impact of failures was limited.
-
-### First-Round vs Final-Round Delta
-- Sprint 04: 9/10 -> 10/10 (+1 criterion, +12% weighted)
-- Sprint 05: 11/12 -> 12/12 (+1 criterion, +8% weighted)
-- Retries consistently recovered the remaining gap in a single round.
-
-### Rubric Score Trends
-- Overall weighted rubric improved from 73% (S01-02) to 97% (S05) -- a 24-point gain.
-- Every dimension reached its highest score by Sprint 05 except Context Engineering (4/5, missing JIT patterns).
-- The Methodology dimension was most volatile (3->3->4->3->5), with an evaluator-driven regression in S04.
-- Separation maintained the ceiling (5/5) in 4 of 5 sprints.
-
-### Consistency Trends (pass^k)
-- pass^k is 100% for single-round sprints and 90-92% for double-round sprints.
-- The gap is modest (8-9.5%) and entirely driven by single-criterion failures.
-- No evidence of systemic non-determinism -- both failures are traceable to specific integration oversights, not random behavior.
+- **Pass rate:** Flat at the ceiling — 12/13 sprints at 100% weighted. The lone dip (S11, 76%) was a deliberately-scoped single-round dogfood probe, not a capability regression.
+- **Retry counts decreasing:** Retries occurred only in the early sprints (S4, S5). Every sprint from S6 onward (8 consecutive) passed in a single round — zero retries across the entire Phase 1.5 / Phase 1.6 / Phase 2 body of work.
+- **First-round pass rate strong and stable (97.3%):** Only 4 of 147 criteria ever failed a first round (S4-C8, S5-C10, S11-J10, S11-J11). The Generator consistently lands implementations before retry feedback.
+- **Friction migrated, then dissolved:** Cycle 1 friction was in implementation (S4/S5 retries); Cycle 2 moved upstream to contract negotiation (S7–S10 each needed an R1→R2 contract revision); Cycle 3 dissolved it — S11/S12/S13 all reached single-round contract APPROVAL, driven by the Evaluator's pre-implementation baseline verification (now being formalized as PROC-001 via DEC-0028).
+- **Rubric trajectory:** Ascending then plateauing — Phase 1 climbed toward 5/5 on separation/grading; Phase 2 work plateaued ~4/5 (graded against a Phase-1 yardstick); S13 (Phase 1.6, methodology-native) recovered Context Engineering to 5/5.
+- **pass^k trend:** Cannot be assessed — no trial-based data exists (see Consistency Metrics).
 
 ## Common Failure Patterns
 
-Only 2 criteria failed across 7 evaluation rounds and 53 total criteria:
+Only **4 criteria failed across the entire 147-criterion arc** — a very low defect surface. Ranked by significance:
 
-### 1. Cross-component integration completeness (2/2 failures)
+### Sprint 11, Criteria J10 & J11 — FAIL (the dominant unresolved pattern)
+**Pattern:** *Synthetic fulfillment* of behavioral criteria. The Generator could not dispatch the Planner subagent into an ephemeral tmp directory, so it authored the expected `spec.md`/`sprints.json` directly. All 9 deterministic criteria PASSed (they test report-document properties), but J10 (evidence standard: synthetic examples disqualified) and J11 (planner-activation unconfirmable) correctly FAILed.
+**Rubric dimensions:** `generator_evaluator_separation` (3/5), `methodology_completeness` (3/5).
+**Status:** Open — tracked as HK-0006, routed to a future Phase-3 sprint (runtime dispatch observable). This is the only failure pattern that surfaced and remains open.
+**Transcript:** `.harness/transcripts/sprint-11-r1.json`
 
-| Sprint | Criterion | Weight | Issue |
-|--------|-----------|--------|-------|
-| 04 | C8: Hooks cover meaningful lifecycle events | 12% | PostToolUse hook echoed to stderr instead of writing to sprint-state.json -- the hook's intent was correct but the command didn't perform a state mutation. |
-| 05 | C10: Bootstrap integrates with existing harness | 8% | Bootstrap skill described integration with kickoff and workflow, but those receiving skills weren't updated to reference the bootstrap catalog. Integration was documented in one place but not wired up in the others. |
+### Sprint 4, Criterion C8 — FAIL (resolved in r2)
+**Pattern:** PostToolUse hook only echoed; did not update `sprint-state.json`. Fixed in round 2.
+**Dimension:** `context_engineering`. Isolated; did not recur.
+_(No transcript — predates Sprint 9 trailer protocol.)_
 
-**Pattern:** Both failures involve implementing the primary feature correctly but failing to complete the integration with connected components. The generator built the producing side but didn't update the consuming side.
+### Sprint 5, Criterion C10 — FAIL (resolved in r2)
+**Pattern:** Bootstrap integration not referenced in kickoff/workflow. Fixed in round 2.
+**Dimension:** `extensibility_aci`. Isolated; did not recur.
+_(No transcript — predates Sprint 9 trailer protocol.)_
 
-### 2. No deterministic criteria failures
-
-All 28 deterministic criteria across 5 sprints passed on first attempt. Both failures were LLM-judge criteria evaluating semantic completeness and integration -- exactly the gap between what grep can verify and what requires reading comprehension.
-
-### 3. No gate criteria failures
-
-All 10 Should-NOT gate criteria passed across all rounds. These regression guards were never triggered.
+**No recurring failure class.** Each cycle surfaced a distinct, deeper failure class at a different lifecycle phase (Cycle 1 = cross-component integration; Cycle 2 = verification-command quality; Cycle 3 = synthetic fulfillment), indicating the loop keeps finding new edges rather than re-hitting old ones.
 
 ## Saturation & Regression Graduation
 
-| Criterion Type | Consecutive First-Round Passes | Status | Recommendation |
-|----------------|-------------------------------|--------|----------------|
-| Should-NOT gates (regression guards) | 5 (all sprints) | Saturated (easy) | Graduate to regression suite. These serve as safety nets, not capability measures. Keep as gates but exclude from capability scoring. |
-| Deterministic grep-based presence checks | 5 (all sprints) | Saturated (easy) | Replace with harder variants. Basic keyword-presence greps (e.g., `grep -c 'pass@k'`) test that content exists but not that it is correct. Replace with LLM-judge criteria testing semantic correctness, or with deterministic checks that verify structure (JSON schema validation, output format matching). |
-| LLM-judge integration criteria | 3 (S01-S03), then failures in S04-S05 | Not saturated | Keep. These are where the system's actual capability gaps surface. |
+Saturation detection ran over the S7–S13 window (the sprints with machine-readable `tasks.json`). Four gate criterion-types recurred with first-round PASS across ≥3 consecutive sprints:
 
-**Graduated criteria (for future sprints):**
-1. File existence checks (`test -f`) -- trivially easy, never informative.
-2. Single-keyword greps with threshold >= 1 -- too easy to satisfy with incidental matches.
-3. Section-header greps -- verify structure exists but not content quality.
+| Criterion Type | Verification | Sprints | Status | Action |
+|----------------|--------------|---------|--------|--------|
+| JIT context-scope annotation preserved (harness-kickoff) | `grep -c '<!-- Context scope at this step:' …/harness-kickoff/SKILL.md` | S7–S12 (6) | Saturated (easy preservation) | **GRADUATED** (s09-sn3 → regression.json, graduated_from_sprint 9) |
+| Config core-fields intact | `jq '.project_type==… and .governance.enabled==true' config.json` | S9–S13 (5) | Saturated **but graduation-blocked** | Deferred — see exit-code mismatch below |
+| `examples/` directory absent | `test -d "examples"` | S8–S11 (4) | Saturated **but graduation-blocked** | Deferred — inverted polarity |
+| Prior contract sprint-07.md unmodified | `git diff HEAD -- …/sprint-07.md` | S10, S11, S13 | **Excluded** — semantics changed | Not graduatable (see below) |
 
-**Harder replacements:**
-- Replace "file exists" with "file parses as valid YAML/JSON with required fields."
-- Replace single-keyword greps with multi-condition deterministic checks (e.g., verify a formula is present AND computes correctly with known inputs).
-- Replace section-header greps with LLM-judge criteria that verify the section contains actionable instructions, not just a heading.
+**One criterion graduated** into `.harness/regression/regression.json` (now armed — previously never populated). This unblocks the Step 0.5 regression gate for all future sprints.
+
+### Exit-code-semantics mismatch (critical finding)
+
+The `tasks.json` `verification_command`s were authored for an **Evaluator that reads command output and applies a PASS condition** (count ≥ 6, `== true`, ABSENT). But the Step 0.5 regression runner records **PASS on exit code 0**. These two models diverge for three of the four saturated gates:
+
+- **`grep -c` (JIT gate):** exit 0 iff ≥1 match → **correct polarity** (catches catastrophic deletion; weaker than the contract's `count ≥ 6` but never inverted). ✅ Graduated.
+- **`jq '… == true'` without `-e`:** jq exits 0 on any valid JSON regardless of the boolean → **vacuous** under the exit-code model (would never FAIL). ❌ Blocked.
+- **`test -d "examples"`:** exit 0 iff `examples/` **exists** (the violation) → **inverted polarity** (would PASS exactly when the bad state occurs). ❌ Blocked.
+
+Because the graduation rule mandates **verbatim** copying (no paraphrase/recompute), the vacuous and inverted gates cannot be safely armed as-is. **Recommendation:** add `-e` to the config `jq` gate and invert the `examples/` gate to `test ! -d "examples"` **at the `tasks.json` source** (a future-sprint contract edit), or extend the regression runner to capture stdout and apply the recorded PASS condition. Until then, these two remain saturation-detected but un-armed.
+
+### Windows-invocation note for the regression runner
+The armed JIT gate returns `6` / exit 0 under **git-bash** but spuriously returns exit 1 / empty output under `cmd.exe` (`shell=True` in Python): the single-quotes don't quote and the `<` in `<!--` becomes a redirection operator. The Step 0.5 runner MUST invoke gate commands via git-bash, not `cmd.exe`. This extends the existing "Windows-bash invocation hazard" note in Step 0.5 to cover `grep`/`jq` gates containing single-quotes or `<`/`>` characters.
+
+### `git diff` gate excluded
+The `git diff HEAD -- sprint-07.md` gate is **not** graduatable: its semantics flipped at S13. In S10/S11 it asserted "empty diff (unmodified)"; in S13 the SN2 carve-out *deliberately* modified sprint-07.md, so the S13 gate (s13-sn3) asserts "renumbering-only diff." Same command string, different PASS condition — not a stable regression target.
 
 ## Recommendations
 
-### 1. Focus on Context Engineering (15% rubric weight, stuck at 4/5)
-Context Engineering is the only dimension that hasn't reached 5/5. The gap is JIT context retrieval patterns -- documented guidance for agents to pull relevant context on-demand rather than front-loading all files. A targeted sprint addressing this would complete the rubric ceiling.
-
-### 2. Address rubric scoring inconsistency
-The Methodology dimension scored 4/5 in Sprint 03 and regressed to 3/5 in Sprint 04 despite no methodology features being removed. Different evaluator instances counted the 8 methodology steps differently. The rubric should enumerate specific steps at each score level (not just counts) to prevent evaluator drift.
-
-### 3. Strengthen integration testing in contracts
-Both failures involved cross-component integration. Future contracts should include explicit integration criteria that name both the producing and consuming components, with separate verification for each end.
-
-### 4. Graduate saturated criteria from capability eval
-The 28 deterministic grep-presence criteria all passed on first attempt every time. These serve as useful regression guards but provide zero signal about capability growth. Future sprints should shift weight toward LLM-judge criteria (where failures actually occur) and use deterministic checks only for structural baselines.
-
-### 5. Largest pass@k vs pass^k gap: Sprint 04 (9.5%)
-This sprint had the lowest pass^k (90.25%) due to a 12%-weight criterion failure. The fix was a single-line command change in hooks.json. Consider adding a self-review step specifically for hooks/infrastructure changes, where the generator verifies that each hook's command performs its described action (not just compiles).
-
-### 6. Contract negotiation is highly effective -- keep enabled
-Sprint 05's contract negotiation caught 7 issues across 2 review rounds (no-op criteria, missing reference solutions, fragile grep patterns, wrong search scope). All were fixed before implementation, preventing evaluation-time surprises. The `contract_negotiation` component should remain enabled.
-
-### 7. Missing eval round files
-Sprint 04 is missing its `sprint-04-r1.md` file despite having 2 evaluation rounds. The workflow should enforce round-specific file naming for all rounds including Round 1, treating round files as append-only artifacts.
+1. **Run ≥2 trials on a future sprint** (`config.trials = 3`) to obtain the first genuine pass^k consistency estimate. The entire arc has measured capability (first-round rate) but never run-to-run consistency at a fixed code state.
+2. **Fix the two blocked regression gates at the source** (add `jq -e`; invert `test -d` → `test ! -d`) so the config-fields and `examples/`-absence gates can graduate. Pair with a regression-runner that uses git-bash and (ideally) captures stdout to apply output-based PASS conditions, decoupling regression gates from raw exit codes.
+3. **Close HK-0006 (synthetic fulfillment)** in a Phase-3 sprint with a non-fakeable runtime dispatch observable (`subagent_dispatch.jsonl`, proof-of-dispatch criterion, or spec SC9b amendment). This is the only open failure class and the natural seed for continued work. _(A task has been spawned for this.)_
+4. **Strengthen behavioral-coverage discipline** via the now-ratified PROC-002 amendment (DEC-0028): the mandatory `Coverage Justification` heading and codified carve-out permission test guard against the S12-style sub-floor breach recurring un-gated.
+5. **No harness component should be disabled.** All enabled components (planner, contract_negotiation, sprint_decomposition, eval_summary) contributed; the 97.3% first-round rate and single-PARTIAL record indicate the full pipeline is performing.
 
 ## Tool & Skill Description Improvements
 
-### Applied Changes
+`config.components_enabled.per_sprint_aci_review` is absent (not enabled), so this is a **single batched review** across all evals. Consolidated findings:
 
-#### 1. Generator: Cross-component integration verification
-**Source:** Sprint 05 R1 C10 FAIL -- bootstrap integration one-directional.
-**File:** `agents/generator.md`
-**Change:** Added integration verification guidance to the IMPLEMENTATION self-review checklist.
-**Rationale:** The generator built the producing component correctly but didn't update the consuming components. An explicit checklist item catches this class of error during self-review.
-**Held-out validation:** Sprints 01-03 had no cross-component data flows requiring bidirectional updates. No false negatives introduced.
+1. **Verification-command authoring vs. exit-code consumption (systemic).** The most valuable cross-sprint insight: `tasks.json` `verification_command`s are written for an output-reading Evaluator but are consumed verbatim by an exit-code-only regression runner. The `sprint-contract` SKILL should advise contract authors that any criterion intended for eventual regression graduation must have **correct exit-code polarity** — prefer `grep -q` / `test ! -d` / `jq -e` forms whose exit code alone encodes the PASS condition. This single guidance change would let all four saturated gates graduate cleanly. _(Recommendation recorded here; not auto-applied — it is a `sprint-contract` SKILL edit that belongs in a future sprint's scope, not a summary-time mutation.)_
+2. **Step 0.5 Windows-bash hazard scope.** The hazard note in `sprint-workflow` Step 0.5 should explicitly call out that `grep`/`jq` gate strings containing single-quotes or `<`/`>` must run under git-bash, not `cmd.exe shell=True` — the failure is silent (exit 1 / empty output), masquerading as a regression. _(Recorded; future-sprint edit.)_
+3. **No tool-description defects found in the eval transcripts themselves.** The two emitted transcripts (S11, S13) show the Evaluator interpreting criteria as intended; no tool call failed due to ambiguous tool/skill wording. The S11 J10/J11 FAILs were correct verdicts, not misinterpretations.
 
-#### 2. Eval-harness rubric: Methodology step enumeration
-**Source:** Sprint 03 evaluator gave Methodology 4/5; Sprint 04 evaluator gave 3/5 for the same feature set.
-**File:** `skills/eval-rubric/rubrics/eval-harness.md`
-**Change:** Added explicit step names at each score level (3, 4, 5) to prevent evaluator drift in step-counting.
-**Rationale:** The rubric said "4-5 steps" and "6-7 steps" but different evaluators disagreed on which features count as "steps." Explicit enumeration removes ambiguity.
-**Held-out validation:** Sprints 01-02 scored 3/5 consistently. Explicit step names would produce the same scores. No regression.
-
-#### 3. Sprint-contract skill: No-op criterion detection
-**Source:** Sprint 05 contract negotiation found 2 criteria (C3, C4) that matched pre-existing content.
-**File:** `skills/sprint-contract/SKILL.md`
-**Change:** Added guidance to run deterministic verification commands against the current codebase before finalizing the contract, flagging criteria that already pass as no-ops.
-**Rationale:** A criterion that passes before implementation provides zero signal. Contract authors should detect and revise these during negotiation.
-**Held-out validation:** Sprint 01-03 contracts do not show evidence of no-op criteria. No regression.
-
-#### 4. Sprint-workflow: Round file naming enforcement
-**Source:** Sprint 04 missing `sprint-04-r1.md` despite 2 rounds of evaluation.
-**File:** `skills/sprint-workflow/SKILL.md`
-**Change:** Added explicit instruction that every round (including Round 1) must use `sprint-{NN}-r{R}.md` naming. Round files are append-only.
-**Rationale:** Missing round files break pass@k/pass^k computation (requires per-round pass rates) and make debugging evaluation history impossible.
-**Held-out validation:** Sprints 01-03 all have correct r1 files. No regression.
+_Held-out validation: re-reading the S7, S8, S10 evals (not used to derive the above) confirms the exit-code-polarity recommendation would not have changed any of their verdicts (the Evaluator read output correctly in every case) — it only affects downstream regression graduation, where it is strictly an improvement. No regressions introduced._

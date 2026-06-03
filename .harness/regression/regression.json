@@ -1,0 +1,18 @@
+{
+  "schema_note": "Regression suite armed by /harness-summary saturation graduation. Append-only. Each entry is a verbatim copy of a saturated criterion from its producing sprint tasks.json, plus graduated_from_sprint. Consumed by sprint-workflow Step 0.5 (regression gate, exit-0-is-PASS).",
+  "graduation_policy": "Only criteria whose verification_command has correct exit-code polarity (exit 0 == desired state) are graduated verbatim. Negative-assertion gates (test -d) and boolean-jq-without-e gates are saturation-detected but graduation-blocked pending an exit-code-faithful source fix; see .harness/summary.md Saturation section.",
+  "created_at": "2026-06-02T14:15:00Z",
+  "created_by": "/harness-summary (Cycle 3 close, CAND-F)",
+  "tasks": [
+    {
+      "task_id": "s09-sn3",
+      "criterion": "Should NOT regress Sprint 6 JIT annotations in harness-kickoff SKILL.md: The six `<!-- Context scope at this step: ... -->` comment blocks added in Sprint 6 must remain intact. Verify: `grep -c '<!-- Context scope at this step:' plugins/trine-eval/skills/harness-kickoff/SKILL.md` assert count >= 6. (Pre-sprint baseline: 6 — Steps 1, 2, 2b, 3, 4, and 5.)",
+      "grader_type": "structural",
+      "weight": 0,
+      "is_gate": true,
+      "verification_command": "grep -c '<!-- Context scope at this step:' plugins/trine-eval/skills/harness-kickoff/SKILL.md",
+      "rubric_dimension": "context_engineering",
+      "graduated_from_sprint": 9
+    }
+  ]
+}
