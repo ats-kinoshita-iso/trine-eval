@@ -36,12 +36,15 @@ Every success criterion carries a percentage weight reflecting its importance to
 
 ## Grader Types
 
-Each criterion should be tagged with its grader type:
+Each criterion must be tagged with one of three grader types:
 
-- **Deterministic** — Can be verified by running a command, checking a file, parsing output, or comparing strings. Preferred whenever possible because it is fast, cheap, reproducible, and eliminates grader disagreement.
-- **LLM-as-judge** — Requires reading comprehension, subjective assessment, or nuanced evaluation that no simple command can capture. Use when deterministic verification is not feasible.
+- **Behavioral** — Verified by *running* the artifact (invoking a skill, triggering a hook, executing a binary, calling a function) and observing the output, state change, or side effect. The strongest form of evidence: it proves the feature works, not just that the code exists.
+- **Structural** — Verified by inspecting an artifact at rest (grep, jq, schema check, file existence, frontmatter field). Use for cheap pre-flight checks that gate a behavioral criterion, or for genuinely static artifacts (documentation, config schemas with no runtime).
+- **LLM-as-judge** — Requires reading comprehension, subjective assessment, or nuanced evaluation that no command can capture. Use when neither behavioral nor structural verification is feasible.
 
-The evaluator attempts deterministic verification first for every criterion. It falls back to LLM judgment only when the criterion genuinely requires subjective assessment.
+**Behavioral coverage rule:** Behavioral criteria must hold **≥ 60% of total weight** across all success criteria. If a sprint genuinely has no behavioral surface (e.g., it produces only static documentation), state the reason in the contract's `## Technical Notes` so the Evaluator can verify the exception during contract review.
+
+The evaluator attempts code-based verification first for every criterion (behavioral and structural both qualify). It falls back to LLM judgment only when the criterion genuinely requires subjective assessment. Crucially, the evidence standard differs by tag: behavioral criteria require execution evidence (command + observed result); structural criteria accept artifact inspection; reading-the-source to confirm a behavior is documented does NOT satisfy a behavioral criterion.
 
 ## Negative (Should-NOT) Criteria
 
@@ -87,33 +90,40 @@ Reference solutions provide known-working outputs for criteria where grader cali
 
 ## Task Taxonomy: sprint-NN.tasks.json
 
-After the contract is approved (Status: APPROVED from the Evaluator review), emit a sibling `.harness/contracts/sprint-{NN}.tasks.json` file alongside the markdown contract. This is the **machine-readable source of record** for the sprint's criteria — it feeds the regression gate (Sprint 7), the Batch API submission grouping (Sprint 8), transcript correlation by task_id (Sprint 9), and adversarial hygiene flags (Sprint 10). Do not skip it: later sprints assume it exists from Sprint 6 onward.
+After the contract is approved (Status: APPROVED from the Evaluator review), emit a sibling
+`.harness/contracts/sprint-{NN}.tasks.json` file alongside the markdown contract. This is the
+**machine-readable source of record** for the sprint's criteria — it feeds the regression gate
+(Step 0.5), the Batch API submission grouping (Step 3d), and the harness-summary
+saturation-graduation step that promotes always-passing criteria into a regression suite.
 
-**When to emit:** right after the Evaluator writes `**Status: APPROVED**` and before the Generator enters IMPLEMENTATION mode. Guarded by `config.taxonomy.emit_tasks_json` (default `true`).
+**When to emit:** right after the Evaluator writes `**Status: APPROVED**` and before the
+Generator enters IMPLEMENTATION mode. Guarded by `config.taxonomy.emit_tasks_json`
+(default `true`).
 
-**Schema:** one entry per criterion in the approved contract — both Success Criteria (deterministic and LLM-judge) and Should-NOT gate criteria.
+**Schema:** one entry per criterion in the approved contract — both Success Criteria and
+Should-NOT gate criteria.
 
 ```json
 {
-  "sprint": 6,
+  "sprint": 9,
   "tasks": [
     {
-      "task_id": "s06-c1",
+      "task_id": "s09-c1",
       "criterion": "<verbatim criterion text from the contract>",
-      "grader_type": "deterministic",
+      "grader_type": "behavioral",
       "weight": 8,
       "is_gate": false,
-      "verification_command": "jq -e '.trials' .harness/config.json",
+      "verification_command": "jq '.tasks | length' .harness/contracts/sprint-09.tasks.json",
       "rubric_dimension": "methodology_completeness"
     },
     {
-      "task_id": "s06-sn1",
+      "task_id": "s09-sn1",
       "criterion": "<Should-NOT criterion text>",
-      "grader_type": "llm-judge",
+      "grader_type": "structural",
       "weight": 0,
       "is_gate": true,
-      "verification_command": null,
-      "rubric_dimension": "generator_evaluator_separation"
+      "verification_command": "grep -c '^## Negotiation Protocol' plugins/trine-eval/skills/sprint-contract/SKILL.md",
+      "rubric_dimension": "grading_architecture"
     }
   ]
 }
@@ -121,13 +131,24 @@ After the contract is approved (Status: APPROVED from the Evaluator review), emi
 
 **Field semantics:**
 
-- `task_id` — Stable identifier: `s<NN>-c<N>` for success criteria (numbered from 1), `s<NN>-sn<N>` for Should-NOT gates. Stability matters because Sprint 9 transcripts and Sprint 10 hygiene flags key off this id across trials.
-- `criterion` — Verbatim criterion text from the markdown contract (no paraphrasing). This is what the Evaluator and downstream tools read.
-- `grader_type` — `"deterministic"` or `"llm-judge"`, matching the tag in the markdown contract.
-- `weight` — The percentage weight from the markdown contract. Gate (Should-NOT) criteria use `0` — they are binary, not weighted.
+- `task_id` — Stable identifier: `s<NN>-c<N>` for success criteria (numbered from 1),
+  `s<NN>-sn<N>` for Should-NOT gates. Stability matters because regression gates and
+  transcript correlation key off this id across trials.
+- `criterion` — Verbatim criterion text from the markdown contract (no paraphrasing).
+  This is what the Evaluator and downstream tools read.
+- `grader_type` — `"behavioral"`, `"structural"`, or `"llm-judge"`, matching the tag in
+  the markdown contract. The legacy 2-way deterministic/llm-judge enum is superseded —
+  use `"behavioral"` or `"structural"` instead of `"deterministic"`.
+- `weight` — The percentage weight from the markdown contract. Gate (Should-NOT) criteria
+  use `0` — they are binary, not weighted.
 - `is_gate` — `true` for Should-NOT gates, `false` for scored success criteria.
-- `verification_command` — For deterministic criteria, a runnable shell command whose exit code or stdout determines PASS/FAIL. For llm-judge criteria, `null`. Sprint 7's regression gate executes these commands directly.
-- `rubric_dimension` — Which rubric dimension this criterion informs (e.g., `methodology_completeness`, `grading_architecture`). Used by Sprint 8 for batching by dimension and by harness-summary for per-dimension rollups.
+- `verification_command` — For behavioral and structural criteria, a runnable shell command
+  whose exit code or stdout determines PASS/FAIL. For llm-judge criteria, `null`. The
+  regression gate executes these commands directly.
+- `rubric_dimension` — Which rubric dimension this criterion informs. Valid values for this
+  project: `methodology_completeness`, `grading_architecture`, `generator_evaluator_separation`,
+  `context_engineering`, `extensibility_aci`. Used by harness-summary for per-dimension
+  rollups.
 
 **Emission process:** The Generator (or main thread in minimal mode) writes the JSON file after reading the approved contract. The Evaluator does not need to review the JSON separately — it is a mechanical transcription of the approved markdown contract, and any drift between the two is caught by the Evaluator's subsequent reads of both files during the EVALUATION step.
 
@@ -169,3 +190,55 @@ Each criterion should describe:
 - The action to take (input)
 - The expected result (output)
 - How to verify it (test method)
+
+## No-Op Detection
+
+Before finalizing a contract, run each behavioral and structural criterion's verification command against the current codebase. If a criterion already passes (the grep count meets the threshold, the file already exists, the artifact already produces the expected output, etc.), it is a **no-op** — it provides zero signal about whether the sprint's implementation was successful. Revise no-op criteria by raising the threshold, narrowing the search scope, choosing a different observable result, or replacing with a criterion that tests new content specifically. No-op structural criteria are especially dangerous because they pass even when nothing was built.
+
+## Exit-Code-Faithful Verification Commands (regression-graduation discipline)
+
+Any criterion whose `verification_command` might later be **graduated into the regression suite** (`.harness/regression/regression.json`, consumed by Step 0.5) MUST be **exit-code-faithful**: its exit code alone must encode PASS, because the regression runner records **PASS on exit code 0** and reads nothing else. A command that is correct for a human/LLM Evaluator reading its *stdout* can be silently wrong as a regression gate. Two failure modes recur:
+
+- **Vacuous (always-PASS).** `jq '.x == true' file.json` prints `true`/`false` but **exits 0 regardless** — it can never FAIL as a gate. Use **`jq -e`** so the exit code encodes the boolean (`jq -e` exits 1 on `false`/`null`). Verify non-vacuity: the `-e` form must exit non-zero when the expression is false.
+- **Inverted (PASS means the violation).** `test -d "examples"` exits 0 when `examples/` **exists** — but the criterion wants it ABSENT. Use **`test ! -d "examples"`** so exit 0 = absent = PASS. Verify polarity: the form must exit non-zero on the bad state.
+
+Prefer exit-code-faithful forms: **`grep -q`** (exit 0 iff a match), **`jq -e`** (exit encodes the boolean), **`test ! -d` / `test ! -f`** (de-inverted negative assertions), and explicit `&& echo OK` chains. Avoid bare `jq` boolean prints, bare `test -d` for absence checks, and `grep -c …| wc -l` thresholds whose exit code does not encode the count. When in doubt, run the command twice — once on the good state (must exit 0) and once on a deliberately-bad state (must exit non-zero). See `sprint-workflow` Step 0.5 for the companion Windows git-bash invocation hazard.
+
+## SN2 Carve-Out: Renumbering-Only Edits to Approved Contracts
+
+**Scope.** This amendment (introduced in Sprint 13 under the SN2 carve-out) permits
+renumbering-only edits to approved markdown contracts when a plan amendment has inserted a
+new sprint that shifted all subsequent sprint numbers. These edits are the narrowest possible
+post-approval change and carry a mandatory audit trail.
+
+**Permitted edits under the carve-out:**
+
+- Renumbering Sprint N references in approved markdown contracts (e.g., "Sprint 9" →
+  "Sprint 10") where the original number was correct at contract-approval time but became
+  stale because a plan amendment inserted a new sprint at a lower number.
+- Adding a `## Revision History` block to the amended contract file, citing the
+  plan-amendment commit and the date of renumbering.
+
+**Forbidden edits — not permitted even under the carve-out:**
+
+- Any change to criterion text, weights, grader type tags, Should-NOT gate text, or
+  reference solutions.
+- Adding, removing, or reordering criteria.
+- Changing prose outside of sprint-number literals in scope (i.e., "Sprint N" renumberings).
+- Applying the carve-out without a `## Revision History` block in the amended file. The
+  Revision History block is the carve-out's required metadata — omitting it voids the
+  carve-out protection and makes the edit indistinguishable from an unauthorized change.
+
+**How to apply the carve-out.** When a plan-amendment commit authorizes renumbering:
+
+1. Identify every occurrence of the stale sprint number in the approved contract file —
+   not just the Out of Scope section but the full document (criterion text, Technical Notes,
+   Evaluator Review sections, everywhere).
+2. Replace each stale "Sprint N" literal with the corrected number.
+3. Add or update the `## Revision History` block at the top of the contract file, citing:
+   - The plan-amendment commit hash (or "Sprint NN plan amendment" if the commit is not yet
+     final at renumbering time)
+   - The date of renumbering
+   - A one-line description of the change (e.g., "Renumber Sprint 9→10, 10→11, 11→12 per
+     DEC-0010 plan amendment")
+4. No other changes to the file are permitted.
