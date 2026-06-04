@@ -20,6 +20,21 @@ You are running one sprint through the full Planner-Generator-Evaluator cycle. T
 
 If all sprints are complete, tell the user and suggest `/harness-summary`.
 
+## Step 0.4: Pre-Sprint Governance Gate (b1)
+
+When `config.governance.enabled` is `true` AND `config.governance.review_frequency` is set (any value), check for the sprint prebrief file at `.council/sprint-prebrief/sprint-{NN}.json` (where NN is the sprint number about to run).
+
+If the file is **absent**, emit a WARN message identifying the missing file path:
+
+```
+WARN: Council sprint prebrief not found: .council/sprint-prebrief/sprint-{NN}.json
+      Proceeding without governance prebrief review.
+```
+
+**This gate does NOT block.** It is warn-only — the sprint proceeds regardless of whether the prebrief exists. The WARN is a signal to the governance-enabled operator that the council prebrief step was skipped.
+
+**Backward compatibility:** When `config.governance.enabled` is `false` or the `governance` key is absent from `config.json`, this gate does not fire and no check is performed. A project without a governance config behaves identically to the pre-gate harness-sprint workflow. Governance is **off by default** — trine-eval ships with no `governance` key, so this gate is inert unless a governance layer (e.g. the henkaten-council plugin) is explicitly configured.
+
 ## Step 0.5: Regression Gate
 
 Before negotiating any new contract, verify that every previously graduated capability still passes. A regression gate is necessary here — not later — because a new sprint's criteria are independent of prior capabilities: the new eval can grade PASS on fresh work while a graduated capability has silently broken. Running the gate *after* the new sprint's eval would let the system ship a green score even though it regressed, overstating system health in the metrics. Running it *before* contract negotiation means the sprint cannot even begin defining new work until existing capability is verified intact. This is why the gate is `fail_fast` by default, not a warning.
@@ -82,7 +97,7 @@ The contract (`.harness/contracts/sprint-{NN}.md`) gets drafted using the sprint
 - Read `.harness/spec.md`, `.harness/sprints.json`, the current sprint number and title, any prior contracts in `.harness/contracts/`, and prior eval results in `.harness/evals/`
 - Read the sprint-contract template at `skills/sprint-contract/template.md` and follow it
 - If `.harness/bootstrap/failure-catalog.json` exists, read it and fold relevant failures into the contract
-- Write the draft contract to `.harness/contracts/sprint-{NN}.md` with weighted **Success Criteria** split into `Deterministic` and `LLM-as-judge` groups (weights sum to 100%), **Should-NOT** gate criteria, **Reference Solutions** for the highest-weighted LLM-judge criterion, **Out of Scope**, and **Technical Notes**
+- Write the draft contract to `.harness/contracts/sprint-{NN}.md` with weighted **Success Criteria** (weights sum to 100%), each criterion tagged `behavioral`, `structural`, or `llm-judge` per the 3-way grader split — with behavioral criteria holding ≥ 60% of total weight unless the Technical Notes justify an exception; plus **Should-NOT** gate criteria, **Reference Solutions** for the highest-weighted LLM-judge criterion, **Out of Scope**, and **Technical Notes**
 - Do not implement anything in this step — only produce the contract
 
 ### 1b. Evaluator Reviews Contract
@@ -257,7 +272,22 @@ Once the sprint passes (or max retries exhausted):
 
 > **Windows encoding hazard for `sprint-state.json` and `progress.md`.** Write JSON / markdown files containing UTF-8 superscripts (`²`, `³`), em-dashes, or other non-ASCII via `Path(...).write_text(content, encoding='utf-8')`. Bash heredocs on Windows + Git Bash produce mojibake (`²` becomes `Â²`). Multiple sprints in this project's run required the Python workaround when their progress entries contained `σ²` or similar.
 
-4. Report to the user:
+4. **Post-Sprint Governance Auto-Trigger Gate (b2).** When `config.governance.enabled` is
+   `true` AND `config.governance.review_frequency == "every-sprint"`, invoke
+   `/henkaten-council:council-autorun` for the just-completed sprint as the final action of
+   this step — **after** updating `progress.md`, `sprint-state.json`, and the git checkpoint
+   (steps 1–3 above), but **before** reporting to the user (step 5 below).
+
+   If `council-autorun` returns an andon halt or autonomy-floor breach, surface that result
+   to the user **before** offering the next sprint. Do not proceed to offer the next sprint
+   until the user acknowledges the andon-stop outcome.
+
+   **Backward compatibility:** When `config.governance.enabled` is `false` or the `governance`
+   key is absent from `config.json`, this gate does not fire. Governance is **off by default**;
+   a project without a governance config behaves identically to the pre-gate harness-sprint
+   workflow.
+
+5. Report to the user:
    - Sprint outcome (PASS/PARTIAL/FAIL)
    - How many rounds it took
    - Key findings from the eval
