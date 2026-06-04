@@ -218,7 +218,7 @@ The extraction process below applies in both cases; batched mode just processes 
 Read through eval reports (`.harness/evals/sprint-NN-rR.md`) looking for:
 
 1. **Tool calls that failed or produced unexpected results** — the tool description may have been ambiguous or missing critical context
-2. **Criteria where the grader type was wrong** — a criterion tagged `deterministic` that required LLM judgment (or vice versa) suggests the verification method in the contract was misspecified
+2. **Criteria where the grader type was wrong** — a criterion tagged `behavioral` whose evidence was actually file-reading (or one tagged `structural` that secretly demanded execution, or one tagged either that genuinely required LLM judgment) suggests the verification method in the contract was misspecified. Mislabeled behavioral criteria are the most common failure mode: they look strong on paper but accept structural evidence at grading time.
 3. **Evaluator misinterpretations** — where the evaluator tested something different from what the criterion intended, often because the skill/agent description was unclear
 4. **Recurring failures across sprints** — the same type of failure appearing in multiple sprints may indicate a systemic description gap rather than an implementation issue
 
