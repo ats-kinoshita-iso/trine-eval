@@ -30,11 +30,11 @@
     },
     {
       "task_id": "s14-c4",
-      "criterion": "Working tree carries no uncommitted non-session content at completion (graded post-Step-5-commit): git status --porcelain | grep -vE settings.local.json|progress.md|sprint-state.json | wc -l returns 0.",
+      "criterion": "Working tree carries no uncommitted non-session content at completion (graded post-Step-5-commit): git status --porcelain | grep -vE settings.local.json|progress.md|sprint-state.json|audit-log.jsonl | wc -l returns 0.",
       "grader_type": "behavioral",
       "weight": 15,
       "is_gate": false,
-      "verification_command": "git status --porcelain | grep -vE 'settings.local.json|progress.md|sprint-state.json' | wc -l",
+      "verification_command": "git status --porcelain | grep -vE 'settings.local.json|progress.md|sprint-state.json|audit-log.jsonl' | wc -l",
       "rubric_dimension": "generator_evaluator_separation"
     },
     {
