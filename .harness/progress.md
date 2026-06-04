@@ -252,3 +252,43 @@ Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
 - Date: 2026-06-02
 - Rubric scores: Methodology 4/5, Grading 4/5, Separation 5/5, Context 5/5, Extensibility 4/5
 - Notes: Phase 1.6 audit-chain repair + governance hardening. 3-way grader split (66% behavioral / 8% structural / 26% llm-judge). Contract APPROVED round 1 with 3 non-blocking advisories. Implementation in 4 commits (4c1da9c contract+tasks.json+features.json; 8950edc sprint-workflow port — Step 0.5/1d/3c-3e/Operational Notes + b1/b2 gates [commit msg narrower than +299-line diff]; dec3680 SN2 carve-out in sprint-contract/SKILL.md; f90a5d7 SN2-authorized renumbering of sprint-07/08 + DEC-0011 awk-anchor fix in sprint-10). Deliverables: (a) sprint-workflow/SKILL.md +299 lines covering Step 0.5 regression gate w/ 4 guard conditions + Windows-bash hazard; Step 1d emission + DEC-0019 features.json advance; Steps 3c/3d/3e (trial-loop, batch API, transcript capture); Operational Notes (Evaluator Fallback + thinking.profile). (b) bidirectional council gates: b1 pre-sprint warn-only check for sprint-prebrief inside Step 0; b2 post-sprint auto-trigger of /henkaten-council:council-autorun in Step 5 respecting andon-stop protocol. (c) SN2 carve-out amendment + applied to sprint-07.md (3-line) and sprint-08.md (7-line including Evaluator advisory #2 fixes) + DEC-0011 awk-anchor fix in sprint-10.md. features.json self-bootstrapped F25-F28 via new Step 1d protocol. Transcript trailer extracted to .harness/transcripts/sprint-13-r1.json. HK-0003 (council bypass) and HK-0004 (in-repo workflow-step gap) structurally closed by construction; HK-0006 (synthetic-authoring detection) remains open per Out of Scope.
+## Session 2026-06-02T10:02:35-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-02T14:02:35Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-06-02T20:03:23-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-03T00:03:23Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-06-03T14:46:32-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-03T18:46:32Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-06-03T14:47:56-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-03T18:47:56Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-06-03T14:48:34-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-03T18:48:34Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+## Session 2026-06-03T14:52:21-04:00
+Stopped. Current sprint state should be committed.
+
+## Session 2026-06-03T18:52:21Z
+Stopped. Current sprint state should be committed.  <!-- SESSION_STOPPED -->
+
+## Sprint 14: Durability & Clean Baseline (P0)
+- Status: PASS
+- Rounds: 1
+- Passed criteria: 5/5
+- Weighted score: 100%
+- Gates: 4/4
+- Date: 2026-06-03
+- Rubric scores: Methodology 4/5, Grading 4/5, Separation 5/5, Context 4/5, Extensibility 4/5
+- Notes: Phase S P0 (first stabilization sprint). Minimal mode (main-thread implementation; Evaluator forked). Step 0.5 regression gate ran live for the first time (s09-sn3 JIT gate PASS via git-bash). Deliverables: committed .council/audit-log.jsonl (append-only, 1321->2358 lines); git rm 2 stale worktree gitlinks (focused-hofstadter, jolly-perlman); clean committed baseline. Contract APPROVED r1, 2 advisories + in-flight B4 fix (exclude live-appended audit-log.jsonl from clean-tree check). Commits 06e5e66 + 5ef3228 + B4 fix. PUSH (52 commits ahead) is a human-gated completion action — graded as readiness (S5 PASS), not executed as a criterion.

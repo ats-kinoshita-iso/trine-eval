@@ -1,5 +1,5 @@
 {
-  "current_sprint": 14,
+  "current_sprint": 15,
   "sprints": [
     {
       "number": 1,
@@ -234,7 +234,34 @@
         "llm_judge_pct": 26
       },
       "notes": "Phase 1.6 audit-chain repair + governance hardening. Contract APPROVED round 1 with 3 non-blocking advisories (SN1 prose inaccuracy on Step 3 context annotation format; B9 does not grep every stale-ref line in sprint-08 but SN3 backstops; J12 reference solution covers only sub-criteria (a)/(d)). 3-way grader split 66% behavioral / 8% structural / 26% llm-judge; no static-artifact exception needed. Implementation in 4 commits (4c1da9c contract+tasks.json+features.json advance; 8950edc sprint-workflow port of Step 0.5/1d/3c-3e/Operational Notes + b1/b2 gates [commit msg narrower than +299-line diff]; dec3680 SN2 carve-out in sprint-contract/SKILL.md; f90a5d7 SN2-authorized renumbering of sprint-07.md/sprint-08.md + DEC-0011 awk-anchor fix in sprint-10.md). R1 PASSed 13/13 + 6/6 gates with zero retries. Deliverables: (a) sprint-workflow/SKILL.md +299 lines (Step 0.5 regression gate w/ 4 guard conditions + Windows-bash hazard; Step 1d tasks.json emission + DEC-0019 features.json advance; Steps 3c/3d/3e trial-loop/batch/transcript; Operational Notes covering Evaluator Fallback + thinking.profile). (b) bidirectional council gates: b1 inside Step 0 (pre-sprint warn-only check for .council/sprint-prebrief/sprint-NN.json), b2 inside Step 5 (post-sprint auto-trigger of /henkaten-council:council-autorun respecting andon-stop protocol). (c) SN2 carve-out amendment in sprint-contract/SKILL.md + applied to sprint-07.md (3-line Out of Scope renumbering) and sprint-08.md (7-line renumbering including B4 parenthetical and Technical Notes repetitions at lines 70/452/559 per Evaluator advisory #2) + DEC-0011 awk-anchor fix in sprint-10.md (h2->h3 anchor with Revision History extension). features.json advanced F25-F28 (workflow-step-port, council-check-gates, sn2-renumbering-carveout, stale-sprint-refs-cleanup) self-bootstrapped via new Step 1d protocol. Transcript trailer extracted to .harness/transcripts/sprint-13-r1.json per new Step 3e protocol. HK-0003 (council bypass by construction) and HK-0004 (in-repo workflow-step gap) structurally closed. HK-0006 (synthetic-authoring detection) remains open per contract Out of Scope (requires runtime dispatch wiring, deferred)."
+    },
+    {
+      "number": 14,
+      "title": "Durability & clean baseline (P0)",
+      "status": "pass",
+      "rounds": 1,
+      "criteria_passed": 5,
+      "criteria_total": 5,
+      "weighted_score": 100,
+      "phase": "stabilization",
+      "rubric_scores": {
+        "methodology_completeness": 4,
+        "grading_architecture": 4,
+        "generator_evaluator_separation": 5,
+        "context_engineering": 4,
+        "extensibility_aci": 4
+      },
+      "should_not_gates": {
+        "passed": 4,
+        "total": 4
+      },
+      "grader_split": {
+        "behavioral_pct": 85,
+        "structural_pct": 15,
+        "llm_judge_pct": 0
+      },
+      "notes": "Phase S P0 durability. Minimal mode (main-thread impl; Evaluator forked). PASS 5/5 + 4/4 gates, 100% weighted, single round. Deliverables: committed .council/audit-log.jsonl (1321->2358 lines, append-only); git rm 2 stale worktree gitlinks; clean baseline. Step 0.5 regression gate ran for the first time (s09-sn3 JIT gate, PASS via git-bash). Contract APPROVED r1 with 2 advisories addressed (B4 untracked-artifact timing; SN1 baseline 2347) + an in-flight B4 fix excluding live-appended audit-log.jsonl. Commits 06e5e66 (deliverables), 5ef3228 (artifacts+F29-31), +B4 fix. PUSH is a human-gated completion action (52 commits ahead of origin) \u2014 graded as readiness only (S5 PASS), not executed as a criterion."
     }
   ],
-  "last_updated": "2026-06-02T09:16:00-04:00"
+  "last_updated": "2026-06-03T22:11:16-04:00"
 }
