@@ -27,6 +27,9 @@ The rubric defines:
 - `cli-tool` — Command-line tools (argument parsing, error messages, exit codes)
 - `api-service` — REST/GraphQL APIs (status codes, validation, concurrency)
 - `eval-harness` — Eval-driven development harnesses (methodology completeness, grading architecture, separation)
+- `harness-build` — Agent runtime harnesses (playbook stages, hard thresholds: loop bounds, sandboxing, governance)
+
+See [rubrics/README.md](rubrics/README.md) for the meta-vs-runtime decision guide between `eval-harness` and `harness-build`.
 
 ## Adding Custom Rubrics
 
