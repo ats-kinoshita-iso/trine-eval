@@ -1,0 +1,16 @@
+{
+  "sprint_number": 14,
+  "classified_at": "2026-06-03T19:05:00Z",
+  "classified_by_agent": "orchestrator",
+  "cynefin": "clear",
+  "confidence": 0.85,
+  "rationale": "Sprint 14 (P0 durability) is a known, procedural task with obvious cause-effect: commit the uncommitted .council/audit-log.jsonl, git rm the two stale worktree gitlinks, reconcile session-noise to reach an empty git status, and push the branch. Best-practice applies directly; there is no novel design space. The only non-routine element is the push of 49 local-only commits, which is a human-gated irreversible action (not an analytical uncertainty). Classified clear with high confidence; the residual 0.15 covers possible surprises in what the audit-log/worktree cleanup touches.",
+  "expected_loop_shape": "plan-then-execute-loop",
+  "projection_manifest": [
+    ".harness/sprints.json (sprint 14 entry)",
+    ".harness/contracts/sprint-14.md (to be drafted)",
+    ".council/standard-work.json",
+    "git status / git log state"
+  ],
+  "autonomy_floor_observed": 4
+}

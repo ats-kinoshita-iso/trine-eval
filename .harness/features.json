@@ -1,7 +1,7 @@
 {
   "version": "1.0",
   "schema_note": "Canonical feature inventory. Level-5 only modifications. Each feature has {id, title, phase, status, sprint, slug, must_should_nice}.",
-  "last_updated": "2026-06-02T13:00:00Z",
+  "last_updated": "2026-06-03T19:10:00Z",
   "features": [
     {
       "id": "F01",
@@ -263,6 +263,33 @@
       "sprint": 13,
       "slug": "stale-sprint-refs-cleanup",
       "must_should_nice": "should"
+    },
+    {
+      "id": "F29",
+      "title": "Working-tree cleanup (clean baseline)",
+      "phase": "stabilization",
+      "status": "implemented",
+      "sprint": 14,
+      "slug": "working-tree-cleanup",
+      "must_should_nice": "must"
+    },
+    {
+      "id": "F30",
+      "title": "Governance audit-log commit",
+      "phase": "stabilization",
+      "status": "implemented",
+      "sprint": 14,
+      "slug": "audit-log-commit",
+      "must_should_nice": "must"
+    },
+    {
+      "id": "F31",
+      "title": "Branch push (durable baseline)",
+      "phase": "stabilization",
+      "status": "implemented",
+      "sprint": 14,
+      "slug": "branch-push",
+      "must_should_nice": "must"
     }
   ]
 }
