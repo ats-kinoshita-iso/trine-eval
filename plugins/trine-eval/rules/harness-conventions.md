@@ -107,6 +107,56 @@ Sprint contracts may declare an optional `## Edge Case Criteria` section, distin
 
 **Backward compatibility.** Sprint contracts that predate Sprint 10 do not declare `## Edge Case Criteria`. Their `tasks.json` files contain only Success Criteria and Should-NOT entries, exactly as before. The Edge Case Pass Rate metric in summary output is rendered as `N/A` when no sprint declared edge-case criteria — absence is meaningful information, not a zero.
 
+## Three Buckets of Verification
+
+Every contract `verification_command` falls into one of three buckets. This framework was retrofitted in Sprint 07 after a meta-observation: the eval-harness had been grading its own deliverables almost entirely on bucket 1 (presence/structural checks), so a sprint could ship at 100% PASS while its deliverable never actually behaved correctly at runtime.
+
+| Bucket | Definition | Example verification | What it catches |
+|---|---|---|---|
+| **1. Structural / presence** | The right file / key / regex / count is present. Asserts on syntax, not behavior. | `grep -q "phase-02-N" rules/harness-conventions.md`, `python -c "import json; d=json.load(open('.harness/config.json')); assert d['python_build']['python_version']=='3.12'"`, `[ -f uv.lock ]` | Plumbing was put in place. Catches gross omission. |
+| **2. Behavioral with mocks** | Code does what it should given stubbed external dependencies. Asserts on observable outcomes — return values, exit codes, raised exceptions, written files. | `tests/runner/test_caps.py` asserts `EvalLog.metadata["cap_hit"] == "token_limit"` fires when the limit is exceeded; `tests/sandbox/test_regression_gate.py` asserts `verdict == "fail"` when a `pass_to_pass` test regresses. | Logic on YOUR side is correct, given assumed behavior of the dependency. Catches code defects. |
+| **3. Behavioral against real systems** | Code AND the dependency execute together. Real Docker, real Anthropic API, real judge subagent, real local services. | `tests/smoke/anthropic/test_caching_live.py` (currently gated off) calls real `messages.create` and asserts `response.usage.cache_read_input_tokens > 0`; a hypothetical `tests/smoke/judge/test_grading_subagent.py` would spawn a real Claude subagent and assert it grades a known-bad answer as FAIL. | Integration with the real dependency works as assumed. Catches integration drift, schema changes, environment-specific failures. |
+
+**Which bucket to use, by default.** Prefer bucket 2. A bucket-2 verification is the cheapest type of evidence that the deliverable actually *does* what the contract claims. Bucket 1 is acceptable only for genuinely-plumbing-only criteria (a config key must exist; a convention must be documented). Bucket 3 is appropriate when the integration with the external system is itself the deliverable (the prompt-caching helper, the Docker sandbox runner, the judge model integration).
+
+**The bucket-2 default applies most aggressively to harness-side deliverables.** A harness change like "add Turn-budget defensive authorship to evaluator.md" can be verified with bucket 1 (`grep -q 'Turn-budget defensive authorship' agents/evaluator.md`) — but that only checks the documentation landed. A bucket-2 verification would spawn a real Evaluator subagent against a >10-criterion contract and assert that the eval file appears with skeleton-then-fill structure. The bucket-2 version is the test that would catch a regression where the documentation lands but the agent doesn't actually follow it.
+
+**Subagent-driven verification is the bucket-2 path for harness-side deliverables.** Most harness changes are documentation/skill changes whose "behavior" only manifests when an agent reads them and acts. To test that behavior without paying for raw Anthropic API tokens, spawn a real subagent via the `Task` tool (Generator, Evaluator, or general-purpose) with a constructed input and assert on the subagent's output. The subagent uses the same Anthropic credentials Claude Code already holds — no separate API key, no separate budget. This pattern is the workhorse for verifying that contract / skill / agent-prompt changes actually change agent behavior.
+
+**Bucket distribution feeds the Functional Integration Coverage rubric dimension.** See `skills/eval-rubric/rubrics/eval-harness.md` for how the rubric scores bucket distribution. A sprint that's 100% bucket 1 scores 1/5 (blocking); 100% bucket 2 with no bucket 3 scores 2/5; bucket 2 default + one bucket 3 scores 3/5; etc.
+
+## Architectural vs Functional Verification
+
+Sprint 07 introduces a fourth criterion class — **Functional Smoke** — and a sixth rubric dimension — **Functional Integration Coverage** — to address a gap exposed by Phase 2: mocked unit tests verify only that code has the right *shape* (architectural verification), not that it actually works against the real external systems it integrates with (functional validation).
+
+**Two complementary verification surfaces.**
+
+- **Architectural verification** — mocked unit tests (`tests/runner/`, `tests/models/`, `tests/core/`, `tests/judge/`, `tests/sandbox/`, `tests/observability/`). Every external call (`anthropic.Anthropic`, `subprocess.run` for docker, judge `complete`) goes through `unittest.mock.patch` or `mocker.patch`. Asserts argv shapes, dict structures, call counts, and exit codes. Fast, free, deterministic, mandatory. Enforced by the existing `s04-sn3-deterministic` regression gate (Sprint 06) via `tests/audit-anthropic-mocked.py`.
+
+- **Functional validation** — live smoke tests under `tests/smoke/`. Exercises real external systems with measurable end-to-end signals. Gated by env vars (`TRINE_EVAL_LIVE_API=1`, `TRINE_EVAL_LIVE_DOCKER=1`). Per-sprint USD spend capped by `config.functional_smoke.budget_usd` (default $1.00/sprint). CI default skips them; operators run them on-demand. Recorded fixtures (VCR-style JSON, replay-style captures) are an acceptable substitute when live cost is prohibitive.
+
+**Directory layout.** Live smoke tests live at `tests/smoke/<system>/test_<feature>_live.py` (e.g., `tests/smoke/anthropic/test_caching_live.py`, `tests/smoke/docker/test_sandbox_live.py`). Each file starts with the standard pytest skipif boilerplate:
+
+```python
+import os, pytest
+pytestmark = pytest.mark.skipif(
+    not os.environ.get("TRINE_EVAL_LIVE_API"),
+    reason="live API smoke test; set TRINE_EVAL_LIVE_API=1 to run",
+)
+```
+
+**Env-var registry.** Reserved env-var names for the live-gate are listed below; new ones added in future sprints append to this list:
+
+| Env var | Gates | Per-run cost reference |
+|---------|-------|------------------------|
+| `TRINE_EVAL_LIVE_API` | Live Anthropic API (Messages, Batches) | $0.01–$0.05 per smoke test |
+| `TRINE_EVAL_LIVE_DOCKER` | Real `docker run` invocations | Free (local resource cost only) |
+| `TRINE_EVAL_LIVE_JUDGE` | Real judge model calls (subset of LIVE_API but separately togglable) | $0.005–$0.02 per smoke test |
+
+**Budget enforcement.** Per-sprint live-API spend totals must stay under `config.functional_smoke.budget_usd` (default `1.00`). The runner's existing `cost_limit` parameter in `src/trine_eval/runner/engine.py` (Opus 4.7 pricing constants at line 15–16) enforces the cap — when functional smoke runs through the runner with `cost_limit=1.00`, the run aborts and records `cap_hit="cost_limit"` if spend exceeds the cap. Smoke tests run outside the runner (direct `pytest`) report their cost via `response.usage.input_tokens * price + output_tokens * price` and the operator is responsible for budget tracking; the harness-summary skill surfaces total per-sprint live-API spend so the operator can spot creep.
+
+**Backward compatibility.** Sprint contracts that predate Sprint 07 do not declare `## Functional Smoke`. Their `tasks.json` files contain only Success Criteria, Should-NOT, and (optionally) Edge Case entries, exactly as before. The Functional Smoke Pass Rate metric in summary output is rendered as `N/A` when no sprint declared functional smoke criteria, and the Functional Integration Coverage rubric dimension scores 1/5 (the documented "all tests mocked, no live execution path" floor) for the existing Phase 2 baseline.
+
 ## Conditional Evaluator Tools
 
 Some evaluator tools are useful only on specific project types. Sprint 10 introduces `config.evaluator_tools` for declaring per-tool availability with backward-compatible defaults.

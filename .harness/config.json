@@ -13,9 +13,17 @@
     "planner": true,
     "contract_negotiation": true,
     "sprint_decomposition": true,
-    "eval_summary": true
+    "eval_summary": true,
+    "per_sprint_aci_review": true,
+    "functional_smoke": false
   },
-  "trials": 1,
+  "trials": 2,
+  "functional_smoke": {
+    "budget_usd": 0.00,
+    "env_gate": "TRINE_EVAL_LIVE_API",
+    "smoke_root": "tests/smoke",
+    "_disabled_note": "Live-API smoke disabled by operator on 2026-05-20 to avoid raw SDK token spend. Flip components_enabled.functional_smoke back to true and raise budget_usd to re-enable. The test file at tests/smoke/anthropic/test_caching_live.py stays in place but cannot run (gated on TRINE_EVAL_LIVE_API env var, which CI never sets)."
+  },
   "sandbox": {
     "mode": "none"
   },
