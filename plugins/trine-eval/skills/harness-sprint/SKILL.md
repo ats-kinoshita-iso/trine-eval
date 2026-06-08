@@ -206,7 +206,7 @@ If either condition is false, the synchronous path documented in Step 3b runs as
 
 **Execution (when the batch path activates).**
 
-1. **Collect.** For each criterion in `.harness/contracts/sprint-{NN}.tasks.json`, build a Batch API request unit: deterministic criteria carry their `verification_command` and a structured "did the command exit 0?" prompt; LLM-judge criteria carry their criterion text plus the rubric dimension. Each unit is keyed by its `task_id` so results map back unambiguously.
+1. **Collect.** For each criterion in `.harness/contracts/sprint-{NN}.tasks.json`, build a Batch API request unit: behavioral and structural criteria carry their `verification_command` and a structured "did the command exit 0?" prompt; LLM-judge criteria carry their criterion text plus the rubric dimension. Each unit is keyed by its `task_id` so results map back unambiguously.
 2. **Submit.** POST a single batch to Anthropic's `/v1/messages/batches` endpoint. The submission contains every criterion as a custom-id-tagged request inside one batch envelope — N criteria collapse to 1 API call.
 3. **Poll.** Wait for the batch to reach a terminal state. The 24-hour SLA is the upper bound; in practice batches typically complete sooner, but the workflow must not assume sub-hour latency. Configure operator-side timeouts to allow the documented 24 hours.
 4. **Map back.** Parse the batch response, demultiplex by `custom_id` (= `task_id`), and write each result into its corresponding `## N. Criterion ...` slot in `.harness/evals/sprint-{NN}-r{R}.md` (or `-t{T}.md` for multi-trial). The per-criterion file shape is byte-for-byte identical to the synchronous path — downstream consumers (the regression gate at Step 0.5, the saturation detector in `harness-summary`, the Generator on retry) cannot tell whether batch or synchronous produced the file. **This invariant is critical.** Changing the file shape would cascade into every Sprint 7 / 9 / 10 deliverable.
@@ -323,7 +323,7 @@ The Evaluator subagent runs forked (`context: fork` in `agents/evaluator.md`) an
 **How to flag a fallback eval.** When the main thread writes the eval, it must add a `## Process Note` section near the top of the eval file explicitly disclosing:
 - That the eval was authored by the main-thread orchestrator, not a forked Evaluator subagent
 - The reason for the fallback (cite the specific tool limitation or dispatch failure)
-- Which deterministic verification commands were run verbatim from the contract (so the audit chain is preserved even though the authorship is degraded)
+- Which behavioral / structural verification commands were run verbatim from the contract (so the audit chain is preserved even though the authorship is degraded)
 
 **Why this matters.** The Sprint 11 round-1 eval was written via this fallback because the Evaluator's `tools:` line did not include `Write`. Sprint 12 closed the underlying tool limitation by adding `Write` to the agent's frontmatter, so the fallback should not fire under normal operation from Sprint 12 onward. The eval-summary skill and rubric `generator_evaluator_separation` dimension penalize fallback eval rounds — a sprint whose eval was written via fallback typically scores 3/5 on that dimension instead of 5/5, regardless of the underlying technical correctness of the verifications.
 

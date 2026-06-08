@@ -180,7 +180,7 @@ Before handing the contract to the Evaluator, the author (Generator subagent or 
 
 ### Authoring Checklist (five trap categories)
 
-These are the recurring authoring mistakes the Evaluator has flagged across Sprints 6–11. Walk every deterministic criterion through all five before submission.
+These are the recurring authoring mistakes the Evaluator has flagged across Sprints 6–11. Walk every behavioral or structural criterion through all five before submission.
 
 1. **multi-line trap.** Does the verification command use a single-line `grep` or `grep -q` over content that actually spans multiple lines? YAML frontmatter blocks, multi-line code fences, and JSON pretty-printed across multiple lines are common offenders — `grep` matches on a line at a time. When the target genuinely spans lines, switch to `awk` over the relevant block (as in Sprint 12 C1's `awk '/^---$/{c++; next} c==1'` for frontmatter), or use `python` to parse the file. If a `grep` pattern looks like it should match a multi-key YAML or multi-line JSON value, it almost certainly will not.
 

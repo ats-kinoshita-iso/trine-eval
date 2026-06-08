@@ -37,10 +37,11 @@ Fields:
 
 - `task_id` — Stable id. `s<NN>-c<N>` for scored success criteria, `s<NN>-sn<N>` for Should-NOT gates. Downstream tools reference tasks by this id across trials and sprints, so it must not be renamed after approval.
 - `criterion` — Verbatim criterion text copied from the markdown contract. No paraphrasing.
-- `grader_type` — `"deterministic"` or `"llm-judge"`.
+- `grader_type` — `"behavioral"`, `"structural"`, or `"llm-judge"`. (The legacy 2-way `"deterministic"`/`"llm-judge"` enum is superseded; `"deterministic"` is treated by downstream tools as a synonym for `"structural"` only for back-compat reading of legacy tasks.json files.)
 - `weight` — Integer percentage. Success criteria carry the weights declared in the markdown contract (summing to 100%); gate criteria use `0` because they are not weighted.
 - `is_gate` — `true` for Should-NOT gates, `false` otherwise.
-- `verification_command` — Runnable shell command for deterministic criteria; `null` for llm-judge.
+- `verification_command` — Runnable shell command for behavioral or structural criteria; `null` for llm-judge.
+- `bucket` — Integer `1`, `2`, or `3` (see "Three Buckets of Verification" below). Sprint contracts authored before Sprint 07 do not carry this field; tools treat missing-`bucket` as `1` (most conservative).
 - `rubric_dimension` — Which rubric dimension this criterion informs. Used for per-dimension summary rollups.
 
 Emission is guarded by `config.taxonomy.emit_tasks_json` (default `true`). See `skills/sprint-contract/SKILL.md` for the full specification and an example.
@@ -233,6 +234,6 @@ Sprint 9's transcript trailer captures messages, tool calls, token usage, timing
 
 **No fabrication.** The Evaluator must not write `verified_via_command: true` for a criterion that was graded by reading prose, by inference from filenames, or by reasoning about code without running the verification command. Fabricated flags would hide exactly the criteria that need human review — defeating the calibration purpose of the audit channel. The no-fabrication rule matches Sprint 9's posture for `token_usage` and `timing`: better an honest `false` than a misleading `true`.
 
-**No inference of PASS/FAIL from filenames or comments.** Beyond the per-criterion flag, the Evaluator's Adversarial Hygiene section in `agents/evaluator.md` forbids inferring verdicts from artifact metadata. A file named `success_FINAL.py` is not evidence of PASS; a `// TODO: broken` comment is not evidence of FAIL. The verdict for a deterministic criterion comes from the exit code of the verification command — nothing else. The verdict for an llm-judge criterion comes from structured rubric assessment of the artifact, not from signals embedded in its filename or comments.
+**No inference of PASS/FAIL from filenames or comments.** Beyond the per-criterion flag, the Evaluator's Adversarial Hygiene section in `agents/evaluator.md` forbids inferring verdicts from artifact metadata. A file named `success_FINAL.py` is not evidence of PASS; a `// TODO: broken` comment is not evidence of FAIL. The verdict for a behavioral or structural criterion comes from the exit code of the verification command — nothing else. The verdict for an llm-judge criterion comes from structured rubric assessment of the artifact, not from signals embedded in its filename or comments.
 
 **Backward compatibility.** A legacy evaluator that predates Sprint 10 does not emit `verified_via_command` flags; its trailer (if present) is missing the per-criterion audit channel. Sprint 9's failure-tolerant extraction stance applies — the harness-summary skill renders an "audit unavailable" note for those criteria rather than treating absence as failure. Projects that predate Sprint 9 entirely produce no trailer and no transcript file, so the question of `verified_via_command` does not arise.

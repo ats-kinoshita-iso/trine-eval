@@ -20,7 +20,7 @@ Rubric for evaluating eval-driven development harnesses against Anthropic's publ
 
 | Score | Description |
 |-------|-------------|
-| 5 | Explicit code→LLM→human grader hierarchy. Deterministic checks run first, LLM-as-judge handles subjective dimensions with isolated per-dimension scoring, structured rubrics with thinking-then-scoring, escape hatches. Human calibration mechanism exists. Pass@k and pass^k metrics available. |
+| 5 | Explicit code→LLM→human grader hierarchy. Code-based checks (behavioral + structural) run first, LLM-as-judge handles subjective dimensions with isolated per-dimension scoring, structured rubrics with thinking-then-scoring, escape hatches. Human calibration mechanism exists. Pass@k and pass^k metrics available. |
 | 4 | Grader hierarchy documented and encouraged. Per-dimension scoring works. LLM grading has rubrics. Missing one of: human calibration, pass@k, or escape hatches. |
 | 3 | Evaluator uses rubrics and per-dimension scoring but doesn't enforce code-first grading. No pass@k metrics. No human calibration pathway. |
 | 2 | Single-pass evaluation with no grader type distinction. Rubrics exist but scoring is ad-hoc. |
