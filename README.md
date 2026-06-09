@@ -154,6 +154,9 @@ trine-eval/                            # Marketplace root
 └── pyproject.toml  uv.lock            # uv-managed Python project
 ```
 
+For a full classification of every path as product, development infrastructure, or dogfooding
+byproduct — and which paths are safe to remove — see [`REPOSITORY-MAP.md`](REPOSITORY-MAP.md).
+
 When running in a target project:
 
 ```
