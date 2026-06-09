@@ -1,0 +1,14 @@
+{
+  "name": "trine-eval",
+  "owner": {
+    "name": "ats-kinoshita-iso"
+  },
+  "plugins": [
+    {
+      "name": "trine-eval",
+      "source": "./plugins/trine-eval",
+      "description": "Planner-Generator-Evaluator harness for eval-driven development across web/RAG/CLI/API projects, eval-harness methodology audits (meta layer), and harness-build agent-runtime conformance (runtime layer).",
+      "version": "0.4.0"
+    }
+  ]
+}

@@ -8,9 +8,9 @@ Rubric for evaluating eval-driven development harnesses against Anthropic's publ
 
 | Score | Description |
 |-------|-------------|
-| 5 | All 8 steps of Anthropic's eval methodology are implemented: early bootstrapping from real failures, manual-to-automated conversion, unambiguous tasks with reference solutions, balanced positive/negative test sets, isolated environments, grader hierarchy, transcript review, saturation graduation. |
-| 4 | 6-7 steps implemented. Missing steps are acknowledged with clear extension points. |
-| 3 | 4-5 steps implemented. Core loop (contract→build→eval→retry) works but bootstrap, balance, and graduation are missing. |
+| 5 | All 8 steps implemented: (0) early bootstrapping from real failures, (1) manual-to-automated conversion, (2) unambiguous tasks with reference solutions, (3) balanced positive/negative test sets, (4) isolated environments, (5) grader hierarchy code→LLM→human, (6) transcript review for grader quality, (7) saturation graduation. |
+| 4 | 6-7 of the 8 steps above are implemented. Missing steps are acknowledged with clear extension points. Typical at this level: steps 0-5 implemented, steps 6-7 (transcript review, saturation) deferred with documented plans. |
+| 3 | 4-5 of the 8 steps above are implemented. Core loop (contract→build→eval→retry) works. Typical at this level: steps 2-5 (reference solutions, negative tests, isolation, grader hierarchy) implemented; steps 0-1 (bootstrapping, manual-to-automated) and 6-7 (transcript review, saturation) are missing. |
 | 2 | Only the core loop exists. No bootstrapping, no negative tests, no saturation tracking. |
 | 1 | Partial implementation. Eval loop is incomplete or broken. |
 
@@ -20,7 +20,7 @@ Rubric for evaluating eval-driven development harnesses against Anthropic's publ
 
 | Score | Description |
 |-------|-------------|
-| 5 | Explicit code→LLM→human grader hierarchy. Deterministic checks run first, LLM-as-judge handles subjective dimensions with isolated per-dimension scoring, structured rubrics with thinking-then-scoring, escape hatches. Human calibration mechanism exists. Pass@k and pass^k metrics available. |
+| 5 | Explicit code→LLM→human grader hierarchy. Code-based checks (behavioral + structural) run first, LLM-as-judge handles subjective dimensions with isolated per-dimension scoring, structured rubrics with thinking-then-scoring, escape hatches. Human calibration mechanism exists. Pass@k and pass^k metrics available. |
 | 4 | Grader hierarchy documented and encouraged. Per-dimension scoring works. LLM grading has rubrics. Missing one of: human calibration, pass@k, or escape hatches. |
 | 3 | Evaluator uses rubrics and per-dimension scoring but doesn't enforce code-first grading. No pass@k metrics. No human calibration pathway. |
 | 2 | Single-pass evaluation with no grader type distinction. Rubrics exist but scoring is ad-hoc. |

@@ -5,23 +5,41 @@
 
 ## Success Criteria
 Each criterion must be independently testable. Be specific enough that pass/fail is unambiguous.
-Tag each criterion as `deterministic` (code-verifiable) or `llm-judge` (requires reading comprehension).
+Tag each criterion as `behavioral` (execution-verified), `structural` (artifact-inspected), or `llm-judge` (reading-comprehension).
 Weights must sum to 100% across all success criteria.
 
-**Bucket discipline (mandatory).** Every criterion belongs to one of three buckets defined in [`rules/harness-conventions.md`](rules/harness-conventions.md) → "Three Buckets of Verification". Briefly:
+**Behavioral coverage:** Behavioral criteria must hold **≥ 60% of total weight**. If a sprint genuinely has no behavioral surface (e.g., it produces only static documentation or a config schema with no runtime), state the reason explicitly in `## Technical Notes` so the Evaluator can verify the exception during CONTRACT_REVIEW.
 
-- **Bucket 1 — structural / presence.** `grep -q "X" file.md`, `assert key in dict`, `[ -f path ]`. Verifies plumbing. Acceptable only for pure-plumbing deliverables (config keys, conventions, documentation that must exist verbatim).
+**Bucket discipline (mandatory).** The grader-type tag (`behavioral`/`structural`/`llm-judge`) describes the **verification method**; the bucket tag describes the **strength of evidence**. They are orthogonal — a behavioral criterion can be bucket 2 (mocked) or bucket 3 (real-system). Every criterion belongs to one of three buckets defined in [`../../rules/harness-conventions.md`](../../rules/harness-conventions.md) → "Three Buckets of Verification". Briefly:
+
+- **Bucket 1 — structural / presence.** `grep -q "X" file.md`, `assert key in dict`, `[ -f path ]`. Verifies plumbing. Acceptable only for pure-plumbing deliverables (config keys, conventions, documentation that must exist verbatim). Pairs naturally with the `structural` grader-type tag.
 - **Bucket 2 — behavioral with mocks.** Asserts on observable outcomes — return values, exit codes, raised exceptions, written files — given stubbed dependencies. *This is the default bucket for nearly every behavioral deliverable.* For harness-side deliverables (skill prose, agent instructions), bucket 2 is achieved via subagent-driven verification (spawn a real subagent, assert on its output — no separate API key needed).
 - **Bucket 3 — behavioral against real systems.** Real Docker, real Anthropic API, real subagent integration. Catches integration drift the mocked test can't.
 
-Tag each criterion's bucket inline (e.g., `[weight: N%, bucket: 2]`). A sprint that's 100% bucket 1 cannot pass — the `Functional Integration Coverage` rubric dimension blocks at 1/5. See the rubric for the full bucket → score mapping. The Authoring Checklist's "bucket discipline trap" (Trap #6 in `skills/sprint-contract/SKILL.md`) walks through how to re-author a bucket-1 criterion as bucket 2.
+Tag each criterion's bucket inline (e.g., `[weight: N%, bucket: 2]`). A sprint that's 100% bucket 1 cannot pass — the `Functional Integration Coverage` rubric dimension blocks at 1/5. See the rubric for the full bucket → score mapping. The Authoring Checklist's "bucket discipline trap" (Trap #6 in `SKILL.md`) walks through how to re-author a bucket-1 criterion as bucket 2.
 
-### Deterministic (code-verifiable)
-1. {Criterion}: {How to verify — specific command, URL, or check} [weight: N%, bucket: 2]
-2. {Criterion}: {How to verify} [weight: N%, bucket: 2]
-3. {Plumbing-only criterion}: {presence check} [weight: N%, bucket: 1]
+**Converting structural criteria to behavioral.** A structural criterion proves a string exists in a file. A behavioral criterion proves the feature works when invoked. Prefer behavioral wherever the artifact can be run:
 
-### LLM-as-judge (requires reading comprehension)
+| Structural (weak) | Behavioral (strong) |
+|---|---|
+| `grep -c '"event":' hooks/hooks.json >= 3` | Trigger the SessionStart hook with a stubbed event and verify `sprint-state.json` `last_updated` changed within 5s of the trigger |
+| `grep -ci 'feature_list\|sprint-state' skills/harness-kickoff/SKILL.md >= 1` | Run `/harness-kickoff` against a fresh fixture spec; assert `.harness/sprint-state.json` is created and conforms to the documented schema |
+| `grep -c 'def evaluate' src/eval.py >= 1` | Invoke `evaluate(sample_input)` and assert the returned `EvalResult` has `passed=True` for the canonical positive case and `passed=False` for the canonical negative case |
+
+### Behavioral (execution-verified)
+Verified by *running* the artifact (invoking a skill, triggering a hook, executing the built binary, calling the library function) and observing the output, state change, or side effect. The "How to verify" must specify the command(s) to run AND the observable result to check. Default bucket is 2 (mocked dependencies); use bucket 3 when the criterion exercises real external systems.
+
+1. {Criterion}: {Command(s) to run, then observable result to check} [weight: N%, bucket: 2]
+2. {Criterion}: {Command(s) to run, then observable result to check} [weight: N%, bucket: 2]
+
+### Structural (artifact-inspected)
+Verified by inspecting an artifact at rest (grep, jq, schema check, file existence, frontmatter field). Use for cheap pre-flight checks that gate a behavioral criterion, or for genuinely static artifacts (config schemas, documentation presence). Structural criteria are bucket 1.
+
+3. {Criterion}: {How to verify — specific command, URL, or check} [weight: N%, bucket: 1]
+
+### LLM-as-judge (reading-comprehension)
+Subjective quality assessment that no command can capture. Typically bucket 2 (mocked judge model) or bucket 3 (live judge model against real systems).
+
 4. {Criterion}: {What to check and what constitutes PASS} [weight: N%, bucket: 2]
 5. {Criterion}: {What to check and what constitutes PASS} [weight: N%, bucket: 2]
 

@@ -40,7 +40,7 @@ For each failure case, create an eval task entry in `.harness/bootstrap/failure-
       "reference_solution": "Optional: known-working output or approach",
       "rubric_dimension": "Which rubric dimension this maps to",
       "severity": "critical | high | medium | low",
-      "grader_type": "deterministic | llm-judge"
+      "grader_type": "behavioral | structural | llm-judge"
     }
   ]
 }
@@ -52,7 +52,7 @@ For each failure case, create an eval task entry in `.harness/bootstrap/failure-
 2. **Define unambiguous success criteria** — use the same standard as sprint contract criteria (action, expected result, verification method)
 3. **Include a reference solution** if the fix is known — this calibrates the grader
 4. **Tag with rubric dimension** — map each failure to the quality dimension it tests (functionality, robustness, etc.)
-5. **Assign grader type** — deterministic if the criterion can be verified by running a command; llm-judge if it requires reading comprehension
+5. **Assign grader type** — `behavioral` if the criterion is verified by invoking the artifact and observing the result (preferred); `structural` if it is verified by inspecting an artifact at rest (grep, jq, schema check); `llm-judge` if it requires reading comprehension or subjective assessment. Default to behavioral whenever the artifact can be executed.
 6. **Prioritize by severity** — critical and high-severity failures should become sprint criteria before medium and low
 
 ## Target Volume
@@ -94,6 +94,52 @@ Real failures (bugs, incidents, tickets)
     ↓ evaluator tests criteria
 .harness/evals/sprint-NN-rR.md (real failure cases as eval tasks)
 ```
+
+## Templates by Rubric
+
+The `templates/by-rubric/` subdirectory contains pre-seeded failure catalogs derived from
+rubric playbook traps. Each file is named after the rubric it targets (e.g.,
+`templates/by-rubric/harness-build.json`) and contains a `failures` array following the
+same schema as `.harness/bootstrap/failure-catalog.json`.
+
+### Purpose
+
+Per-rubric templates provide a curated starting point for projects graded by a specific rubric.
+Rather than starting from zero failure cases, a harness-build project can begin with 12–15
+trap-derived entries that cover all rubric dimensions — including the three UNCONDITIONAL gate
+dimensions (Control Plane & Agentic Loop, Tool Registry & Sandboxing, Governance & Human Oversight)
+that carry the highest risk weight and cause automatic sprint FAIL if absent.
+
+### Kickoff Merge Procedure
+
+When `/harness-kickoff` runs for a project and a matching per-rubric template exists, the
+merge is triggered during Step 2b (failure catalog seeding). The procedure is:
+
+1. **Identify the rubric.** Read the project type from the kickoff context (e.g., `harness-build`).
+2. **Locate the template.** Look up `templates/by-rubric/<rubric-name>.json` within the
+   bootstrap-failures skill directory. For a harness-build project, this is
+   `templates/by-rubric/harness-build.json`.
+3. **Read the template.** Load the `failures` array from the template file.
+4. **Check for an existing project catalog.** Read `.harness/bootstrap/failure-catalog.json`
+   if it exists. If no project catalog exists yet, proceed to step 6.
+5. **Collect existing IDs.** Build a set of all `id` values already present in the project catalog.
+6. **Additive merge by id.** For each entry in the template's `failures` array: if the entry's
+   `id` is not already in the existing-ID set, append the entry to the project catalog. Entries
+   whose `id` is already present are skipped and not overwritten.
+7. **Write the merged catalog.** Write the updated `failures` array back to
+   `.harness/bootstrap/failure-catalog.json`. If no project catalog existed, this write creates
+   the file with the template entries as the initial catalog.
+
+**Additive-merge-by-id rule:** per-rubric template entries do not overwrite user-authored entries.
+Any entry with an `id` already present in the project catalog is skipped. This ensures the merge
+is idempotent — running kickoff a second time on the same project does not duplicate entries or
+overwrite changes the practitioner made to the catalog after the initial seeding.
+
+### Available Templates
+
+- `by-rubric/harness-build.json` — 12–15 playbook-trap-derived entries for agent runtime harnesses,
+  covering all 7 harness-build rubric dimensions with at least 2 entries each for the three gate
+  dimensions.
 
 ## Running the Bootstrap
 

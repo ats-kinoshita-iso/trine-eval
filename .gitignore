@@ -1,3 +1,7 @@
+# henkaten-council governance state — an artifact of running the separate
+# council plugin against this repo, NOT part of trine-eval itself.
+.council/
+
 # Python virtual environment
 .venv/
 

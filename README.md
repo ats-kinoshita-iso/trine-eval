@@ -1,6 +1,6 @@
 # trine-eval
 
-A modular three-agent eval-driven development harness for Claude Code. Implements Anthropic's Planner-Generator-Evaluator architecture as a portable, rubric-swappable plugin.
+A modular three-agent eval-driven development harness for Claude Code. Implements Anthropic's Planner-Generator-Evaluator architecture as a portable, rubric-swappable plugin (`plugins/trine-eval/`), shipped alongside the `trine_eval` Python eval library (`src/trine_eval/`) that the harness builds and exercises.
 
 ## How It Works
 
@@ -18,7 +18,7 @@ Copy or clone this repository into your Claude Code plugins directory, or instal
 
 ```bash
 # From your project directory
-claude /plugin install /path/to/eval-harness
+claude /plugin install /path/to/trine-eval
 ```
 
 ## Usage
@@ -105,7 +105,7 @@ The `components_enabled` section lets you simplify the harness as models improve
 
 These optional fields extend `.harness/config.json` with backward-compatible defaults. A config that omits them runs exactly as in Phase 1.
 
-- **`thinking.profile`** — one of `"default"`, `"fast"`, or `"thorough"`. Default: `"default"`, which preserves Phase-1 behavior (no override applied to agent-level adaptive-thinking effort declared in agent frontmatter). The `"fast"` and `"thorough"` values are reserved for a future override dispatcher; the default is the only path that mutates today's behavior, and it does not. Each role's effort level is declared in the agent's own frontmatter (`agents/planner.md`, `agents/generator.md`, `agents/evaluator.md`, and the `harness-summary` skill) — `medium` for routine planning and implementation, `high` for capability evaluation, and `max` for contract review and cross-sprint summary analysis.
+- **`thinking.profile`** — one of `"default"`, `"fast"`, or `"thorough"`. Default: `"default"`, which preserves Phase-1 behavior (no override applied to agent-level adaptive-thinking effort declared in agent frontmatter). The `"fast"` and `"thorough"` values are reserved for a future override dispatcher; the default is the only path that mutates today's behavior, and it does not. Each role's effort level is declared in the agent's own frontmatter (`plugins/trine-eval/agents/planner.md`, `plugins/trine-eval/agents/generator.md`, `plugins/trine-eval/agents/evaluator.md`, and the `harness-summary` skill) — `medium` for routine planning and implementation, `high` for capability evaluation, and `max` for contract review and cross-sprint summary analysis.
 
 - **`batch.enabled`** — boolean. Default: `false`. When `true` and a sprint has at least `batch.min_criteria` criteria, eval verifications are submitted as a single Anthropic Batch API call (50% discount on input/output tokens, 24-hour SLA). Batch is a cost optimization, not a latency optimization. With the default `false`, evaluations run synchronously as in Phase 1.
 
@@ -119,7 +119,7 @@ These optional fields extend `.harness/config.json` with backward-compatible def
 
 ## Adding Custom Rubrics
 
-1. Create a new file in `skills/eval-rubric/rubrics/your-type.md`
+1. Create a new file in `plugins/trine-eval/skills/eval-rubric/rubrics/your-type.md`
 2. Follow the structure of existing rubrics:
    - Define quality dimensions with percentage weights (must total 100%)
    - For each dimension, provide a 1-5 scoring table with specific descriptions
@@ -130,20 +130,28 @@ These optional fields extend `.harness/config.json` with backward-compatible def
 ## Directory Structure
 
 ```
-eval-harness/                     # Plugin root
-├── .claude-plugin/plugin.json    # Plugin manifest
-├── skills/
-│   ├── harness-kickoff/          # Entry point: init + planning
-│   ├── harness-sprint/           # Per-sprint contract→build→eval loop
-│   ├── eval-rubric/              # Rubric loader + domain rubrics
-│   ├── sprint-contract/          # Contract template + negotiation protocol
-│   └── harness-summary/          # Cross-sprint analysis
-├── agents/
-│   ├── planner.md                # Product strategist
-│   ├── generator.md              # Senior engineer
-│   └── evaluator.md              # Adversarial QA
-├── hooks/hooks.json              # Session lifecycle hooks
-└── rules/harness-conventions.md  # Conventions for .harness/ files
+trine-eval/                            # Marketplace root
+├── .claude-plugin/marketplace.json    # Marketplace manifest
+├── plugins/trine-eval/                # The Claude Code plugin (methodology layer)
+│   ├── .claude-plugin/plugin.json     # Plugin manifest
+│   ├── skills/
+│   │   ├── harness-kickoff/           # Entry point: init + planning
+│   │   ├── harness-sprint/            # Per-sprint contract→build→eval loop
+│   │   ├── eval-rubric/               # Rubric loader + domain rubrics (incl. harness-build)
+│   │   ├── sprint-contract/           # Contract template + negotiation protocol
+│   │   ├── bootstrap-failures/        # Seed the eval suite from real failures
+│   │   └── harness-summary/           # Cross-sprint analysis
+│   ├── agents/
+│   │   ├── planner.md                 # Product strategist
+│   │   ├── generator.md               # Senior engineer
+│   │   └── evaluator.md               # Adversarial QA
+│   ├── hooks/hooks.json               # Session lifecycle hooks
+│   └── rules/harness-conventions.md   # Conventions for .harness/ files
+├── src/trine_eval/                    # The Python eval library (runtime layer)
+│   ├── runner/  models/  scorers/     # Async runner, Anthropic wrapper, scorers
+│   └── observability/                 # OpenTelemetry + Langfuse
+├── tests/                             # Library tests (uv run pytest)
+└── pyproject.toml  uv.lock            # uv-managed Python project
 ```
 
 When running in a target project:

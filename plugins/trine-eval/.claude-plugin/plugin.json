@@ -1,0 +1,16 @@
+{
+  "name": "trine-eval",
+  "version": "0.4.0",
+  "description": "trine-eval: Planner-Generator-Evaluator harness for eval-driven development across web/RAG/CLI/API projects, eval-harness methodology audits (meta layer), and harness-build agent-runtime conformance (runtime layer)",
+  "author": {
+    "name": "ats-kinoshita-iso"
+  },
+  "license": "MIT",
+  "skills": [
+    "skills/"
+  ],
+  "agents": [
+    "agents/"
+  ],
+  "hooks": "hooks/hooks.json"
+}
