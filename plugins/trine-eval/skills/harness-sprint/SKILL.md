@@ -35,6 +35,22 @@ WARN: Council sprint prebrief not found: .council/sprint-prebrief/sprint-{NN}.js
 
 **Backward compatibility:** When `config.governance.enabled` is `false` or the `governance` key is absent from `config.json`, this gate does not fire and no check is performed. A project without a governance config behaves identically to the pre-gate harness-sprint workflow. Governance is **off by default** — trine-eval ships with no `governance` key, so this gate is inert unless a governance layer (e.g. the henkaten-council plugin) is explicitly configured.
 
+### Step 0.4b: Direction-check verdict (read-only)
+
+Also when `config.governance.enabled` is `true`, look for a work charter at `.council/charters/sprint-{NN}.json`. If present, read its **pre-written** `direction_check` block (`result`: `pass` | `warn` | `block`). This verdict is produced by the henkaten-council work-start gate (`council-autorun` Step 1A.7).
+
+**trine-eval reads this verdict; it never computes it.** The harness does not execute `direction-check.py`, import any council code, or depend on the henkaten-council plugin in any way — it only reads a JSON field if the file happens to exist (the same "peek at a `.council/` file if present" pattern as the prebrief check above). The dependency direction stays one-way.
+
+- `result: "block"` AND `config.governance.direction_check.enforcement == "block"` → **abort the sprint** before contract negotiation, identifying the charter path and the recorded findings. This is the only blocking behavior, and it is opt-in.
+- Any other case (`result` is `warn`/`pass`/absent, charter missing, or `enforcement` unset/`"warn"`) → **warn-only**, emit a one-line notice and proceed:
+
+```
+WARN: Direction-check verdict for sprint-{NN} is '{result}' (charter: .council/charters/sprint-{NN}.json).
+      Proceeding (direction_check.enforcement is not 'block').
+```
+
+**Backward compatibility:** identical to Step 0.4 — inert when governance is off or no charter exists.
+
 ## Step 0.5: Regression Gate
 
 Before negotiating any new contract, verify that every previously graduated capability still passes. A regression gate is necessary here — not later — because a new sprint's criteria are independent of prior capabilities: the new eval can grade PASS on fresh work while a graduated capability has silently broken. Running the gate *after* the new sprint's eval would let the system ship a green score even though it regressed, overstating system health in the metrics. Running it *before* contract negotiation means the sprint cannot even begin defining new work until existing capability is verified intact. This is why the gate is `fail_fast` by default, not a warning.
