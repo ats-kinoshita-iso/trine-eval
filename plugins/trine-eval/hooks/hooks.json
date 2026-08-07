@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -d .harness ]; then bash -c 'echo \"## Session $(date -Iseconds)\" >> .harness/progress.md && echo \"Stopped. Current sprint state should be committed.\" >> .harness/progress.md'; fi"
+            "command": "if [ -d .harness ]; then bash -c 'echo \"## Session $(date -u +%Y-%m-%dT%H:%M:%SZ)\" >> .harness/progress.md && echo \"Stopped. Current sprint state should be committed.\" >> .harness/progress.md'; fi"
           }
         ]
       }
@@ -26,7 +26,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if [ -d .harness ] && [ -f .harness/sprint-state.json ]; then bash -c 'LATEST=$(ls -t .harness/evals/sprint-*-r*.md 2>/dev/null | head -1); if [ -n \"$LATEST\" ]; then python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/touch-sprint-state.py\" .harness/sprint-state.json \"$(date -Iseconds)\" 2>/dev/null || true; fi'; fi"
+            "command": "if [ -d .harness ] && [ -f .harness/sprint-state.json ]; then bash -c 'LATEST=$(ls -t .harness/evals/sprint-*-r*.md 2>/dev/null | head -1); if [ -n \"$LATEST\" ]; then PY=\"\"; for c in python3 python; do \"$c\" -c \"\" >/dev/null 2>&1 && { PY=\"$c\"; break; }; done; if [ -n \"$PY\" ]; then \"$PY\" \"${CLAUDE_PLUGIN_ROOT}/scripts/touch-sprint-state.py\" .harness/sprint-state.json \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\" 2>/dev/null || true; fi; fi'; fi"
           }
         ]
       }
