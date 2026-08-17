@@ -9,14 +9,14 @@ from unittest.mock import MagicMock, patch
 import pytest
 import pydantic
 
-from trine_eval.models.anthropic import AnthropicModel, EFFORT_BUDGET, INTERLEAVED_THINKING_BETA
+from trine_eval.models.anthropic import AnthropicModel
 
 
 class TestDefaults:
     def test_defaults(self) -> None:
         with patch("anthropic.Anthropic"):
             m = AnthropicModel()
-            assert m.model == "claude-opus-4-7"
+            assert m.model == "claude-opus-5"
             assert m.effort == "medium"
             assert m.api_key is None
 
@@ -56,23 +56,25 @@ class TestEffortValidation:
             AnthropicModel(effort="ultra")  # type: ignore[arg-type]
 
 
-class TestBudgetMapping:
-    def test_effort_budget_values(self) -> None:
-        assert EFFORT_BUDGET["low"] == 1_000
-        assert EFFORT_BUDGET["medium"] == 8_000
-        assert EFFORT_BUDGET["high"] == 16_000
-        assert EFFORT_BUDGET["xhigh"] == 32_000
-        assert EFFORT_BUDGET["max"] == 100_000
-
-    def test_budget_tokens_property(self) -> None:
-        with patch("anthropic.Anthropic"):
+class TestRequestShape:
+    def test_create_uses_adaptive_thinking_and_effort(self) -> None:
+        """The request carries adaptive thinking + output_config.effort — no
+        budget_tokens (removed on Opus 4.7+, 400s) and no beta header."""
+        with patch("anthropic.Anthropic") as MockClient:
             m = AnthropicModel(effort="high")
-            assert m.budget_tokens == 16_000
+            m.create(messages=[{"role": "user", "content": "hi"}])
 
-    def test_beta_headers_property(self) -> None:
-        with patch("anthropic.Anthropic"):
-            m = AnthropicModel()
-            assert INTERLEAVED_THINKING_BETA in m.beta_headers
+            kwargs = MockClient.return_value.messages.create.call_args[1]
+            assert kwargs["thinking"] == {"type": "adaptive"}
+            assert kwargs["output_config"] == {"effort": "high"}
+            assert "betas" not in kwargs
+
+    def test_effort_tier_forwarded_per_instance(self) -> None:
+        with patch("anthropic.Anthropic") as MockClient:
+            m = AnthropicModel(effort="low")
+            m.create(messages=[{"role": "user", "content": "hi"}])
+            kwargs = MockClient.return_value.messages.create.call_args[1]
+            assert kwargs["output_config"] == {"effort": "low"}
 
 
 class TestThinkingBlockRoundTrip:

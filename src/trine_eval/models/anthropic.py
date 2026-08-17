@@ -5,38 +5,26 @@ from typing import Any, Literal
 import anthropic
 from pydantic import BaseModel, field_validator
 
-# Effort tier → thinking budget_tokens mapping.
-# low: 1_000, medium: 8_000, high: 16_000, xhigh: 32_000, max: 100_000
-EFFORT_BUDGET: dict[str, int] = {
-    "low": 1_000,
-    "medium": 8_000,
-    "high": 16_000,
-    "xhigh": 32_000,
-    "max": 100_000,
-}
-
-# Beta header required for interleaved thinking support.
-INTERLEAVED_THINKING_BETA = "interleaved-thinking-2025-05-14"
-
 EffortLiteral = Literal["low", "medium", "high", "xhigh", "max"]
 
 
 class AnthropicModel(BaseModel):
     """
-    Thin wrapper around the Anthropic SDK with effort-tier thinking support.
+    Thin wrapper around the Anthropic SDK with adaptive thinking at a
+    configurable effort level.
 
     Parameters
     ----------
     model:
-        The Anthropic model ID. Defaults to "claude-opus-4-7".
+        The Anthropic model ID. Defaults to "claude-opus-5".
     effort:
-        Thinking budget tier. One of: low, medium, high, xhigh, max.
-        Maps to budget_tokens: low→1k, medium→8k, high→16k, xhigh→32k, max→100k.
+        API effort level (``output_config.effort``). One of: low, medium,
+        high, xhigh, max. Controls thinking depth and overall token spend.
     api_key:
         Optional API key. Falls back to the ANTHROPIC_API_KEY environment variable.
     """
 
-    model: str = "claude-opus-4-7"
+    model: str = "claude-opus-5"
     effort: EffortLiteral = "medium"
     api_key: str | None = None
 
@@ -61,16 +49,6 @@ class AnthropicModel(BaseModel):
     def _anthropic_client(self) -> anthropic.Anthropic:
         return object.__getattribute__(self, "_client")
 
-    @property
-    def beta_headers(self) -> list[str]:
-        """Return the list of beta headers required for interleaved thinking."""
-        return [INTERLEAVED_THINKING_BETA]
-
-    @property
-    def budget_tokens(self) -> int:
-        """Return the thinking budget_tokens for the current effort tier."""
-        return EFFORT_BUDGET[self.effort]
-
     def create(
         self,
         messages: list[dict[str, Any]],
@@ -78,16 +56,18 @@ class AnthropicModel(BaseModel):
         **kwargs: Any,
     ) -> Any:
         """
-        Call messages.create with interleaved thinking enabled.
+        Call messages.create with adaptive thinking at the configured effort.
 
-        Thinking blocks in the assistant's content are passed through verbatim —
-        the caller is responsible for including them unmodified in subsequent turns.
+        Adaptive thinking interleaves thinking between tool calls without a
+        beta header. Thinking blocks in the assistant's content are passed
+        through verbatim — the caller is responsible for including them
+        unmodified in subsequent turns.
         """
         return self._anthropic_client.messages.create(
             model=self.model,
             messages=messages,
             max_tokens=max_tokens,
-            betas=[INTERLEAVED_THINKING_BETA],
-            thinking={"type": "enabled", "budget_tokens": EFFORT_BUDGET[self.effort]},
+            thinking={"type": "adaptive"},
+            output_config={"effort": self.effort},
             **kwargs,
         )
