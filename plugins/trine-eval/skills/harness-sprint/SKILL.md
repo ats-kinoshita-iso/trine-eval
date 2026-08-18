@@ -191,6 +191,18 @@ The retry loop in Step 4 is unchanged: a FAIL verdict (aggregated across trials 
 
 After the Evaluator finishes, read the appropriate file (`sprint-{NN}-r{R}.md` for single-trial or the trial files for multi-trial) and check the verdict. Copy the latest eval to `.harness/evals/sprint-{NN}.md` so the Generator always has a stable path for the latest eval.
 
+### 3c-w. Workflow dispatch for the trial loop (optional)
+
+**Read `config.trials_dispatch` (default `"subagent"` if absent).** With the default, Step 3c runs exactly as written above — no behavior change for existing installs. With `"workflow"`, the trial loop is dispatched through the native Workflow runtime instead of hand-spawned Evaluator subagents:
+
+1. Invoke the Workflow tool with `scriptPath: ${CLAUDE_PLUGIN_ROOT}/skills/harness-sprint/workflows/trial-loop.js` and `args: {sprint, round, trials, tasks, briefing}` where `tasks` is the sprint's `tasks.json` entries verbatim and `briefing` carries the working directory, sandbox note, and pass threshold. Pass `isolation: "worktree"` in args only when verification commands write to the tree.
+2. Each trial runs as an independent agent that must return a **schema-validated verdict object** (per-criterion `task_id` / `verdict` / `evidence` / `exit_code` / `verified_via_command` / `sub_conditions[]`, plus `weighted_score`, `trial_verdict`, `thinking_summary`). A trial that did the verification work can no longer fail to transcribe its verdicts — the historical "pending-scaffold" dispatch-budget failure is impossible by construction, and the per-sub-condition table for llm-judge criteria is enforced as schema rather than prose convention.
+3. **You (the orchestrator) write the artifacts** from the returned objects: one `.harness/evals/sprint-{NN}-r{R}-t{T}.md` per trial in the standard eval format, and one `.harness/transcripts/sprint-{NN}-r{R}-t{T}.json` per trial with `criteria_audit` built from each criterion's `verified_via_command` and `token_usage: null` (no fabrication — the workflow does not expose per-agent token counts to the script). File formats, the trial-1 latest-copy convention, and Step 4 are unchanged.
+4. **Truncation recovery:** if the run dies or returns fewer trials than requested, re-invoke with `resumeFromRunId` — completed trials replay from the journal at no cost. Fall back to the Step 3c subagent path (with the standard `## Process Note` disclosure) only if resume also fails; a workflow-dispatched round that completes needs no fallback and no G/E-separation penalty.
+5. If the Workflow tool is not available in the session, ignore this subsection and run Step 3c as written.
+
+Evaluator agent-type note: the workflow prompts **default subagents** with the adversarial-hygiene rules inlined — do not point it at `trine-eval:evaluator` (custom agent types fight the structured-output contract; the evaluator agent remains the engine for the Step 1b contract review and the subagent dispatch path).
+
 ### 3d. Batch API Mode (optional)
 
 This subsection applies inside Step 3 — it routes the per-criterion verifications the Evaluator would otherwise perform synchronously through Anthropic's Batch API. It is a **cost optimization, not a latency optimization** — the published Batch API contract trades a 50% discount on input/output tokens for a 24-hour SLA.
