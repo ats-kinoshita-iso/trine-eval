@@ -41,8 +41,8 @@ class _CostlyModel:
 
     model = "stub-model"
 
-    # Uses OPUS_47_OUTPUT_PRICE = 15.00 / 1_000_000 = $0.000015 per output token
-    # 1000 output tokens = $0.015 cost
+    # Uses OPUS_OUTPUT_PRICE = 25.00 / 1_000_000 = $0.000025 per output token
+    # 1000 output tokens = $0.025 cost
     def __init__(self, output_tokens: int = 10_000) -> None:
         self._output_tokens = output_tokens
 
@@ -84,8 +84,8 @@ async def test_time_limit_cap() -> None:
 @pytest.mark.asyncio
 async def test_cost_limit_cap() -> None:
     """When cost_limit is exceeded, cap_hit == 'cost_limit' and log is partial."""
-    # Each sample: 1 input token ($0.000005) + 10_000 output tokens ($0.15) ≈ $0.15
-    # cost_limit=0.2 → only 1 sample completes before cap fires
+    # Each sample: 1 input token ($0.000005) + 10_000 output tokens ($0.25) ≈ $0.25
+    # cost_limit=0.2 → the first completed sample already exceeds the cap
     model = _CostlyModel(output_tokens=10_000)
     task = _make_task(n=10)
     log = await run(task, model, cost_limit=0.2)

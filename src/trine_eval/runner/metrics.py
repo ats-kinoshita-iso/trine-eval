@@ -3,9 +3,10 @@ from __future__ import annotations
 
 from trine_eval.core.log import EvalLog
 
-# Opus 4.7 pricing constants (USD per token) — must match engine.py
-OPUS_47_INPUT_PRICE: float = 5.00 / 1_000_000   # $5.00 per 1M input tokens
-OPUS_47_OUTPUT_PRICE: float = 15.00 / 1_000_000  # $15.00 per 1M output tokens
+# Opus-tier pricing constants (USD per token) — must match engine.py.
+# Opus 4.7, 4.8, and 5 all list at $5 input / $25 output per 1M tokens.
+OPUS_INPUT_PRICE: float = 5.00 / 1_000_000    # $5.00 per 1M input tokens
+OPUS_OUTPUT_PRICE: float = 25.00 / 1_000_000  # $25.00 per 1M output tokens
 
 
 def _total_cost(log: EvalLog) -> float:
@@ -17,7 +18,7 @@ def _total_cost(log: EvalLog) -> float:
     # Fall back to computing from token counts if available
     input_tokens = int(log.metadata.get("total_input_tokens", 0))
     output_tokens = int(log.metadata.get("total_output_tokens", 0))
-    return input_tokens * OPUS_47_INPUT_PRICE + output_tokens * OPUS_47_OUTPUT_PRICE
+    return input_tokens * OPUS_INPUT_PRICE + output_tokens * OPUS_OUTPUT_PRICE
 
 
 def _total_tokens(log: EvalLog) -> int:
@@ -51,7 +52,7 @@ def accuracy_per_dollar(log: EvalLog) -> float:
     log:
         The EvalLog to analyse. Cost is read from ``metadata["total_cost_usd"]``
         or computed from ``metadata["total_input_tokens"]`` +
-        ``metadata["total_output_tokens"]`` using Opus 4.7 pricing.
+        ``metadata["total_output_tokens"]`` using Opus-tier pricing.
 
     Returns
     -------

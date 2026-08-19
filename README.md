@@ -115,6 +115,8 @@ These optional fields extend `.harness/config.json` with backward-compatible def
 
 - **`trials`** / **`sandbox.mode`** / **`taxonomy.emit_tasks_json`** — see Sprint 6 documentation. Defaults `1`, `"none"`, `true` reproduce Phase-1 behavior.
 
+- **`trials_dispatch`** — string. Default `"subagent"` (forked Evaluator subagents, unchanged behavior). `"workflow"` dispatches the trial loop through the native Workflow runtime (`skills/harness-sprint/workflows/trial-loop.js`): each trial returns a schema-validated verdict object (per-criterion verdict/evidence/exit-code/`verified_via_command` plus per-sub-condition rows for llm-judge criteria), so a trial cannot complete without transcribed verdicts, and truncated runs resume from the workflow journal instead of falling back to main-thread grading. Artifacts (eval files, transcripts, trial-vs-retry semantics) are identical in both modes — see `rules/harness-conventions.md` and SKILL.md Step 3c-w.
+
 - **`evaluator_tools.playwright`** — string. Default `"auto"`. Reserved values: `"auto"` (Playwright MCP enabled when `project_type == "web-app"`, disabled otherwise — recommended default), `"never"` (disable unconditionally — used when running a `web-app` project without Playwright installed; the Evaluator falls back to `curl` and routes Visual Design findings to human review), `"always"` (enable regardless of project type — for explicit testing of the Playwright path). Backward compatibility: a config that lacks the `evaluator_tools` object hits `"auto"`, which combined with any non-`web-app` project type resolves to "Playwright disabled" — exactly Phase-1 behavior.
 
 ## Adding Custom Rubrics

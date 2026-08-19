@@ -10,10 +10,10 @@ from trine_eval.core.sample import Sample
 from trine_eval.core.score import Score
 from trine_eval.core.task import Task
 
-# Opus 4.7 pricing constants (USD per token).
-# Update these when Anthropic publishes final pricing.
-OPUS_47_INPUT_PRICE: float = 5.00 / 1_000_000   # $5.00 per 1M input tokens
-OPUS_47_OUTPUT_PRICE: float = 15.00 / 1_000_000  # $15.00 per 1M output tokens
+# Opus-tier pricing constants (USD per token). Opus 4.7, 4.8, and 5 all
+# list at $5 input / $25 output per 1M tokens (verified 2026-08).
+OPUS_INPUT_PRICE: float = 5.00 / 1_000_000    # $5.00 per 1M input tokens
+OPUS_OUTPUT_PRICE: float = 25.00 / 1_000_000  # $25.00 per 1M output tokens
 
 
 class TokenUsage:
@@ -29,10 +29,10 @@ class TokenUsage:
 
 
 def _compute_cost(usage: TokenUsage) -> float:
-    """Compute USD cost from token usage using Opus 4.7 pricing."""
+    """Compute USD cost from token usage using Opus-tier pricing."""
     return (
-        usage.input_tokens * OPUS_47_INPUT_PRICE
-        + usage.output_tokens * OPUS_47_OUTPUT_PRICE
+        usage.input_tokens * OPUS_INPUT_PRICE
+        + usage.output_tokens * OPUS_OUTPUT_PRICE
     )
 
 

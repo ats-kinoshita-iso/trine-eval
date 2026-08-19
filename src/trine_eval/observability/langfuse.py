@@ -68,7 +68,7 @@ def get_langfuse_client(
         return _NoopLangfuseClient()
 
     try:
-        from langfuse import Langfuse  # type: ignore[import-not-found]
+        from langfuse import Langfuse  # type: ignore[import-untyped]
 
         # Disable background threads that would try network connections
         client = Langfuse(
