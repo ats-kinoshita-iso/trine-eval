@@ -918,7 +918,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "anthropic", specifier = ">=0.40" },
+    { name = "anthropic", specifier = ">=0.102" },
     { name = "httpx", specifier = ">=0.27" },
     { name = "langfuse", specifier = ">=2.0,<3" },
     { name = "msgpack", specifier = ">=1.0" },

@@ -108,7 +108,10 @@ const opts = (t) => {
 
 const results = await parallel(
   Array.from({ length: trialCount }, (_, i) => () =>
-    agent(trialPrompt(i + 1), opts(i + 1)).then((v) => ({ trial: i + 1, verdict: v }))
+    // agent() resolves to null (not a rejection) when a trial is skipped or
+    // dies — propagate that null instead of wrapping it, so filter(Boolean)
+    // below actually drops dead trials and the resume warning can fire.
+    agent(trialPrompt(i + 1), opts(i + 1)).then((v) => v && { trial: i + 1, verdict: v })
   )
 )
 
