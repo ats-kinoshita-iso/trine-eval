@@ -1,5 +1,12 @@
 # Sprint {NN} Contract: {Title}
 
+## Strategic Anchor & Direction
+{OPTIONAL — for projects with a strategic-anchor doc. Cite the anchor this sprint is reconciled against and declare the direction, so wrong-direction work is caught at contract time rather than several sprints later (cf. the bay-o-net cmpx-writer drift). Degrade to "N/A — single mainline" when the project has no anchor.}
+
+- **Strategic anchor:** {e.g. docs/divorce-spec.md §Persistence / ADR-0008, or "N/A — single mainline"}
+- **exploration_mode:** {mainline | parallel-exploration | competitive}
+- **Divergence justification:** {required when exploration_mode ≠ mainline — the competing hypothesis being tested}
+
 ## What I Will Build
 {2-3 sentences describing the deliverable at a high level}
 
