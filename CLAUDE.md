@@ -16,6 +16,9 @@ is designed to build and exercise.
   part of trine-eval itself. trine-eval exposes only an opt-in, config-gated governance seam
   (off by default) — it does not depend on any governance layer.
 
+See [`REPOSITORY-MAP.md`](REPOSITORY-MAP.md) for a full path-by-path classification of product
+vs. development infrastructure vs. dogfooding byproducts, with a removal/breakage analysis.
+
 ## Skills
 
 - `/harness-kickoff` — Initialize harness with a product prompt
